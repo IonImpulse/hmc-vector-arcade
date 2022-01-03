@@ -145,7 +145,7 @@ fn main() {
     // Seconds it takes to fade one brightness value
     let mut fade_rate: f32 = 0.01;
     // Frame delay in seconds
-    let mut frame_delay: f32 = 0.1;
+    let mut frame_delay: f32 = 0.5;
 
     let matches = App::new("Vector Generator")
         .version("1.0")
@@ -177,7 +177,7 @@ fn main() {
                 .short("d")
                 .long("delay")
                 .takes_value(true)
-                .help("Frame delay in seconds. Default is 0.1"),
+                .help("Frame delay in seconds. Default is 0.5"),
         )
         .get_matches();
 
