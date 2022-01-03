@@ -282,7 +282,7 @@ fn main() {
                 }
 
                 // Draw next new lines if time has elapsed
-                if line_is_completed && last_frame_time.elapsed().as_secs() > frame_delay as u64 {
+                if line_is_completed && last_frame_time.elapsed() > Duration::from_secs_f32(frame_delay) {
                     line_is_completed = false;
                     last_frame_time = Instant::now();
 
