@@ -20,6 +20,8 @@ use femtovg::{
     LineCap, LineJoin, Paint, Path, Renderer, Solidity,
 };
 
+use interprocess::local_socket::*;
+
 #[derive(Debug, Clone, Copy)]
 struct VCommand {
     pub x: f32,
@@ -105,10 +107,18 @@ impl VLine {
         self.draw_progress
     }
 
-    pub fn update_progress(&mut self, last_frame_time: Instant, speed: f32, canvas_width: f32, canvas_height: f32) -> f32 {
+    pub fn update_progress(
+        &mut self,
+        last_frame_time: Instant,
+        speed: f32,
+        canvas_width: f32,
+        canvas_height: f32,
+    ) -> f32 {
         if self.draw_progress != 1. {
-            self.draw_progress =
-                (1. as f32).min(speed * last_frame_time.elapsed().as_secs_f32() / self.distance(canvas_width, canvas_height));
+            self.draw_progress = (1. as f32).min(
+                speed * last_frame_time.elapsed().as_secs_f32()
+                    / self.distance(canvas_width, canvas_height),
+            );
         }
         self.draw_progress
     }
@@ -199,6 +209,13 @@ fn main() {
                 .takes_value(false)
                 .help("Sets speed, fade, and delay to realistic values. Is overridden by speed, fade, and delay arguments"),
         )
+        .arg(
+            Arg::with_name("pipe_mode")
+                .short("p")
+                .long("pipe-mode")
+                .takes_value(false)
+                .help("Wait for input from pipes"),
+        )
         .get_matches();
 
     let show_axis = matches.is_present("show_axis");
@@ -221,17 +238,27 @@ fn main() {
         frame_delay = delay.parse::<f32>().expect("Frame delay must be a number");
     }
 
-    let input_file = matches.value_of("input").expect("Input file invalid");
+    let pipe_mode = matches.is_present("pipe_mode");
 
-    println!("Opening file...");
+    if pipe_mode {
+        let listener =
+            LocalSocketListener::bind("/tmp/vector.sock").expect("failed to set up server");
+    } else {
+        let input_file = matches.value_of("input").expect("Input file invalid");
 
-    let mut commands_to_process = open_file(input_file).expect("Could not open file");
+        println!("Opening file...");
 
-    println!("Opened file with {} commands", commands_to_process.len());
+        let mut commands_to_process = open_file(input_file).expect("Could not open file");
 
-    for command in commands_to_process.iter_mut() {
-        println!("{:?}", command);
+        println!("Opened file with {} commands", commands_to_process.len());
+
+        for command in commands_to_process.iter_mut() {
+            println!("{:?}", command);
+        }
     }
+}
+
+fn start_window(show_axis: bool,instructions: Option<Vec<VCommand>>, listener: Option<LocalSocketListener>) {
     // Boilerplate window creation
     let window_size = glutin::dpi::PhysicalSize::new(800, 800);
     let el = EventLoop::new();
@@ -298,7 +325,12 @@ fn main() {
                 line_is_completed = true;
 
                 for line in drawn_lines.iter_mut() {
-                    let progress = line.update_progress(last_frame_time, speed_of_motor, canvas.width() as f32, canvas.height() as f32);
+                    let progress = line.update_progress(
+                        last_frame_time,
+                        speed_of_motor,
+                        canvas.width() as f32,
+                        canvas.height() as f32,
+                    );
                     if progress != 1. {
                         line_is_completed = false;
                     } else {
@@ -315,7 +347,9 @@ fn main() {
                 }
 
                 // Draw next new lines if time has elapsed
-                if line_is_completed && last_frame_time.elapsed() > Duration::from_secs_f32(frame_delay) {
+                if line_is_completed
+                    && last_frame_time.elapsed() > Duration::from_secs_f32(frame_delay)
+                {
                     line_is_completed = false;
                     last_frame_time = Instant::now();
 
@@ -369,11 +403,7 @@ fn draw_ui<T: Renderer>(canvas: &mut Canvas<T>) {
         // Draw axis lines as a dark blue
         let mut p = Path::new();
 
-        let mut paint = Paint::color(Color::rgbf(
-            0.0,
-            0.0,
-            0.5,
-        ));
+        let mut paint = Paint::color(Color::rgbf(0.0, 0.0, 0.5));
 
         paint.set_line_width(1.);
         paint.set_anti_alias(true);
@@ -397,7 +427,8 @@ fn draw_vector_line<T: Renderer>(canvas: &mut Canvas<T>, line: &VLine) {
 
         // Shift over according to the canvas size
         // and max/min 12 bit values
-        let translated_coords = line.as_canvas_coords(canvas.width() as f32, canvas.height() as f32);
+        let translated_coords =
+            line.as_canvas_coords(canvas.width() as f32, canvas.height() as f32);
 
         let x1 = translated_coords.0;
         let y1 = translated_coords.1;
@@ -415,7 +446,10 @@ fn draw_vector_line<T: Renderer>(canvas: &mut Canvas<T>, line: &VLine) {
         canvas.translate(x1, y1);
         canvas.rotate(angle);
         p.move_to(0., 0.);
-        p.line_to(line.distance(canvas.width() as f32, canvas.height() as f32) * progress, 0.);
+        p.line_to(
+            line.distance(canvas.width() as f32, canvas.height() as f32) * progress,
+            0.,
+        );
         let mut paint = Paint::color(Color::rgbf(
             brightness as f32 / 500.,
             brightness as f32 / 255.,
