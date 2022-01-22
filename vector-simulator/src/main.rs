@@ -1,4 +1,5 @@
 use std::cmp::*;
+use std::error::Error;
 use std::f32::consts::PI;
 use std::fs::File;
 use std::io::Read;
@@ -20,7 +21,15 @@ use femtovg::{
     LineCap, LineJoin, Paint, Path, Renderer, Solidity,
 };
 
-use interprocess::local_socket::*;
+use os_pipe::PipeReader;
+use os_pipe::PipeWriter;
+
+struct Options {
+    pub show_axis: bool,
+    pub speed_of_motor: f32,
+    pub fade_rate: f32,
+    pub frame_delay: f32,
+}
 
 #[derive(Debug, Clone, Copy)]
 struct VCommand {
@@ -42,6 +51,15 @@ impl VCommand {
 
     pub fn is_relative(&self) -> bool {
         self.relative
+    }
+
+    pub fn new_from_string(string: &str) -> Result<Self, Box<dyn Error>> {
+        let mut parts = string.split_whitespace();
+        let x = parts.next().ok_or("No x value")?.parse::<f32>()?;
+        let y = parts.next().ok_or("No y value")?.parse::<f32>()?;
+        let brightness = parts.next().ok_or("No brightness value")?.parse::<u8>()?;
+        let relative = parts.next().ok_or("No relative value")?.parse::<bool>()?;
+        Ok(Self::new(x, y, brightness, relative))
     }
 }
 
@@ -240,9 +258,17 @@ fn main() {
 
     let pipe_mode = matches.is_present("pipe_mode");
 
+    let options = Options {
+        show_axis,
+        speed_of_motor,
+        fade_rate,
+        frame_delay,
+    };
+
     if pipe_mode {
-        let listener =
-            LocalSocketListener::bind("/tmp/vector.sock").expect("failed to set up server");
+        let (mut reader, writer) = os_pipe::pipe().expect("Failed to create pipe");
+
+        start_window(options, None, Some((reader, writer)));
     } else {
         let input_file = matches.value_of("input").expect("Input file invalid");
 
@@ -255,15 +281,21 @@ fn main() {
         for command in commands_to_process.iter_mut() {
             println!("{:?}", command);
         }
+
+        start_window(options, Some(commands_to_process), None);
     }
 }
 
-fn start_window(show_axis: bool,instructions: Option<Vec<VCommand>>, listener: Option<LocalSocketListener>) {
+fn start_window(
+    options: Options,
+    instructions: Option<Vec<VCommand>>,
+    reader_writer: Option<(PipeReader, PipeWriter)>,
+) {
     // Boilerplate window creation
     let window_size = glutin::dpi::PhysicalSize::new(800, 800);
     let el = EventLoop::new();
     let wb = WindowBuilder::new()
-        .with_inner_size(glutin::dpi::PhysicalSize::new(800, 800))
+        .with_inner_size(glutin::dpi::PhysicalSize::new(800 as u32, 800 as u32))
         .with_title("Vector Generator");
 
     let windowed_context = ContextBuilder::new()
@@ -302,6 +334,52 @@ fn start_window(show_axis: bool,instructions: Option<Vec<VCommand>>, listener: O
                 _ => (),
             },
             Event::RedrawRequested(_) => {
+                let mut commands_to_run: Vec<VCommand>;
+
+                if let Some(reader_writer) = &reader_writer {
+                    let mut reader = &reader_writer.0;
+
+                    let mut buffer = [0u8; 10000];
+
+                    loop {
+                        match reader.read(&mut buffer) {
+                            Ok(0) => break,
+                            Ok(_) => {
+                                println!("{}", String::from_utf8_lossy(&buffer));
+                            }
+                            Err(e) => {
+                                println!("Error reading from pipe: {}", e);
+                                break;
+                            }
+                        }
+                    }
+
+                    // Now we have data, convert to string
+                    let string_from_pipe = String::from_utf8_lossy(&buffer);
+
+                    // Split the string into lines
+                    let lines = string_from_pipe.split("\n");
+                    let mut commands_from_pipe: Vec<VCommand> = Vec::new();
+
+                    // Iterate over the lines, and process them
+                    for line in lines {
+                        if line.is_empty() {
+                            continue;
+                        }
+
+                        let command =
+                            VCommand::new_from_string(line).expect("Could not parse command");
+
+                        println!("{:?}", command);
+
+                        commands_from_pipe.push(command);
+                    }
+
+                    commands_to_run = commands_from_pipe;
+                } else {
+                    commands_to_run = instructions.as_ref().unwrap().to_vec();
+                }
+
                 let dpi_factor = windowed_context.window().scale_factor();
                 let size = windowed_context.window().inner_size();
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
@@ -314,7 +392,7 @@ fn start_window(show_axis: bool,instructions: Option<Vec<VCommand>>, listener: O
                 );
 
                 // Draw ui
-                if show_axis {
+                if options.show_axis {
                     draw_ui(&mut canvas);
                 }
 
@@ -322,19 +400,15 @@ fn start_window(show_axis: bool,instructions: Option<Vec<VCommand>>, listener: O
                 let now = Instant::now();
 
                 // First, fade all lines that have been drawn
-                line_is_completed = true;
-
                 for line in drawn_lines.iter_mut() {
                     let progress = line.update_progress(
                         last_frame_time,
-                        speed_of_motor,
+                        options.speed_of_motor,
                         canvas.width() as f32,
                         canvas.height() as f32,
                     );
-                    if progress != 1. {
-                        line_is_completed = false;
-                    } else {
-                        line.fade_if_old(now, fade_rate);
+                    if progress == 1. {
+                        line.fade_if_old(now, options.fade_rate);
                     }
                 }
 
@@ -347,44 +421,43 @@ fn start_window(show_axis: bool,instructions: Option<Vec<VCommand>>, listener: O
                 }
 
                 // Draw next new lines if time has elapsed
-                if line_is_completed
-                    && last_frame_time.elapsed() > Duration::from_secs_f32(frame_delay)
-                {
-                    line_is_completed = false;
+                if last_frame_time.elapsed() > Duration::from_secs_f32(options.frame_delay) {
                     last_frame_time = Instant::now();
 
-                    let new_command = commands_to_process.remove(0);
+                    while !commands_to_run.is_empty() {
+                        let new_command = commands_to_run.remove(0);
 
-                    let line: VLine;
-                    print!("Line from ({}, {})", current_x, current_y);
-                    // If it's relative, then add current position to the command
-                    if new_command.is_relative() {
-                        line = VLine::new(
-                            current_x,
-                            current_y,
-                            current_x + new_command.x,
-                            current_y + new_command.y,
-                            new_command.brightness,
-                        );
-                        // Update current x/y
-                        current_x = new_command.x + current_x;
-                        current_y = new_command.y + current_y;
-                    } else {
-                        line = VLine::new(
-                            current_x,
-                            current_y,
-                            new_command.x,
-                            new_command.y,
-                            new_command.brightness,
-                        );
+                        let line: VLine;
+                        print!("Line from ({}, {})", current_x, current_y);
+                        // If it's relative, then add current position to the command
+                        if new_command.is_relative() {
+                            line = VLine::new(
+                                current_x,
+                                current_y,
+                                current_x + new_command.x,
+                                current_y + new_command.y,
+                                new_command.brightness,
+                            );
+                            // Update current x/y
+                            current_x = new_command.x + current_x;
+                            current_y = new_command.y + current_y;
+                        } else {
+                            line = VLine::new(
+                                current_x,
+                                current_y,
+                                new_command.x,
+                                new_command.y,
+                                new_command.brightness,
+                            );
 
-                        // Update current x/y
-                        current_x = new_command.x;
-                        current_y = new_command.y;
+                            // Update current x/y
+                            current_x = new_command.x;
+                            current_y = new_command.y;
+                        }
+                        println!(" to ({}, {})", current_x, current_y);
+                        draw_vector_line(&mut canvas, &line);
+                        drawn_lines.push(line);
                     }
-                    println!(" to ({}, {})", current_x, current_y);
-                    draw_vector_line(&mut canvas, &line);
-                    drawn_lines.push(line);
                 }
                 canvas.save();
                 canvas.reset();
