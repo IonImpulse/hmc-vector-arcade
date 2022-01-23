@@ -37,15 +37,17 @@ struct VCommand {
     pub y: f32,
     pub brightness: u8,
     pub relative: bool,
+    pub halt: bool,
 }
 
 impl VCommand {
-    pub fn new(x: f32, y: f32, brightness: u8, relative: bool) -> Self {
+    pub fn new(x: f32, y: f32, brightness: u8, relative: bool, halt: bool) -> Self {
         Self {
             x,
             y,
             brightness,
             relative,
+            halt,
         }
     }
 
@@ -54,12 +56,25 @@ impl VCommand {
     }
 
     pub fn new_from_string(string: &str) -> Result<Self, Box<dyn Error>> {
-        let mut parts = string.split_whitespace();
-        let x = parts.next().ok_or("No x value")?.parse::<f32>()?;
-        let y = parts.next().ok_or("No y value")?.parse::<f32>()?;
-        let brightness = parts.next().ok_or("No brightness value")?.parse::<u8>()?;
-        let relative = parts.next().ok_or("No relative value")?.parse::<bool>()?;
-        Ok(Self::new(x, y, brightness, relative))
+        if string.to_lowercase() == "halt" {
+            return Ok(Self::new(0.0, 0.0, 0, false, true));
+        } else {
+            let mut parts = string.split_whitespace();
+            let command = parts.next().ok_or("No command")?;
+            let relative;
+
+            if command.to_lowercase() == "rvec" {
+                relative = true;
+            } else {
+                relative = false;
+            }
+
+            let x = parts.next().ok_or("No x value")?.parse::<f32>()?;
+            let y = parts.next().ok_or("No y value")?.parse::<f32>()?;
+            let brightness = parts.next().ok_or("No brightness value")?.parse::<u8>()?;
+
+            return Ok(Self::new(x, y, brightness, relative, false));
+        }
     }
 }
 
@@ -147,7 +162,7 @@ const MAX_COORD: f32 = 4095.0;
 /// Min value for signed 12-bit integer.
 const MIN_COORD: f32 = -4095.0;
 
-fn open_file(path: &str) -> std::io::Result<Vec<VCommand>> {
+fn open_file(path: &str) -> Result<Vec<VCommand>, Box<dyn Error>> {
     let mut file = std::fs::File::open(path)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -156,19 +171,7 @@ fn open_file(path: &str) -> std::io::Result<Vec<VCommand>> {
 
     let mut commands = Vec::new();
     for line in contents.lines() {
-        let mut parts = line.split(' ');
-        let command = parts.next().unwrap();
-        let mut relative = false;
-        if command == "rvec" {
-            relative = true;
-        }
-
-        let x = parts.next().unwrap().parse::<f32>().unwrap();
-        let y = parts.next().unwrap().parse::<f32>().unwrap();
-
-        let brightness = parts.next().unwrap().parse::<u8>().unwrap();
-
-        commands.push(VCommand::new(x, y, brightness, relative));
+        commands.push(VCommand::new_from_string(line)?);
     }
     Ok(commands)
 }
@@ -319,7 +322,8 @@ fn start_window(
     let mut current_x = 0.;
     let mut current_y = 0.;
     let mut last_frame_time = Instant::now();
-    let mut line_is_completed = true;
+    let mut halted = false;
+    let mut current_buffer = 0;
 
     el.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -340,11 +344,24 @@ fn start_window(
                     let mut reader = &reader_writer.0;
 
                     let mut buffer = [0u8; 1];
-                    reader.read(&mut buffer).unwrap();
+                    reader.read(&mut buffer);
 
-                    let commands_from_pipe = open_file(format!("buff{}", buffer[0]).as_str()).expect("Could not open file");
+                    if buffer[0] == 0 {
+                        current_buffer = 0;
+                        halted = false;
+                    } else if buffer[0] == 1 {
+                        current_buffer = 1;
+                        halted = false;
+                    }
 
-                    commands_to_run = commands_from_pipe;
+                    if !halted {
+                        let commands_from_pipe = open_file(format!("buff{}", current_buffer).as_str()).expect("Could not open file");
+
+                        commands_to_run = commands_from_pipe;
+                    } else {
+                        commands_to_run = Vec::new();
+                    }
+                    
                 } else {
                     commands_to_run = instructions.as_ref().unwrap().to_vec();
                 }
@@ -398,6 +415,12 @@ fn start_window(
 
                         let line: VLine;
                         print!("Line from ({}, {})", current_x, current_y);
+
+                        if new_command.halt {
+                            print!("HALTED");
+                            halted = true;
+                        }
+
                         // If it's relative, then add current position to the command
                         if new_command.is_relative() {
                             line = VLine::new(
