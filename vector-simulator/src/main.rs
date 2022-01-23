@@ -339,41 +339,10 @@ fn start_window(
                 if let Some(reader_writer) = &reader_writer {
                     let mut reader = &reader_writer.0;
 
-                    let mut buffer = [0u8; 10000];
+                    let mut buffer = [0u8; 1];
+                    reader.read(&mut buffer).unwrap();
 
-                    loop {
-                        match reader.read(&mut buffer) {
-                            Ok(0) => break,
-                            Ok(_) => {
-                                println!("{}", String::from_utf8_lossy(&buffer));
-                            }
-                            Err(e) => {
-                                println!("Error reading from pipe: {}", e);
-                                break;
-                            }
-                        }
-                    }
-
-                    // Now we have data, convert to string
-                    let string_from_pipe = String::from_utf8_lossy(&buffer);
-
-                    // Split the string into lines
-                    let lines = string_from_pipe.split("\n");
-                    let mut commands_from_pipe: Vec<VCommand> = Vec::new();
-
-                    // Iterate over the lines, and process them
-                    for line in lines {
-                        if line.is_empty() {
-                            continue;
-                        }
-
-                        let command =
-                            VCommand::new_from_string(line).expect("Could not parse command");
-
-                        println!("{:?}", command);
-
-                        commands_from_pipe.push(command);
-                    }
+                    let commands_from_pipe = open_file(format!("buff{}", buffer[0]).as_str()).expect("Could not open file");
 
                     commands_to_run = commands_from_pipe;
                 } else {
