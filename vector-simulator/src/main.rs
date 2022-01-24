@@ -3,8 +3,15 @@ use std::error::Error;
 use std::f32::consts::PI;
 use std::fs::File;
 use std::io::Read;
+use std::io;
 use std::time::Duration;
 use std::time::Instant;
+use std::env;
+use std::cmp;
+use std::sync::mpsc;
+use std::sync::mpsc::Receiver;
+use std::sync::mpsc::TryRecvError;
+use std::{thread, time};
 
 use clap::{App, Arg};
 
@@ -103,7 +110,9 @@ impl VLine {
     }
 
     fn fade(&mut self) {
-        self.brightness -= 1;
+        if self.brightness > 0 {
+            self.brightness -= 1;
+        }
     }
 
     pub fn fade_if_old(&mut self, now: Instant, fade_rate: f32) {
@@ -271,7 +280,7 @@ fn main() {
     if pipe_mode {
         let (mut reader, writer) = os_pipe::pipe().expect("Failed to create pipe");
 
-        start_window(options, None, Some((reader, writer)));
+        start_window(options, None, true);
     } else {
         let input_file = matches.value_of("input").expect("Input file invalid");
 
@@ -281,18 +290,18 @@ fn main() {
 
         println!("Opened file with {} commands", commands_to_process.len());
 
-        for command in commands_to_process.iter_mut() {
-            println!("{:?}", command);
-        }
+        //for command in commands_to_process.iter_mut() {
+            //println!("{:?}", command);
+        //}
 
-        start_window(options, Some(commands_to_process), None);
+        start_window(options, Some(commands_to_process), false);
     }
 }
 
 fn start_window(
     options: Options,
     instructions: Option<Vec<VCommand>>,
-    reader_writer: Option<(PipeReader, PipeWriter)>,
+    pipe_mode: bool,
 ) {
     // Boilerplate window creation
     let window_size = glutin::dpi::PhysicalSize::new(800, 800);
@@ -324,6 +333,9 @@ fn start_window(
     let mut last_frame_time = Instant::now();
     let mut halted = false;
     let mut current_buffer = 0;
+    let mut commands_to_run: Vec<VCommand>;
+    let mut commands_to_run = Vec::new();
+    let stdin_channel = spawn_stdin_channel();
 
     el.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -338,30 +350,26 @@ fn start_window(
                 _ => (),
             },
             Event::RedrawRequested(_) => {
-                let mut commands_to_run: Vec<VCommand>;
 
-                if let Some(reader_writer) = &reader_writer {
-                    let mut reader = &reader_writer.0;
-
-                    let mut buffer = [0u8; 1];
-                    reader.read(&mut buffer);
-
-                    if buffer[0] == 0 {
-                        current_buffer = 0;
-                        halted = false;
-                    } else if buffer[0] == 1 {
-                        current_buffer = 1;
-                        halted = false;
+                if pipe_mode {
+                    let mut buffer = String::new();
+                    //io::stdin().read_line(&mut buffer);
+                    match stdin_channel.try_recv() {
+                        Ok(buffer) => {
+                            //println!("Select Buffer {}", buffer);
+                            if buffer == "0\n" {
+                                current_buffer = 0;
+                                halted = false;
+                            } else if buffer == "1\n" {
+                                current_buffer = 1;
+                                halted = false;
+                            }
+                            let dir = env::current_dir().unwrap();
+                            commands_to_run = open_file(format!("buff{}", current_buffer).as_str()).expect(format!("Could not open file; Current Dir {}", dir.display()).as_str());
+                        },
+                        Err(TryRecvError::Empty) => {},
+                        Err(TryRecvError::Disconnected) => panic!("Channel disconnected"),
                     }
-
-                    if !halted {
-                        let commands_from_pipe = open_file(format!("buff{}", current_buffer).as_str()).expect("Could not open file");
-
-                        commands_to_run = commands_from_pipe;
-                    } else {
-                        commands_to_run = Vec::new();
-                    }
-                    
                 } else {
                     commands_to_run = instructions.as_ref().unwrap().to_vec();
                 }
@@ -394,12 +402,15 @@ fn start_window(
                         canvas.height() as f32,
                     );
                     if progress == 1. {
-                        line.fade_if_old(now, options.fade_rate);
+                      line.fade_if_old(now, options.fade_rate);
                     }
+                    //println!("Prog: {}, Bright: {}, Dead: {}",progress,line.brightness,line.is_dead());
                 }
 
                 // Then, remove dead lines
+                //println!("All : {}",drawn_lines.len());
                 drawn_lines.retain(|line| !line.is_dead());
+                //println!("Trim: {}",drawn_lines.len());
 
                 // Draw all old lines
                 for line in drawn_lines.iter() {
@@ -414,10 +425,10 @@ fn start_window(
                         let new_command = commands_to_run.remove(0);
 
                         let line: VLine;
-                        print!("Line from ({}, {})", current_x, current_y);
+                        //print!("Line from ({}, {})", current_x, current_y);
 
                         if new_command.halt {
-                            print!("HALTED");
+                            //print!("HALTED");
                             halted = true;
                         }
 
@@ -446,7 +457,7 @@ fn start_window(
                             current_x = new_command.x;
                             current_y = new_command.y;
                         }
-                        println!(" to ({}, {})", current_x, current_y);
+                        //println!(" to ({}, {})", current_x, current_y);
                         draw_vector_line(&mut canvas, &line);
                         drawn_lines.push(line);
                     }
@@ -531,4 +542,14 @@ fn draw_vector_line<T: Renderer>(canvas: &mut Canvas<T>, line: &VLine) {
     };
 
     r(line.x1, line.y1, line.x2, line.y2, line.brightness);
+}
+
+fn spawn_stdin_channel() -> Receiver<String> {
+    let (tx, rx) = mpsc::channel::<String>();
+    thread::spawn(move || loop {
+        let mut buffer = String::new();
+        io::stdin().read_line(&mut buffer).unwrap();
+        tx.send(buffer).unwrap();
+    });
+    rx
 }
