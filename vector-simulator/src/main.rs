@@ -1,16 +1,16 @@
+use std::cmp;
 use std::cmp::*;
+use std::env;
 use std::error::Error;
 use std::f32::consts::PI;
 use std::fs::File;
-use std::io::Read;
 use std::io;
-use std::time::Duration;
-use std::time::Instant;
-use std::env;
-use std::cmp;
+use std::io::Read;
 use std::sync::mpsc;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::TryRecvError;
+use std::time::Duration;
+use std::time::Instant;
 use std::{thread, time};
 
 use clap::{App, Arg};
@@ -164,6 +164,10 @@ impl VLine {
         }
         self.draw_progress
     }
+
+    pub fn finish(&mut self) {
+        self.draw_progress = 1.;
+    }
 }
 
 /// Max value for signed 12-bit integer.
@@ -192,6 +196,8 @@ fn main() {
     let mut fade_rate: f32 = 0.01;
     // Frame delay in seconds
     let mut frame_delay: f32 = 0.5;
+
+    let mut fancy_mode = false;
 
     let matches = App::new("Vector Generator")
         .version("1.0")
@@ -246,6 +252,13 @@ fn main() {
                 .takes_value(false)
                 .help("Wait for input from pipes"),
         )
+        .arg(
+            Arg::with_name("fancy_mode")
+                .short("n")
+                .long("fancy-mode")
+                .takes_value(false)
+                .help("Use fancy mode"),
+        )
         .get_matches();
 
     let show_axis = matches.is_present("show_axis");
@@ -268,6 +281,10 @@ fn main() {
         frame_delay = delay.parse::<f32>().expect("Frame delay must be a number");
     }
 
+    if matches.is_present("fancy_mode") {
+        fancy_mode = true;
+    }
+
     let pipe_mode = matches.is_present("pipe_mode");
 
     let options = Options {
@@ -280,7 +297,7 @@ fn main() {
     if pipe_mode {
         let (mut reader, writer) = os_pipe::pipe().expect("Failed to create pipe");
 
-        start_window(options, None, true);
+        start_window(options, None, true, fancy_mode);
     } else {
         let input_file = matches.value_of("input").expect("Input file invalid");
 
@@ -291,10 +308,10 @@ fn main() {
         println!("Opened file with {} commands", commands_to_process.len());
 
         //for command in commands_to_process.iter_mut() {
-            //println!("{:?}", command);
+        //println!("{:?}", command);
         //}
 
-        start_window(options, Some(commands_to_process), false);
+        start_window(options, Some(commands_to_process), false, fancy_mode);
     }
 }
 
@@ -302,6 +319,7 @@ fn start_window(
     options: Options,
     instructions: Option<Vec<VCommand>>,
     pipe_mode: bool,
+    fancy_mode: bool,
 ) {
     // Boilerplate window creation
     let window_size = glutin::dpi::PhysicalSize::new(800, 800);
@@ -333,7 +351,6 @@ fn start_window(
     let mut last_frame_time = Instant::now();
     let mut halted = false;
     let mut current_buffer = 0;
-    let mut commands_to_run: Vec<VCommand>;
     let mut commands_to_run = Vec::new();
     let stdin_channel = spawn_stdin_channel();
 
@@ -350,123 +367,147 @@ fn start_window(
                 _ => (),
             },
             Event::RedrawRequested(_) => {
+                windowed_context.window().set_title("Vector Generator: Buffer -");
 
                 if pipe_mode {
-                    let mut buffer = String::new();
-                    //io::stdin().read_line(&mut buffer);
                     match stdin_channel.try_recv() {
                         Ok(buffer) => {
-                            //println!("Select Buffer {}", buffer);
-                            if buffer == "0\n" {
+                            println!("Select Buffer {}", buffer);
+                            
+                            if buffer == "0\n" && current_buffer == 1 {
                                 current_buffer = 0;
                                 halted = false;
-                            } else if buffer == "1\n" {
+                                println!("Buffer 0");
+                            } else if buffer == "1\n" && current_buffer == 0 {
                                 current_buffer = 1;
                                 halted = false;
+                                println!("Buffer 1"); 
                             }
-                            let dir = env::current_dir().unwrap();
-                            commands_to_run = open_file(format!("buff{}", current_buffer).as_str()).expect(format!("Could not open file; Current Dir {}", dir.display()).as_str());
-                        },
-                        Err(TryRecvError::Empty) => {},
+
+                            if !halted {
+                                let dir = env::current_dir().unwrap();
+                                commands_to_run = open_file(
+                                    format!("buff{}", current_buffer).as_str(),
+                                )
+                                .expect(
+                                    format!("Could not open file; Current Dir {}", dir.display())
+                                        .as_str(),
+                                );
+                            }
+                        }
+                        Err(TryRecvError::Empty) => {}
                         Err(TryRecvError::Disconnected) => panic!("Channel disconnected"),
                     }
                 } else {
                     commands_to_run = instructions.as_ref().unwrap().to_vec();
                 }
 
-                let dpi_factor = windowed_context.window().scale_factor();
-                let size = windowed_context.window().inner_size();
-                canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                canvas.clear_rect(
-                    0,
-                    0,
-                    size.width as u32,
-                    size.height as u32,
-                    Color::rgbf(0.0, 0.0, 0.0),
-                );
-
-                // Draw ui
-                if options.show_axis {
-                    draw_ui(&mut canvas);
-                }
-
-                // Get current time
-                let now = Instant::now();
-
-                // First, fade all lines that have been drawn
-                for line in drawn_lines.iter_mut() {
-                    let progress = line.update_progress(
-                        last_frame_time,
-                        options.speed_of_motor,
-                        canvas.width() as f32,
-                        canvas.height() as f32,
+                if !halted {
+                    let dpi_factor = windowed_context.window().scale_factor();
+                    let size = windowed_context.window().inner_size();
+                    canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
+                    canvas.clear_rect(
+                        0,
+                        0,
+                        size.width as u32,
+                        size.height as u32,
+                        Color::rgbf(0.0, 0.0, 0.0),
                     );
-                    if progress == 1. {
-                      line.fade_if_old(now, options.fade_rate);
+    
+                    // Draw ui
+                    if options.show_axis {
+                        draw_ui(&mut canvas);
                     }
-                    //println!("Prog: {}, Bright: {}, Dead: {}",progress,line.brightness,line.is_dead());
-                }
-
-                // Then, remove dead lines
-                //println!("All : {}",drawn_lines.len());
-                drawn_lines.retain(|line| !line.is_dead());
-                //println!("Trim: {}",drawn_lines.len());
-
-                // Draw all old lines
-                for line in drawn_lines.iter() {
-                    draw_vector_line(&mut canvas, line);
-                }
-
-                // Draw next new lines if time has elapsed
-                if last_frame_time.elapsed() > Duration::from_secs_f32(options.frame_delay) {
-                    last_frame_time = Instant::now();
-
-                    while !commands_to_run.is_empty() {
-                        let new_command = commands_to_run.remove(0);
-
-                        let line: VLine;
-                        //print!("Line from ({}, {})", current_x, current_y);
-
-                        if new_command.halt {
-                            //print!("HALTED");
-                            halted = true;
-                        }
-
-                        // If it's relative, then add current position to the command
-                        if new_command.is_relative() {
-                            line = VLine::new(
-                                current_x,
-                                current_y,
-                                current_x + new_command.x,
-                                current_y + new_command.y,
-                                new_command.brightness,
+    
+                    // Get current time
+                    let now = Instant::now();
+    
+                    if fancy_mode {
+                        // First, fade all lines that have been drawn
+                        for line in drawn_lines.iter_mut() {
+                            let progress = line.update_progress(
+                                last_frame_time,
+                                options.speed_of_motor,
+                                canvas.width() as f32,
+                                canvas.height() as f32,
                             );
-                            // Update current x/y
-                            current_x = new_command.x + current_x;
-                            current_y = new_command.y + current_y;
-                        } else {
-                            line = VLine::new(
-                                current_x,
-                                current_y,
-                                new_command.x,
-                                new_command.y,
-                                new_command.brightness,
-                            );
-
-                            // Update current x/y
-                            current_x = new_command.x;
-                            current_y = new_command.y;
+                            if progress == 1. {
+                                line.fade_if_old(now, options.fade_rate);
+                            }
+                            //println!("Prog: {}, Bright: {}, Dead: {}",progress,line.brightness,line.is_dead());
                         }
-                        //println!(" to ({}, {})", current_x, current_y);
-                        draw_vector_line(&mut canvas, &line);
-                        drawn_lines.push(line);
+    
+                        // Then, remove dead lines
+                        //println!("All : {}",drawn_lines.len());
+                        drawn_lines.retain(|line| !line.is_dead());
+                        //println!("Trim: {}",drawn_lines.len());
+    
+                        // Draw all old lines
+                        for line in drawn_lines.iter() {
+                            draw_vector_line(&mut canvas, line);
+                        }
+    
                     }
+    
+                    
+                    // Draw next new lines if time has elapsed
+                    if last_frame_time.elapsed() > Duration::from_secs_f32(options.frame_delay)
+                        || !fancy_mode
+                    {
+                        last_frame_time = Instant::now();
+    
+                        while !commands_to_run.is_empty() {
+                            let new_command = commands_to_run.remove(0);
+    
+                            let mut line: VLine;
+                            println!("Line from ({}, {})", current_x, current_y);
+    
+                            if new_command.halt {
+                                println!("HALTED");
+                                halted = true;
+                            }
+    
+                            // If it's relative, then add current position to the command
+                            if new_command.is_relative() {
+                                line = VLine::new(
+                                    current_x,
+                                    current_y,
+                                    current_x + new_command.x,
+                                    current_y + new_command.y,
+                                    new_command.brightness,
+                                );
+                                // Update current x/y
+                                current_x = new_command.x + current_x;
+                                current_y = new_command.y + current_y;
+                            } else {
+                                line = VLine::new(
+                                    current_x,
+                                    current_y,
+                                    new_command.x,
+                                    new_command.y,
+                                    new_command.brightness,
+                                );
+    
+                                // Update current x/y
+                                current_x = new_command.x;
+                                current_y = new_command.y;
+                            }
+    
+                            if !fancy_mode {
+                                line.finish();
+                            }
+    
+                            //println!(" to ({}, {})", current_x, current_y);
+                            draw_vector_line(&mut canvas, &line);
+                            drawn_lines.push(line);
+                        }
+                    }
+                    canvas.save();
+                    canvas.reset();
+                    canvas.restore();
+                    canvas.flush();
+                    windowed_context.swap_buffers().unwrap();
                 }
-                canvas.save();
-                canvas.reset();
-                canvas.restore();
-                canvas.flush();
-                windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => windowed_context.window().request_redraw(),
             _ => (),
