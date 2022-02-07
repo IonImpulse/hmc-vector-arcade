@@ -367,21 +367,17 @@ fn start_window(
                 _ => (),
             },
             Event::RedrawRequested(_) => {
-                windowed_context.window().set_title("Vector Generator: Buffer -");
 
                 if pipe_mode {
                     match stdin_channel.try_recv() {
                         Ok(buffer) => {
-                            println!("Select Buffer {}", buffer);
-                            
+                           
                             if buffer == "0\n" && current_buffer == 1 {
                                 current_buffer = 0;
                                 halted = false;
-                                println!("Buffer 0");
                             } else if buffer == "1\n" && current_buffer == 0 {
                                 current_buffer = 1;
                                 halted = false;
-                                println!("Buffer 1"); 
                             }
 
                             if !halted {
@@ -460,10 +456,10 @@ fn start_window(
                             let new_command = commands_to_run.remove(0);
     
                             let mut line: VLine;
-                            println!("Line from ({}, {})", current_x, current_y);
+                            //println!("Line from ({}, {})", current_x, current_y);
     
                             if new_command.halt {
-                                println!("HALTED");
+                                //println!("HALTED");
                                 halted = true;
                             }
     

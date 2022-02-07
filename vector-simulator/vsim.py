@@ -54,6 +54,6 @@ if __name__ == "__main__" :
     while True :
         sim.toggle_buffer_select()
         
-        print(f"{sim.buffer_select}")
+        print(f"Sending {sim.buffer_select}")
         # Wait for frame delay
-        time.sleep(1)
+        time.sleep(.01)
