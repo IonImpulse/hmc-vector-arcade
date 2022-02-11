@@ -19,26 +19,7 @@
 
 #![no_std]
 
-#[repr(C)]
-struct GpioPin {
-    input_val: u32,
-    input_en: u32,
-    output_en: u32,
-    output_val: u32,
-    pue: u32,
-    ds: u32,
-    rise_ie: u32,
-    rise_ip: u32,
-    fall_ie: u32,
-    fall_ip: u32,
-    high_ie: u32,
-    high_ip: u32,
-    low_ie: u32,
-    low_ip: u32,
-    out_xor: u32,
-}
-
-const GPIO_ADDRESS: usize = 0x1001_2000;
+const VECTOR_BUFFER_LENGTH: usize = 4096;
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
@@ -88,16 +69,47 @@ pub enum VectorCommand {
         brightness: u16,
     },
     /// Begin drawing the specified buffer and writing the other buffer. This command begins with
-    /// `0000_001` to specify the command, followed by a `0` to indicate that buffer 0 is being
-    /// drawn or a `1` to indicate that buffer 1 is being drawn.
+    /// `0110_00` to specify the command, followed by two bits to determine [which buffer
+    /// instruction](BufferInstructionType) is requested. `00` corresponds to [drawing buffer
+    /// A](BufferInstructionType::DrawA), `01` corresponds to [drawing buffer
+    /// B](BufferInstructionType::DrawB), `10` corresponds to [drawing the most recently drawn
+    /// buffer](BufferInstructionType::DrawSame), and `11` corresponds to [drawing the least
+    /// recently drawn buffer](BufferInstructionType::DrawSwitch).
     ///
     /// Unlike the other [commands](VectorCommand), this one immediately takes effect instead of
     /// being written to the buffer and waiting until later.
-    Buffer(u8),
+    Buffer(BufferInstructionType),
     /// End drawing the buffer.
     ///
     /// This command is the null byte.
     Halt,
+}
+/// An enum representing which buffer the controller should draw.
+///
+/// In normal use, you probably want to use [DrawSwitch](BufferInstructionType::DrawSwitch), as it
+/// will draw the buffer which has just been written to, but the others are provided for
+/// completeness.
+///
+/// See [VectorCommand::Buffer] for the bit encodings of each
+pub enum BufferInstructionType {
+    /// Draw buffer A, and set buffer B for writing.
+    ///
+    /// This resets the indices of both buffers to the beginning.
+    DrawA,
+    /// Draw buffer B, and set buffer A for writing.
+    ///
+    /// This resets the indices of both buffers to the beginning.
+    DrawB,
+    /// Draw the most recently drawn buffer, which will repeat the same image as previously drawn.
+    ///
+    /// When executed, this resets the position of the buffer being drawn (so it draws the entire
+    /// buffer) but the position of the buffer being written is kept, so that it continues to be
+    /// appended from the same location as before.
+    DrawSame,
+    /// Draw the buffer which is least recently drawn, which is also the one most recently written.
+    ///
+    /// When executed, this instruction also resets the position of both buffers to the beginning.
+    DrawSwitch,
 }
 impl VectorCommand {
     /// Given a buffer and a starting index into the buffer, return the [VectorCommand]
@@ -110,15 +122,17 @@ impl VectorCommand {
                 *index += 1;
                 VectorCommand::Halt
             }
-            // Draw buffer 0, write to buffer 1
-            2 => {
+            // Draw Buffer
+            x if (x & 0xFC == 0x60) => {
+                let buf = match x & 0x03 {
+                    0 => BufferInstructionType::DrawA,
+                    1 => BufferInstructionType::DrawB,
+                    2 => BufferInstructionType::DrawSame,
+                    3 => BufferInstructionType::DrawSwitch,
+                    _ => unreachable!(),
+                };
                 *index += 1;
-                VectorCommand::Buffer(0)
-            }
-            // Draw buffer 1, write to buffer 0
-            3 => {
-                *index += 1;
-                VectorCommand::Buffer(1)
+                VectorCommand::Buffer(buf)
             }
             x if (x & 0xC0 == 0x80) => {
                 let end_x: u16 =
@@ -163,14 +177,15 @@ impl VectorCommand {
     }
 }
 
-const VECTOR_BUFFER_LENGTH: usize = 4096;
-
 #[no_mangle]
 extern "C" fn main() -> i32 {
-    let gpio = unsafe { (GPIO_ADDRESS as *mut GpioPin).as_mut() }.unwrap();
-    let mut buf1: [u8; VECTOR_BUFFER_LENGTH] = [0; VECTOR_BUFFER_LENGTH];
-    let mut buf2: [u8; VECTOR_BUFFER_LENGTH] = [0; VECTOR_BUFFER_LENGTH];
-    let mut buf1_index: usize = 0;
-    let mut buf2_index: usize = 0;
-    loop {}
+    // TODO: Set up global memory for use in interrupt handlers and set up interrupt handlers
+    loop {
+        // In main, we just wait, because all code is handled in interrupt handlers
+        unsafe {
+            // Calls the `wfi` instruction, which signals to the chip that we can wait until an
+            // interrupt
+            riscv::asm::wfi()
+        }
+    }
 }

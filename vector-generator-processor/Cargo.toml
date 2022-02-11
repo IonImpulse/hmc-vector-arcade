@@ -12,6 +12,7 @@ autobenches = true
 publish = true
 
 [dependencies]
+riscv = "0.7"
 
 [dev-dependencies]
 
