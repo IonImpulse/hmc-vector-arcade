@@ -24,6 +24,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dcb6dd1c2376d2e096796e234a70e17e94cc2d5d54ff8ce42b28cef1d0d359a4"
 
 [[package]]
+name = "either"
+version = "1.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -74,8 +80,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "sifive-fe310-g002"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7b483fd1cf49613caf690749d72258285fda2fbea188d8a92864b622be33454"
+dependencies = [
+ "bare-metal",
+ "riscv",
+]
+
+[[package]]
 name = "vector-generator-processor"
 version = "0.1.0"
 dependencies = [
+ "either",
  "riscv",
+ "sifive-fe310-g002",
 ]
