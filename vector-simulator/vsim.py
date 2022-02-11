@@ -11,21 +11,24 @@ class Simulator :
     def __init__(self):
         # Buffer select can either be 0 or 1
         self.buffer_select = 0
-        
+
         # Load child process and set up communication pipes
         if os.name == 'nt':
             path = ["./../vector-simulator/vector-simulator.exe"]
             path.extend(OPTIONS)
             self.child_process = subprocess.Popen(path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        elif os.name == 'posix':
+            path = ['./../vector-simulator/target/debug/vector-simulator']
+            self.child_process = subprocess.Popen(path + ['-p'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         else:
             path = ["../vector-simulator/vector-simulator"]
             path.extend(OPTIONS)
             self.child_process = subprocess.Popen(path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        
+
     def send_command(self, command) :
         self.child_process.stdin.write(f"{command}\n".encode())
         self.child_process.stdin.flush()
-    
+
     def toggle_buffer_select(self) :
         '''
         Toggles buffer select between 0 and 1
@@ -43,7 +46,7 @@ class Simulator :
 
         self.buffer_select = buffer_select
         self.send_command(f"{self.buffer_select}")
-    
+
 
 if __name__ == "__main__" :
     print("Staring simulator demo...")
@@ -53,7 +56,7 @@ if __name__ == "__main__" :
 
     while True :
         sim.toggle_buffer_select()
-        
+
         print(f"Sending {sim.buffer_select}")
         # Wait for frame delay
         time.sleep(.01)
