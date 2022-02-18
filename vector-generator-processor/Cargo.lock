@@ -81,9 +81,9 @@ dependencies = [
 
 [[package]]
 name = "sifive-fe310-g002"
-version = "0.1.3"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b16b46e46a4cc200a87f8e2c4f027cb902b650557280b12df49b9712b50e9fb2"
+checksum = "fbf8a73d691ce0c5c9f08b52a174daca772df357b5925cdae1ad746f9ffdb1eb"
 dependencies = [
  "bare-metal",
  "bit_field",
@@ -94,6 +94,7 @@ dependencies = [
 name = "vector-generator-processor"
 version = "0.1.0"
 dependencies = [
+ "bit_field",
  "either",
  "riscv",
  "sifive-fe310-g002",

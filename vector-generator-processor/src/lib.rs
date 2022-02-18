@@ -19,15 +19,19 @@
 
 #![no_std]
 #![feature(mixed_integer_ops)]
+#![feature(naked_functions)]
+#![feature(asm_sym)]
 
 mod command;
 
+use bit_field::BitField;
 pub use command::{BufferInstructionType, VectorCommand};
+use core::arch::asm;
 use either::Either::{Left, Right};
 use riscv::asm::wfi;
 use sifive_fe310_g002::{
-    gpio::{GpioControls, GPIO},
-    uart::{UartControls, UART0},
+    clint::{ClintControls, CLINT},
+    gpio::GPIO,
 };
 
 #[panic_handler]
@@ -48,6 +52,86 @@ static mut DRAW_X_POS: u16 = 0;
 static mut DRAW_Y_POS: u16 = 0;
 // State which is only needed when handling a uart interrupt (reading instructions)
 static mut BYTES_LEFT_IN_CURRENT_INSTRUCTION: usize = 0;
+
+#[naked]
+/// The entry point for the interrupt handler.
+///
+/// This function should never be called directly, because it returns by calling `mret`, which will
+/// break if called using normal calling conventions
+unsafe extern "C" fn _raw_interrupt_handler() -> ! {
+    asm!(
+        // Store caller-saved registers on the stack
+        "addi rsp,rsp,64",
+        "sw ra,0(rsp)",
+        "sw t0,4(rsp)",
+        "sw t1,8(rsp)",
+        "sw t2,12(rsp)",
+        "sw t3,16(rsp)",
+        "sw t4,20(rsp)",
+        "sw t5,24(rsp)",
+        "sw t6,28(rsp)",
+        "sw a0,32(rsp)",
+        "sw a1,36(rsp)",
+        "sw a2,40(rsp)",
+        "sw a3,44(rsp)",
+        "sw a4,48(rsp)",
+        "sw a5,52(rsp)",
+        "sw a6,56(rsp)",
+        "sw a7,60(rsp)",
+        // Call the interrupt handler
+        "jal ra,{0}",
+        // Restore caller-saved registers
+        "lw ra,0(rsp)",
+        "lw t0,4(rsp)",
+        "lw t1,8(rsp)",
+        "lw t2,12(rsp)",
+        "lw t3,16(rsp)",
+        "lw t4,20(rsp)",
+        "lw t5,24(rsp)",
+        "lw t6,28(rsp)",
+        "lw a0,32(rsp)",
+        "lw a1,36(rsp)",
+        "lw a2,40(rsp)",
+        "lw a3,44(rsp)",
+        "lw a4,48(rsp)",
+        "lw a5,52(rsp)",
+        "lw a6,56(rsp)",
+        "lw a7,60(rsp)",
+        "addi rsp,rsp,-64",
+        // Return from the interrupt handler
+        "mret",
+        sym interrupt_handler,
+        options(noreturn),
+    );
+}
+
+#[allow(dead_code)]
+extern "C" fn interrupt_handler() {
+    use riscv::register::mcause::{self, Interrupt, Trap};
+    match mcause::read().cause() {
+        Trap::Interrupt(Interrupt::MachineTimer) => handle_timer_interrupt(),
+        Trap::Interrupt(Interrupt::MachineExternal) => {
+            // todo: handle external interrupts (which may come from GPIO or UART)
+        }
+        // If faced with an unknown interrupt, do nothing
+        Trap::Interrupt(_) => {}
+        // If faced with an unknown exception, do nothing
+        Trap::Exception(_) => panic!(),
+    }
+}
+
+/// When we receive a timer interrupt, toggle the LED on the RED-V.
+///
+/// We do this so that we can see if something causes the chip to freeze, as the LED will no longer
+/// be blinking
+pub fn handle_timer_interrupt() {
+    unsafe {
+        (*GPIO)
+            .output_val
+            .set_bit(5, !(*GPIO).output_val.get_bit(5));
+    }
+    ClintControls::clear_mtime(CLINT);
+}
 
 /// Handle a UART interrupt, which means that we've received a byte from the main CPU.
 ///
@@ -168,6 +252,22 @@ pub fn handle_gpio_interrupt(input_low: bool) {
 
 #[no_mangle]
 extern "C" fn main() -> i32 {
+    unsafe {
+        // Enable output to the on-chip LED
+        (*GPIO).output_en |= 1 << 5;
+        (*GPIO).output_val &= !(1 << 5);
+        // Write the address of our interrupt handler into `mtvec` so we handle interrupts
+        riscv::register::mtvec::write(
+            &_raw_interrupt_handler as *const _ as usize,
+            riscv::register::mtvec::TrapMode::Direct,
+        );
+        // Enable interrupts
+        riscv::register::mie::set_mtimer();
+        riscv::register::mie::set_mext();
+        // Set up the timer interrupts:
+    }
+    ClintControls::clear_mtime(CLINT);
+    ClintControls::set_mtimecmp(CLINT, 100000000);
     // TODO: Set up global memory for use in interrupt handlers and set up interrupt handlers
     loop {
         // In main, we just wait in a loop, because we now only need to respond to interrupts

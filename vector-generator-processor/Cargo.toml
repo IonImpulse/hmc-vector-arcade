@@ -14,7 +14,8 @@ publish = true
 [dependencies]
 riscv = "0.7"
 either = { version = "1", default-features = false }
-sifive-fe310-g002 = "0.1"
+sifive-fe310-g002 = "0.1.5"
+bit_field = "0.10"
 
 [dev-dependencies]
 
