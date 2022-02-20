@@ -557,6 +557,14 @@ fn start_window(
                                 if !fancy_mode {
                                     line.finish();
                                 }
+
+                                if buffer_select == 0 {
+                                    buffer_0.push(line);
+                                } else {
+                                    buffer_1.push(line);
+                                }
+
+                                
                             }
                         }
                     }
