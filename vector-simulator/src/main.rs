@@ -38,23 +38,34 @@ struct Options {
     pub frame_delay: f32,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum Draw {
+    None,
+    DrawA,
+    DrawB,
+    DrawSame,
+    DrawSwitch,
+}
+
 #[derive(Debug, Clone, Copy)]
 struct VCommand {
     pub x: f32,
     pub y: f32,
-    pub brightness: u8,
+    pub brightness: u16,
     pub relative: bool,
     pub halt: bool,
+    pub draw: Draw,
 }
 
 impl VCommand {
-    pub fn new(x: f32, y: f32, brightness: u8, relative: bool, halt: bool) -> Self {
+    pub fn new(x: f32, y: f32, brightness: u16, relative: bool, halt: bool, draw: Draw) -> Self {
         Self {
             x,
             y,
             brightness,
             relative,
             halt,
+            draw,
         }
     }
 
@@ -64,7 +75,7 @@ impl VCommand {
 
     pub fn new_from_string(string: &str) -> Result<Self, Box<dyn Error>> {
         if string.to_lowercase() == "halt" {
-            return Ok(Self::new(0.0, 0.0, 0, false, true));
+            return Ok(Self::new(0.0, 0.0, 0, false, true, Draw::None));
         } else {
             let mut parts = string.split_whitespace();
             let command = parts.next().ok_or("No command")?;
@@ -78,11 +89,47 @@ impl VCommand {
 
             let x = parts.next().ok_or("No x value")?.parse::<f32>()?;
             let y = parts.next().ok_or("No y value")?.parse::<f32>()?;
-            let brightness = parts.next().ok_or("No brightness value")?.parse::<u8>()?;
+            let brightness = parts.next().ok_or("No brightness value")?.parse::<u16>()?;
 
-            return Ok(Self::new(x, y, brightness, relative, false));
+            return Ok(Self::new(x, y, brightness, relative, false, Draw::None));
         }
     }
+
+    pub fn new_from_pipe(bits: String) -> Result<Self, Box<dyn Error>> {
+        if &bits == "0" && bits.len() == 1 {
+            return Ok(Self::new(0.0, 0.0, 0, false, true, Draw::None));
+        }
+
+        let command_type = &bits[0..2];
+
+        // It's a absolute command
+        if command_type == "10" || command_type == "11" {
+            let x = u64::from_str_radix(&bits[2..12], 2)? as f32;
+            let y = u64::from_str_radix(&bits[12..24], 2)? as f32;
+
+            let brightness = u16::from_str_radix(&bits[24..32], 2)?;
+
+            let relative = command_type == "11";
+
+            return Ok(Self::new(x, y, brightness, relative, false, Draw::None));
+
+        }else if command_type == "01" {
+            // It's a draw command
+            let draw = match &bits[6..8] {
+                "00" => Draw::DrawA,
+                "01" => Draw::DrawB,
+                "10" => Draw::DrawSame,
+                "11" => Draw::DrawSwitch,
+                _ => return Err(Box::new(io::Error::new(io::ErrorKind::InvalidData, "Invalid draw command"))),
+            };
+
+            return Ok(Self::new(0.0, 0.0, 0, false, false, draw));
+        } else {
+            return Err(Box::new(io::Error::new(io::ErrorKind::InvalidData, "Invalid command")));
+        }
+
+    }
+
 }
 
 // A compiled vector line using absolute coordinates.
@@ -91,13 +138,13 @@ struct VLine {
     pub y1: f32,
     pub x2: f32,
     pub y2: f32,
-    pub brightness: u8,
+    pub brightness: u16,
     pub draw_progress: f32,
     last_fade: Instant,
 }
 
 impl VLine {
-    pub fn new(x1: f32, y1: f32, x2: f32, y2: f32, brightness: u8) -> Self {
+    pub fn new(x1: f32, y1: f32, x2: f32, y2: f32, brightness: u16) -> Self {
         Self {
             x1,
             y1,
@@ -350,9 +397,12 @@ fn start_window(
     let mut current_y = 0.;
     let mut last_frame_time = Instant::now();
     let mut halted = false;
-    let mut current_buffer = 0;
     let mut commands_to_run = Vec::new();
     let stdin_channel = spawn_stdin_channel();
+
+    let mut buffer_0: Vec<VLine> = Vec::new();
+    let mut buffer_1: Vec<VLine> = Vec::new();
+    let mut buffer_select = 0;
 
     el.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -371,25 +421,9 @@ fn start_window(
                 if pipe_mode {
                     match stdin_channel.try_recv() {
                         Ok(buffer) => {
-                           
-                            if buffer == "0\n" && current_buffer == 1 {
-                                current_buffer = 0;
-                                halted = false;
-                            } else if buffer == "1\n" && current_buffer == 0 {
-                                current_buffer = 1;
-                                halted = false;
-                            }
-
-                            if !halted {
-                                let dir = env::current_dir().unwrap();
-                                commands_to_run = open_file(
-                                    format!("buff{}", current_buffer).as_str(),
-                                )
-                                .expect(
-                                    format!("Could not open file; Current Dir {}", dir.display())
-                                        .as_str(),
-                                );
-                            }
+                            let command = VCommand::new_from_pipe(buffer).expect("Could not parse command");
+                            
+                            commands_to_run.push(command);
                         }
                         Err(TryRecvError::Empty) => {}
                         Err(TryRecvError::Disconnected) => panic!("Channel disconnected"),
@@ -454,48 +488,76 @@ fn start_window(
     
                         while !commands_to_run.is_empty() {
                             let new_command = commands_to_run.remove(0);
-    
-                            let mut line: VLine;
-                            //println!("Line from ({}, {})", current_x, current_y);
-    
+                            
                             if new_command.halt {
-                                //println!("HALTED");
                                 halted = true;
-                            }
-    
-                            // If it's relative, then add current position to the command
-                            if new_command.is_relative() {
-                                line = VLine::new(
-                                    current_x,
-                                    current_y,
-                                    current_x + new_command.x,
-                                    current_y + new_command.y,
-                                    new_command.brightness,
-                                );
-                                // Update current x/y
-                                current_x = new_command.x + current_x;
-                                current_y = new_command.y + current_y;
+                            } else if new_command.draw != Draw::None {
+                                if new_command.draw == Draw::DrawA {
+                                    buffer_select = 0;
+                                } else if new_command.draw == Draw::DrawB {
+                                    buffer_select = 1;
+                                } else if new_command.draw == Draw::DrawSwitch {
+                                    buffer_select = (buffer_select + 1) % 2;
+                                }
+
+                                if buffer_select == 0 {
+                                    for line in buffer_0.iter() {
+                                        draw_vector_line(&mut canvas, line.clone());
+                                    }
+                                } else {
+                                    for line in buffer_1.iter() {
+                                        draw_vector_line(&mut canvas, line.clone());
+                                    }
+                                }
                             } else {
-                                line = VLine::new(
-                                    current_x,
-                                    current_y,
-                                    new_command.x,
-                                    new_command.y,
-                                    new_command.brightness,
-                                );
-    
-                                // Update current x/y
-                                current_x = new_command.x;
-                                current_y = new_command.y;
+                                if halted == true {
+                                    if buffer_select == 0 {
+                                        buffer_0.clear();
+                                    } else {
+                                        buffer_1.clear();
+                                    }
+
+                                    halted = false;
+                                }
+
+                                let mut line: VLine;
+                                //println!("Line from ({}, {})", current_x, current_y);
+        
+                                if new_command.halt {
+                                    //println!("HALTED");
+                                    halted = true;
+                                }
+        
+                                // If it's relative, then add current position to the command
+                                if new_command.is_relative() {
+                                    line = VLine::new(
+                                        current_x,
+                                        current_y,
+                                        current_x + new_command.x,
+                                        current_y + new_command.y,
+                                        new_command.brightness,
+                                    );
+                                    // Update current x/y
+                                    current_x = new_command.x + current_x;
+                                    current_y = new_command.y + current_y;
+                                } else {
+                                    line = VLine::new(
+                                        current_x,
+                                        current_y,
+                                        new_command.x,
+                                        new_command.y,
+                                        new_command.brightness,
+                                    );
+        
+                                    // Update current x/y
+                                    current_x = new_command.x;
+                                    current_y = new_command.y;
+                                }
+        
+                                if !fancy_mode {
+                                    line.finish();
+                                }
                             }
-    
-                            if !fancy_mode {
-                                line.finish();
-                            }
-    
-                            //println!(" to ({}, {})", current_x, current_y);
-                            draw_vector_line(&mut canvas, &line);
-                            drawn_lines.push(line);
                         }
                     }
                     canvas.save();
@@ -533,7 +595,7 @@ fn draw_ui<T: Renderer>(canvas: &mut Canvas<T>) {
 }
 
 fn draw_vector_line<T: Renderer>(canvas: &mut Canvas<T>, line: &VLine) {
-    let mut r = |x1: f32, y1: f32, x2: f32, y2: f32, brightness: u8| {
+    let mut r = |x1: f32, y1: f32, x2: f32, y2: f32, brightness: u16| {
         // First, translate x/y to screen coordinates
         // knowing that the origin is in the top left corner
         // and the y axis is inverted
