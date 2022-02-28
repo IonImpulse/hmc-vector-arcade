@@ -91,6 +91,7 @@ void startSIDclock() {
     //GPIO->out_xor|=1<<19;
 }
 int main(void) {
+    GPIO->iof_en=0;
     GPIO->output_en |= -1;
     startSIDclock();
     while (1) {
