@@ -28,9 +28,9 @@ def make_frame(points):
                 "args": [None, {"frame": {"duration": 20}}],
             }
         ],
-    }    
+    }
     layout = go.Layout(updatemenus=[button],
-                       title_text=f"",yaxis_range=[-1,1], xaxis_range=[-1,1])  
+                       title_text=f"",yaxis_range=[-1,1], xaxis_range=[-1,1])
     frame = go.Frame(
         data=edges,
         layout=go.Layout(title_text=f"",yaxis_range=[-1,1], xaxis_range=[-1,1])
