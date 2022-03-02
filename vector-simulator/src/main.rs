@@ -96,7 +96,7 @@ impl VCommand {
     }
 
     pub fn new_from_pipe(bits: String) -> Result<Self, Box<dyn Error>> {
-        if &bits == "0" {
+        if &bits == "0" && bits.len() < 5 {
             return Ok(Self::new(0.0, 0.0, 0, false, true, Draw::None));
         }
 
