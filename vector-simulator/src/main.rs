@@ -96,7 +96,7 @@ impl VCommand {
     }
 
     pub fn new_from_pipe(bits: String) -> Result<Self, Box<dyn Error>> {
-        if &bits == "0" && bits.len() == 1 {
+        if &bits == "0" {
             return Ok(Self::new(0.0, 0.0, 0, false, true, Draw::None));
         }
 
@@ -113,7 +113,7 @@ impl VCommand {
 
             return Ok(Self::new(x, y, brightness, relative, false, Draw::None));
 
-        }else if command_type == "01" {
+        } else if command_type == "01" {
             // It's a draw command
             let draw = match &bits[6..8] {
                 "00" => Draw::DrawA,
