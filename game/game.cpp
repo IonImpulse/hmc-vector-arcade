@@ -21,10 +21,12 @@ typedef struct {
 } Object;
 
 void doNextFrame() {
-    string buffer_select = "10 ";
+    cout << "10";
     cout << " 0001100100";
     cout << " 0001100100";
-    cout << " 0001100100" << endl;
+    cout << " 1111111111" << endl;
+    cout << endl;
+    cout << "0" << endl; // halt
 }
 
 int main() {
