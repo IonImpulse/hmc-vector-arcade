@@ -25,6 +25,8 @@ void doNextFrame() {
     cout << " 0001100100";
     cout << " 0001100100";
     cout << " 1111111111" << endl;
+    cout << endl;
+    cout << "0" << endl; // halt
 }
 
 int main() {
