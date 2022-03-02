@@ -1,7 +1,12 @@
 #include <iostream>
 #include <chrono>
 #include <unistd.h>
+#include <string>
+#include <bitset>
+
 #define FRAME_DELAY .3
+using namespace std;
+
 
 typedef struct {
     float x, y, z, w;
@@ -16,9 +21,10 @@ typedef struct {
 } Object;
 
 void doNextFrame() {
-    static int buffer_select = 0;
-    buffer_select ^= 1;
-    std::cout << buffer_select << std::endl;
+    string buffer_select = "10 ";
+    cout << " 0001100100";
+    cout << " 0001100100";
+    cout << " 0001100100" << endl;
 }
 
 int main() {
