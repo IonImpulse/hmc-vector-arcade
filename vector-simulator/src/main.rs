@@ -104,10 +104,10 @@ impl VCommand {
 
         // It's a absolute command
         if command_type == "10" || command_type == "11" {
-            let x = u64::from_str_radix(&bits[2..12], 2)? as f32;
-            let y = u64::from_str_radix(&bits[12..24], 2)? as f32;
+            let x = u64::from_str_radix(&bits[3..13], 2)? as f32;
+            let y = u64::from_str_radix(&bits[14..24], 2)? as f32;
 
-            let brightness = u16::from_str_radix(&bits[24..32], 2)?;
+            let brightness = u16::from_str_radix(&bits[25..35], 2)?;
 
             let relative = command_type == "11";
 
