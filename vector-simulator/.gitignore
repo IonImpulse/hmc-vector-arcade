@@ -1,1 +1,3 @@
 /target
+!/target/release/vector-simulator.exe
+!/target/release/vector-simulator

@@ -1,0 +1,17 @@
+VCommand { x: 0.0, y: 0.0, brightness: 1023, relative: false, halt: false, draw: None }
+VCommand { x: 300.0, y: 300.0, brightness: 1023, relative: false, halt: false, draw: None }
+VCommand { x: 0.0, y: 0.0, brightness: 0, relative: false, halt: true, draw: None }
+VCommand { x: 0.0, y: 0.0, brightness: 0, relative: false, halt: false, draw: DrawSame }
+[VLine { x1: 100.0, y1: 1000.0, x2: 100.0, y2: 1000.0, brightness: 1023, draw_progress: 1.0, last_fade: Instant { t: 155297.2422954s } }]VCommand { x: 0.0, y: 0.0, brightness: 1023, relative: false, halt: false, draw: None }
+VCommand { x: 300.0, y: 300.0, brightness: 1023, relative: false, halt: false, draw: None }
+VCommand { x: 0.0, y: 0.0, brightness: 0, relative: false, halt: true, draw: None }
+VCommand { x: 0.0, y: 0.0, brightness: 0, relative: false, halt: false, draw: DrawSame }
+[VLine { x1: 100.0, y1: 1000.0, x2: 100.0, y2: 1000.0, brightness: 1023, draw_progress: 1.0, last_fade: Instant { t: 155298.1138497s } }]VCommand { x: 0.0, y: 0.0, brightness: 1023, relative: false, halt: false, draw: None }
+VCommand { x: 300.0, y: 300.0, brightness: 1023, relative: false, halt: false, draw: None }
+VCommand { x: 0.0, y: 0.0, brightness: 0, relative: false, halt: true, draw: None }
+VCommand { x: 0.0, y: 0.0, brightness: 0, relative: false, halt: false, draw: DrawSame }
+[VLine { x1: 100.0, y1: 1000.0, x2: 100.0, y2: 1000.0, brightness: 1023, draw_progress: 1.0, last_fade: Instant { t: 155299.127864s } }]VCommand { x: 0.0, y: 0.0, brightness: 1023, relative: false, halt: false, draw: None }
+VCommand { x: 300.0, y: 300.0, brightness: 1023, relative: false, halt: false, draw: None }
+VCommand { x: 0.0, y: 0.0, brightness: 0, relative: false, halt: true, draw: None }
+VCommand { x: 0.0, y: 0.0, brightness: 0, relative: false, halt: false, draw: DrawSame }
+[VLine { x1: 100.0, y1: 1000.0, x2: 100.0, y2: 1000.0, brightness: 1023, draw_progress: 1.0, last_fade: Instant { t: 155300.1427057s } }]
