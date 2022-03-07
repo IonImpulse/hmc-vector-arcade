@@ -21,7 +21,8 @@ class Simulator :
             self.child_process = subprocess.Popen(path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         elif os.name == 'posix':
             path = ['./../vector-simulator/target/release/vector-simulator']
-            self.child_process = subprocess.Popen(path + ['-p'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            path.extend(OPTIONS)
+            self.child_process = subprocess.Popen(path, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         else:
             path = ["../vector-simulator/target/release/vector-simulator"]
             path.extend(OPTIONS)
