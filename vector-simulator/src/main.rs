@@ -13,7 +13,6 @@ use std::sync::mpsc::TryRecvError;
 use std::time::Duration;
 use std::time::Instant;
 use std::{thread, time};
-
 use clap::{App, Arg};
 
 use glutin::error;
@@ -159,35 +158,14 @@ impl VCommand {
 }
 
 pub fn signed_binary_conversion(binary: &str) -> f32 {
-    let is_negative: bool = { binary.starts_with('1') };
-    let mut binary_mut: String = binary.to_owned();
-    if is_negative {
-        binary_mut = binary.chars().rev().collect();
-        let mut found_1 = false;
-        let mut temp_string: String = "".to_string();
-
-        for i in binary_mut.chars() {
-            if found_1 {
-                if i == '1' {
-                    temp_string += "0";
-                } else {
-                    temp_string += "0";
-                }
-            } else if i == '1' && !found_1 {
-                found_1 = true;
-                temp_string += "1";
-            }
-        }
-
-        binary_mut = temp_string.chars().rev().collect();
-    }
-
-    let decoded_signed = i16::from_str_radix(binary_mut.as_str(), 2).unwrap();
-    
-    if is_negative {
-        -decoded_signed as f32
+    if binary.starts_with("0") {
+        return u16::from_str_radix(&binary, 2).unwrap() as f32;
     } else {
-        decoded_signed as f32
+        let width: u16 = binary.len() as u16;
+
+        let raw_value = u16::from_str_radix(&binary, 2).unwrap();
+
+        return -((2_u16.pow(width as u32) - raw_value) as f32);
     }
 }
 
@@ -296,9 +274,9 @@ impl VLine {
 }
 
 /// Max value for signed 12-bit integer.
-const MAX_COORD: f32 = 4095.0;
+const MAX_COORD: f32 = 511.0;
 /// Min value for signed 12-bit integer.
-const MIN_COORD: f32 = -4095.0;
+const MIN_COORD: f32 = -511.0;
 
 fn open_file(path: &str) -> Result<Vec<VCommand>, Box<dyn Error>> {
     let mut file = std::fs::File::open(path)?;
@@ -558,23 +536,6 @@ fn start_window(
                 _ => (),
             },
             Event::RedrawRequested(_) => {
-
-                if pipe_mode {
-                    match stdin_channel.try_recv() {
-                        Ok(buffer) => {
-                            let command = VCommand::new_from_pipe(buffer).expect("Could not parse command");
-                            // Log command to file named log.txt
-                            file.write_all(format!("{:?}\n", command).as_bytes()).expect("Could not write to log file");
-                            file.flush().expect("Could not flush log file");
-                            commands_to_run.push(command);
-                        }
-                        Err(TryRecvError::Empty) => {}
-                        Err(TryRecvError::Disconnected) => panic!("Channel disconnected"),
-                    }
-                } else {
-                    commands_to_run = instructions.as_ref().unwrap().to_vec();
-                }
-
                 let dpi_factor = windowed_context.window().scale_factor();
                 let size = windowed_context.window().inner_size();
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
@@ -591,43 +552,50 @@ fn start_window(
                     draw_ui(&mut canvas);
                 }
 
-                commands_to_run.push(VCommand::new(
-                    100., 1000., 1023, false, false, Draw::None
-                ));
+                (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select)).unwrap_or((current_x, current_y));
+
+                if pipe_mode {
+                    match stdin_channel.try_recv() {
+                        Ok(buffer) => {
+                            let command = VCommand::new_from_pipe(buffer).expect("Could not parse command");
+                            commands_to_run.push(command);
+                        }
+                        Err(TryRecvError::Empty) => {
+                        }
+                        Err(TryRecvError::Disconnected) => panic!("Channel disconnected"),
+                    }
+                } else {
+                    commands_to_run = instructions.as_ref().unwrap().to_vec();
+                }
 
                 while !commands_to_run.is_empty() {
                     let new_command = commands_to_run.remove(0);
-                    
-                    // Log command to file named log.txt
-                    file.flush().expect("Could not flush log file");
+                
 
                     // First, draw type
                     match new_command.draw {
                         Draw::DrawA => {
                             buffer_select = 0;
-                            (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select));
                         }
 
                         Draw::DrawB => {
                             buffer_select = 1;
-                            (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select));
                         }
 
                         Draw::DrawSwitch => {
-                            (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select));
                             buffer_select = (buffer_select + 1) % 2;
                         }
 
                         Draw::DrawSame => {
-                            file.write_all(format!("{:?}", &buffers.get_buffer(buffer_select)).as_bytes()).expect("Could not write to log file");
 
-                            (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select));
                         }
 
                         Draw::None => {
                             // If it's not halt, then add line to current buffer
                             if new_command.halt {
                                 buffers.set_halt(buffer_select, true);
+                                file.write_all(format!("{:?}\n", &buffers.get_buffer(buffer_select)).as_bytes()).expect("Could not write to log file");
+                                file.flush().expect("Could not flush log file");
                             } else {
                                 // Clear if it's halted previously
                                 if buffers.get_halt(buffer_select) {
@@ -643,6 +611,8 @@ fn start_window(
                                 current_y = new_line.y2;
 
                                 buffers.add_to_buffer(buffer_select, new_line);
+
+                                (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select)).unwrap_or((current_x, current_y));                                
                             }                            
                         }
                     }
@@ -660,12 +630,16 @@ fn start_window(
     });
 }
 
-fn draw_buffer<T: Renderer>(canvas: &mut Canvas<T>, buffer: &Vec<VLine>) -> (f32, f32) {
+fn draw_buffer<T: Renderer>(canvas: &mut Canvas<T>, buffer: &Vec<VLine>) -> Option<(f32, f32)> {
     for line in buffer {
         draw_vector_line(canvas, line);
     }
 
-    buffer.last().unwrap().get_end_point()
+    if buffer.is_empty() {
+        None
+    } else {
+        Some(buffer.last().unwrap().get_end_point())
+    }
 }
 
 fn draw_ui<T: Renderer>(canvas: &mut Canvas<T>) {

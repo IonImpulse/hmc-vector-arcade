@@ -2,8 +2,9 @@ import subprocess
 import os
 import time
 import sys
+import keyboard
 
-OPTIONS = ["-p"]
+OPTIONS = ["-p", "-a"]
 
 class Simulator :
     '''
@@ -38,6 +39,7 @@ class Simulator :
         y_bin = Simulator.num_to_bin(y, 10)
         brightness_bin = Simulator.num_to_bin(brightness, 10)
 
+        print(f"{x}:{x_bin} {y}:{y_bin} {brightness}:{brightness_bin}")
         return (x_bin, y_bin, brightness_bin)
 
     def absolute_vec(self, x, y, brightness) :
@@ -79,27 +81,43 @@ class Simulator :
         '''
         self.send_command(f"0")
     
-    def num_to_bin(num, wordsize):
-        if num < 0:
-            num = 2**wordsize+num
-        base = bin(num)[2:]
-        padding_size = wordsize - len(base)
-        return '0' * padding_size + base                                                       
+    def num_to_bin(value: int, width: int=None) -> str:
+        if width is None:
+            width = 8
+        if value < 0:
+            value = 2 ** width + value
+        template = "{:0" + str(width + 2) + "b}"
+        return template.format(value)[2:]                                                     
 
 if __name__ == "__main__" :
     print("Staring simulator demo...")
 
     # Create simulator object
     sim = Simulator()
+    
+    box_x = 0
+    box_y = 0
 
     while True :
-        # Draw absolute vec to 300, 300, with max brightness
-        print(Simulator.create_vec(300, 300, 1023))
-        sim.absolute_vec(0, 0, 1023)
-        sim.absolute_vec(300, 300, 1023)
-
+        # Draw box
+        sim.absolute_vec(box_x, box_y, 0)
+        sim.absolute_vec(box_x + 100, box_y, 1023)
+        sim.absolute_vec(box_x + 100, box_y + 100, 1023)
+        sim.absolute_vec(box_x, box_y + 100, 1023)
+        sim.absolute_vec(box_x, box_y, 1023)
         sim.halt()
 
-        sim.draw_current_buffer()
-
-        time.sleep(1)
+        # Wait for the next event.
+        event = keyboard.read_event()
+        
+        # Get input
+        if event.event_type == keyboard.KEY_DOWN and event.name == 'up':
+            box_y += 10
+        elif event.event_type == keyboard.KEY_DOWN and event.name == 'down':
+            box_y -= 10
+        elif event.event_type == keyboard.KEY_DOWN and event.name == 'left':
+            box_x -= 10
+        elif event.event_type == keyboard.KEY_DOWN and event.name == 'right':
+            box_x += 10
+        
+        
