@@ -1,0 +1,22 @@
+23 B7
+22 B6
+21 B5
+20 B4
+19 B3
+18 B2
+
+17 TX
+16 RX
+
+13 B1
+12 B0
+11 Not Strobe Latch
+10 Strobe Ramp
+9 
+
+5  A3 (well, almost -- select brightness, really)
+4  A2
+3  A1
+2  A0
+1  Ramp High
+0  Ramp Low
