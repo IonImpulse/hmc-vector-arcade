@@ -552,7 +552,9 @@ fn start_window(
                     draw_ui(&mut canvas);
                 }
 
-                (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select)).unwrap_or((current_x, current_y));
+                if buffers.get_halt(buffer_select) {
+                    (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select)).unwrap_or((current_x, current_y));
+                }
 
                 if pipe_mode {
                     match stdin_channel.try_recv() {

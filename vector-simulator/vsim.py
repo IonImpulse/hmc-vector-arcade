@@ -101,6 +101,7 @@ if __name__ == "__main__" :
 
     while True :
         # Draw box
+        sim.draw_buffer_switch()
         sim.absolute_vec(box_x, box_y, 0)
         sim.absolute_vec(box_x + 100, box_y, 1023)
         sim.absolute_vec(box_x + 100, box_y + 100, 1023)
