@@ -25,7 +25,7 @@ void absolute_vec(int x, int y, int brightness) {
     std::string y_bin = num_to_bin(y, 10);
     std::string brightness_bin = num_to_bin(brightness, 10);
 
-    sprintf(command, "10%s%s%d", x_bin.c_str(), y_bin.c_str(), brightness_bin.c_str());
+    sprintf(command, "10%s%s%s", x_bin.c_str(), y_bin.c_str(), brightness_bin.c_str());
 
     send_command(command);
 }
@@ -37,7 +37,7 @@ void relative_vec(int x_delta, int y_delta, int brightness) {
     std::string y_bin = num_to_bin(y_delta, 10);
     std::string brightness_bin = num_to_bin(brightness, 10);
 
-    sprintf(command, "11%s%s%d", x_bin.c_str(), y_bin.c_str(), brightness_bin.c_str());
+    sprintf(command, "11%s%s%s", x_bin.c_str(), y_bin.c_str(), brightness_bin.c_str());
 
     send_command(command);
 }
