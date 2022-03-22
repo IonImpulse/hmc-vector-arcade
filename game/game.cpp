@@ -3,9 +3,10 @@
 #include <unistd.h>
 #include <string>
 #include <bitset>
+#include "wrapper.cpp"
 
 #define FRAME_DELAY .3
-using namespace std;
+
 
 
 typedef struct {
@@ -21,12 +22,20 @@ typedef struct {
 } Object;
 
 void doNextFrame() {
-    cout << "10";
-    cout << " 0001100100";
-    cout << " 0001100100";
-    cout << " 1111111111" << endl;
-    cout << endl;
-    cout << "0" << endl; // halt
+    int box_x = 0;
+    int box_y = 0;
+    draw_buffer_switch();  
+    absolute_vec(box_x, box_y, 0);
+    absolute_vec(box_x + 100, box_y, 1023);
+    absolute_vec(box_x + 100, box_y + 100, 1023);
+    absolute_vec(box_x, box_y + 100, 1023);
+    absolute_vec(box_x, box_y, 1023);
+    halt();
+    // std::cout << "0111"  << std::endl;
+    // std::cout << "10000000000000000000000000000000"  << std::endl;
+    // std::cout << "10000110010000000000001111111111"  << std::endl;
+
+    // std::cout << "0"  << std::endl;
 }
 
 int main() {
@@ -50,7 +59,7 @@ int main() {
         }
         else {
             unsigned int sleep_dur_us = (FRAME_DELAY-frameTime)*1e6;
-            //std::cout << sleep_dur_us << std::endl;
+            // std::cout << sleep_dur_us << std::endl;
             usleep(sleep_dur_us);
         }
     }
