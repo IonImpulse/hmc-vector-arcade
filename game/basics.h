@@ -1,7 +1,7 @@
 #ifndef BASICS
 #define BASICS 
 #include <string>
-#include "wrapper.cpp"
+#include "rawio.h"
 
 typedef struct {
     float x = 0;
@@ -29,13 +29,13 @@ class object2D {
     }
 
     void drawObject() {
-        absolute_vec(pos.x, pos.y, 0);
-        absolute_vec(pos.x + SIZE, pos.y, 1023);
-        absolute_vec(pos.x + SIZE, pos.y + SIZE, 1023);
-        absolute_vec(pos.x, pos.y + SIZE, 1023);
-        absolute_vec(pos.x, pos.y, 1023);
-        absolute_vec(-250,0,0);
-        absolute_vec(250,0,255);
+        draw_absolute_vector(pos.x, pos.y, 0);
+        draw_absolute_vector(pos.x + SIZE, pos.y, 1023);
+        draw_absolute_vector(pos.x + SIZE, pos.y + SIZE, 1023);
+        draw_absolute_vector(pos.x, pos.y + SIZE, 1023);
+        draw_absolute_vector(pos.x, pos.y, 1023);
+        draw_absolute_vector(-250,0,0);
+        draw_absolute_vector(250,0,255);
     }
 
 };

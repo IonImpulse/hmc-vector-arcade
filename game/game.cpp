@@ -3,12 +3,11 @@
 #include <unistd.h>
 #include <string>
 #include <bitset>
-#include "wrapper.cpp"
-#include <conio.h>
 #include "enemy.h"
 #include "basics.h"
 #include "player.h"
 
+#include "rawio.h"
 
 #define FRAME_DELAY .03
 
@@ -16,27 +15,6 @@
 
 // using namespace System;
 using namespace std;
-
-<<<<<<< HEAD
-int current  = 0;
-
-void doNextFrame() {
-    current = (current + 1)%2;
-    cout << current << endl;
-}
-
-int main() {
-
-=======
-// typedef struct {
-//     float x, y, z, w;
-// } Coord;
-// typedef struct {
-//     Coord c1, c2, c3;
-// } Triangle;
-// typedef struct {
-//     Triangle* tri_list;
-// } Object;
 
 object2D* scene[20];
 
@@ -53,25 +31,17 @@ float M_DOWN = 0;
 float ACCELERATION = 6; 
 
 void takeInput() {
-    if(kbhit())
-        {
-            int input = _getch();
-            if (input == 100){ //pressed d 
-                M_RIGHT = 1; 
-            }
-             if (input == 115){ //pressed s
-                M_DOWN = 1; 
-            }
-             if (input == 119){ //pressed w
-                M_UP = 1;
-            }
-            if (input == 97){ //pressed a
-               M_LEFT = 1;
-            }
-         
-    } 
-    
-
+    InputState input = get_inputs();
+    if (input.ypos < 0) {
+        M_DOWN = 1;
+    } else if (input.ypos > 0) {
+        M_UP = 1;
+    }
+    if (input.xpos < 0) {
+        M_LEFT = 1;
+    } else if (input.xpos > 0) {
+        M_RIGHT = 1;
+    }
 }
 
 void updateMoveVector() {
@@ -91,9 +61,8 @@ void updateMoveVector() {
        player.vel.x += ACCELERATION*M_RIGHT;
        M_RIGHT  *= .5; 
    }
-   
 }
-
+   
 void updatePhysics() {
     // player 
     player.pos.x += player.vel.x;
@@ -137,7 +106,7 @@ void doNextFrame() {
     baddie.drawEnemy();
     baddie.updateEnemy();
 
-    halt();
+    draw_end_buffer();
     
 }
 
@@ -147,8 +116,7 @@ int main() {
     //     Triangle{Coord{0, 0, 0}, Coord{1, 0, 0}, Coord{0, 1, 0}}, 
     //     Triangle{Coord{1, 0, 0}, Coord{1, 1, 0}, Coord{0,1,0}}
     // };
->>>>>>> 0621db3749b850e22eb50aa7b5187f7a3cae5da3
-
+    initialize_input_output();
     
     // Render loop
     typedef std::chrono::high_resolution_clock Clock;
@@ -157,12 +125,8 @@ int main() {
         doNextFrame();
         auto end = Clock::now();
 
-
         takeInput();
         updateMoveVector();
-        updatePhysics();
-        
-
 
         std::chrono::duration<double> frameTimeObj = end - start;
         double frameTime = frameTimeObj.count();

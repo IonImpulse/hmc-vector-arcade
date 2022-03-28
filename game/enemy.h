@@ -7,8 +7,9 @@
 #include <bitset>
 #include <math.h>
 #include <string.h>
-#include "wrapper.cpp"
 #include "basics.h"
+
+#include "rawio.h"
 
 
 // typedef struct {
@@ -22,43 +23,32 @@
 
 
 class Enemy {
-    public: 
-        Vec2 path[4];
-        Vec2 Velocity;
-        float x = 0;
-        float y = 256;
-        const float ENEMY_SIZE = 10;
+public: 
+    Vec2 path[5];
+    Vec2 Velocity;
+    int x = 0;
+    int y = 256;
+    const int ENEMY_SIZE = 10;
 
-        Enemy(float startx, float starty, Vec2 inPath[4]) {
-            path[4] = *inPath;
-            Velocity.x = (startx-inPath[0].x)*.1;
-            Velocity.y = (starty-inPath[0].y)*.1;
-            x = startx;
-            y = starty;
-        }
+    Enemy(float startx, float starty, Vec2 inPath[4]) {
+        path[4] = *inPath;
+        Velocity.x = (startx-inPath[0].x)*.1;
+        Velocity.y = (starty-inPath[0].y)*.1;
+        x = startx;
+        y = starty;
+    }
 
     void drawEnemy() {
-       
-        absolute_vec(x, y, 0);
-        relative_vec(ENEMY_SIZE, 0, 900);
-        relative_vec(-(ENEMY_SIZE/2), ENEMY_SIZE, 1023);
-        absolute_vec(x, y, 1023);   
+        draw_absolute_vector(x, y, 0);
+        draw_relative_vector(ENEMY_SIZE, 0, 900);
+        draw_relative_vector(-(ENEMY_SIZE/2), ENEMY_SIZE, 1023);
+        draw_absolute_vector(x, y, 1023);   
     }
     void updateEnemy() {
         x += Velocity.x; 
         y += Velocity.y;
-        
     }
 
 };
-
-
-
-
-
-
-
-
-
 
 #endif
