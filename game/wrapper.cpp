@@ -1,3 +1,6 @@
+#ifndef WRAPPER 
+#define WRAPPER
+
 #include <iostream>
 #include <chrono>
 #include <unistd.h>
@@ -61,3 +64,4 @@ void draw_buffer_switch() {
 void halt() {
     send_command("0");
 }
+#endif

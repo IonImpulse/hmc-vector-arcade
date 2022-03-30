@@ -5,42 +5,40 @@
 #include <bitset>
 #include "wrapper.cpp"
 #include <conio.h>
+#include "enemy.h"
+#include "basics.h"
+#include "player.h"
 
 
 #define FRAME_DELAY .03
-#define PLAYER_SIZE 20
+
+
 
 // using namespace System;
 using namespace std;
 
-typedef struct {
-    float x, y, z, w;
-} Coord;
+// typedef struct {
+//     float x, y, z, w;
+// } Coord;
+// typedef struct {
+//     Coord c1, c2, c3;
+// } Triangle;
+// typedef struct {
+//     Triangle* tri_list;
+// } Object;
 
-typedef struct {
-    float x = 0;
-    float y = 0;
-} Vec2;
+object2D* scene[20];
 
-
-typedef struct {
-    Coord c1, c2, c3;
-} Triangle;
-
-typedef struct {
-    Triangle* tri_list;
-} Object;
+Player player(0,0,20);
 
 
-
-Vec2 box;
 
 // Movement:
 float M_LEFT = 0;
 float M_UP = 0;
 float M_RIGHT = 0;
 float M_DOWN = 0;
- Vec2 VELOCITY; 
+ 
 float ACCELERATION = 6; 
 
 void takeInput() {
@@ -67,19 +65,19 @@ void takeInput() {
 
 void updateMoveVector() {
    if (M_UP) {
-       VELOCITY.y += ACCELERATION*M_UP; 
+       player.vel.y += ACCELERATION*M_UP; 
        M_UP *= .5;
    }
    if (M_DOWN) {
-       VELOCITY.y -= ACCELERATION*M_DOWN;
+       player.vel.y -= ACCELERATION*M_DOWN;
        M_DOWN *= .5; 
    }
    if (M_LEFT) {
-       VELOCITY.x -= ACCELERATION*M_LEFT;
+       player.vel.x -= ACCELERATION*M_LEFT;
        M_LEFT *= .5; 
    }
    if (M_RIGHT) {
-       VELOCITY.x += ACCELERATION*M_RIGHT;
+       player.vel.x += ACCELERATION*M_RIGHT;
        M_RIGHT  *= .5; 
    }
    
@@ -87,38 +85,46 @@ void updateMoveVector() {
 
 void updatePhysics() {
     // player 
-    box.x += VELOCITY.x;
-    box.y += VELOCITY.y;
+    player.pos.x += player.vel.x;
+    player.pos.y += player.vel.y;
 
-    if(box.x < -256) {
-        box.x = -256;
+    if(player.pos.x < -256) {
+        player.pos.x = -256;
+        player.vel.x = 0;
     }
-    if((box.x + PLAYER_SIZE) > 256) {
-        box.x = 256 - PLAYER_SIZE;
+    if((player.pos.x + player.SIZE) > 256) {
+        player.pos.x = 256 - player.SIZE;
+        player.vel.x = 0;
     }
-    if(box.y < -256) {
-        box.y = -256;
+    if(player.pos.y < -256) {
+        player.pos.y = -256;
+        player.vel.y = 0;
     }
-    if((box.y + PLAYER_SIZE) > 0) {
-        box.y = 0 - PLAYER_SIZE;
+    if((player.pos.y + player.SIZE) > 0) {
+        player.pos.y = 0 - player.SIZE;
+        player.vel.y = 0;
     }
 
-    VELOCITY.x *= .9;
-    VELOCITY.y *= .9;
+    player.vel.x *= .9;
+    player.vel.y *= .9;
 
 
 }
 
+
 void doNextFrame() {
+    Vec2 point1 = {0,40};
+    Vec2 point2 = {-100,150};
+    Vec2 point3 = {0,50};
+    Vec2 point4 = {100,256};
+    Vec2 path[4] = {point1, point2, point3, point4};
+    Enemy baddie = Enemy(0,30,path);
 
     draw_buffer_switch();  
-    absolute_vec(box.x, box.y, 0);
-    absolute_vec(box.x + PLAYER_SIZE, box.y, 1023);
-    absolute_vec(box.x + PLAYER_SIZE, box.y + PLAYER_SIZE, 1023);
-    absolute_vec(box.x, box.y + PLAYER_SIZE, 1023);
-    absolute_vec(box.x, box.y, 1023);
-    absolute_vec(-250,0,0);
-    absolute_vec(250,0,255);
+    
+    player.drawObject();
+    baddie.drawEnemy();
+    baddie.updateEnemy();
 
     halt();
     
@@ -126,12 +132,12 @@ void doNextFrame() {
 
 int main() {
     
-    Triangle tris[] {
-        Triangle{Coord{0, 0, 0}, Coord{1, 0, 0}, Coord{0, 1, 0}}, 
-        Triangle{Coord{1, 0, 0}, Coord{1, 1, 0}, Coord{0,1,0}}
-    };
+    // Triangle tris[] {
+    //     Triangle{Coord{0, 0, 0}, Coord{1, 0, 0}, Coord{0, 1, 0}}, 
+    //     Triangle{Coord{1, 0, 0}, Coord{1, 1, 0}, Coord{0,1,0}}
+    // };
 
-
+    
     // Render loop
     typedef std::chrono::high_resolution_clock Clock;
     while (1) {
@@ -139,9 +145,11 @@ int main() {
         doNextFrame();
         auto end = Clock::now();
 
+
         takeInput();
         updateMoveVector();
         updatePhysics();
+        
 
 
         std::chrono::duration<double> frameTimeObj = end - start;
