@@ -10,6 +10,14 @@
 #define FRAME_DELAY 1
 #define SCREEN_HEIGHT 2400
 #define SCREEN_WIDTH 2400
+#define PI 3.141592f
+
+// Important Constants
+
+const float CLOSE_PLANE = 0.1f;
+const float FAR_PLANE = 1000.0f;
+const float FOV = 90; // In degrees?
+const float ASP = SCREEN_HEIGHT/SCREEN_WIDTH;
 
 std::string FILENAMES = {"buff0", "buff1"};
 
@@ -17,37 +25,19 @@ uint8_t current_buffer = 0;
 game_object objects[255];
 std::ofstream* buffer_handle;
 
-void draw_triangle(triangle& tri) {
-    std::ofstream buffer;
-    std::string filename = (current_buffer)? "buff1":"buff0";
-    buffer.open(filename);
-
-    for (auto vec: tri.points) {
-        buffer << "vec "<< vec.x << ' ' << vec.y << ' ' << 255 << '\n';
+void draw_triangle(triangle* tri) {
+    std::ofstream output ("buff0", std::ios::out);
+    
+    for (auto &point : tri -> points) {
+        output << "vec " << point.x <<  ' ' << point.y << ' ' << 255 << '\n'; 
     }
-    buffer << "vec " << tri.points[0].x << ' ' << tri.points[0].y << ' ' << 255 << '\n';
-    buffer << "halt\n";
-
-    buffer.close();
+    output << "halt";
 }
 
 void render_frame() {
-    current_buffer = (current_buffer + 1) % 2;
-    
-    std::string filename = (current_buffer)? "buff1" : "buff0";
-    std::ofstream buff;
-    buffer_handle = &buff;
-    
-    //buff.open(filename, std::ofstream::out | std::ofstream::trunc); // Clear buffer for writing
-
-    for (game_object g: objects) {
-        for (triangle t: g.tris) {
-            draw_triangle(t); 
-        }
+    while(1){
+        std::cout << 0 << '\n';
     }
-        
-    buff.close();
-    std::cout << current_buffer << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -81,10 +71,10 @@ int main(int argc, char** argv) {
 		};
 
     triangle t = {
-        vec3{0.0f, 0.0f, 0.0f}, vec3{2048.0f, 0.0f, 0.0f}, vec3{0.0f, 100.0f, 0.0f}
+        vec3{0.0f, 0.0f, 0.0f}, vec3{1000.0f, 0.0f, 0.0f}, vec3{0.0f, 100.0f, 0.0f}
     };
 
-    draw_triangle(t);
+    draw_triangle(&t);
 
     typedef std::chrono::high_resolution_clock Clock;
     while(1) {

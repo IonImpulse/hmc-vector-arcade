@@ -5,4 +5,4 @@ game: game.cpp
 
 clean:
 	rm game
-c
+
