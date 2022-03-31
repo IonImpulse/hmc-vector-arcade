@@ -4,7 +4,11 @@
 #include <string>
 #include <unistd.h>
 #include <chrono>
-
+#include <Terathon-Math-Library/TSVector3D.h>
+#include <Terathon-Math-Library/TSVector4D.h>
+#include <Terathon-Math-Library/TSBivector4D.h>
+#include <Terathon-Math-Library/TSTrivector4D.h>
+#include <Terathon-Math-Library/TSMotor4D.h>
 #include "util.hpp"
 
 #define FRAME_DELAY 1
@@ -33,6 +37,8 @@ void draw_triangle(triangle* tri) {
     }
     output << "halt";
 }
+
+
 
 void render_frame() {
     while(1){

@@ -1,6 +1,7 @@
 use std::cmp;
 use std::cmp::*;
 use std::env;
+use std::io::Write;
 use std::error::Error;
 use std::f32::consts::PI;
 use std::fs::File;
@@ -12,9 +13,9 @@ use std::sync::mpsc::TryRecvError;
 use std::time::Duration;
 use std::time::Instant;
 use std::{thread, time};
-
 use clap::{App, Arg};
 
+use glutin::error;
 use glutin::{
     dpi::{LogicalSize, PhysicalSize},
     event::{Event, WindowEvent},
@@ -95,8 +96,30 @@ impl VCommand {
         }
     }
 
+    /// Creates a new VCommand from a string, piped in from the game
+    /// # Spec:
+    /// ## halt: 0
+    /// ## vec: 10
+    /// - Draws a absolute vector
+    /// - 10 bits x,y,brightness
+    /// ## rvev: 11
+    /// - Draws a relative vector
+    /// - 10 bits x,y,brightness
+    /// ## draw: 01
+    /// - Sets draw command
+    /// - 00 - Draw buffer A
+    /// - 01 - Draw buffer B
+    /// - 10 - Draw current buffer
+    /// - 11 - Draw and then switch
+    /// # Examples:
+    /// - "0" - Marks the end of a buffer. Any more commands will erase that buffer
+    /// - "10000001111100000111111111111111" - Draws a vector to 31,31 with brightness 1023/1023
+    /// - "01000001101100000110111111111111" - Draws a vector to 27,27,     he current vector
     pub fn new_from_pipe(bits: String) -> Result<Self, Box<dyn Error>> {
-        if &bits == "0" && bits.len() < 5 {
+        let mut parts = bits.split_whitespace();
+        let bits = parts.next().ok_or("No command")?.to_string();
+
+        if &bits == "0" {
             return Ok(Self::new(0.0, 0.0, 0, false, true, Draw::None));
         }
 
@@ -104,10 +127,10 @@ impl VCommand {
 
         // It's a absolute command
         if command_type == "10" || command_type == "11" {
-            let x = u64::from_str_radix(&bits[3..13], 2)? as f32;
-            let y = u64::from_str_radix(&bits[14..24], 2)? as f32;
+            let x = signed_binary_conversion(&bits[2..12]);
+            let y = signed_binary_conversion(&bits[12..22]);
 
-            let brightness = u16::from_str_radix(&bits[25..35], 2)?;
+            let brightness = u16::from_str_radix(&bits[22..32], 2)?;
 
             let relative = command_type == "11";
 
@@ -115,24 +138,39 @@ impl VCommand {
 
         } else if command_type == "01" {
             // It's a draw command
-            let draw = match &bits[6..8] {
+            let draw = match &bits[2..4] {
                 "00" => Draw::DrawA,
                 "01" => Draw::DrawB,
                 "10" => Draw::DrawSame,
                 "11" => Draw::DrawSwitch,
-                _ => return Err(Box::new(io::Error::new(io::ErrorKind::InvalidData, "Invalid draw command"))),
+                _ => {
+                    let error_msg = format!("Invalid draw command: {}", bits);
+                    return Err(Box::new(io::Error::new(io::ErrorKind::InvalidData, error_msg)));
+                },
             };
 
             return Ok(Self::new(0.0, 0.0, 0, false, false, draw));
         } else {
-            return Err(Box::new(io::Error::new(io::ErrorKind::InvalidData, "Invalid command")));
+            let error_msg = format!("Invalid command: {}", bits);
+            return Err(Box::new(io::Error::new(io::ErrorKind::InvalidData, error_msg)));
         }
-
     }
+}
 
+pub fn signed_binary_conversion(binary: &str) -> f32 {
+    if binary.starts_with("0") {
+        return u16::from_str_radix(&binary, 2).unwrap() as f32;
+    } else {
+        let width: u16 = binary.len() as u16;
+
+        let raw_value = u16::from_str_radix(&binary, 2).unwrap();
+
+        return -((2_u16.pow(width as u32) - raw_value) as f32);
+    }
 }
 
 // A compiled vector line using absolute coordinates.
+#[derive(Debug, Clone)]
 struct VLine {
     pub x1: f32,
     pub y1: f32,
@@ -153,6 +191,20 @@ impl VLine {
             brightness,
             draw_progress: 0.0,
             last_fade: Instant::now(),
+        }
+    }
+
+    pub fn from_command(command: &VCommand, current_x: f32, current_y: f32) -> Self {
+        if command.is_relative() {
+            Self::new(
+                current_x,
+                current_y,
+                current_x + command.x,
+                current_y + command.y,
+                command.brightness,
+            )
+        } else {
+            Self::new(current_x, current_y, command.x, command.y, command.brightness)
         }
     }
 
@@ -215,12 +267,16 @@ impl VLine {
     pub fn finish(&mut self) {
         self.draw_progress = 1.;
     }
+
+    pub fn get_end_point(&self) -> (f32, f32) {
+        return (self.x2, self.y2);
+    }
 }
 
 /// Max value for signed 12-bit integer.
-const MAX_COORD: f32 = 4095.0;
+const MAX_COORD: f32 = 511.0;
 /// Min value for signed 12-bit integer.
-const MIN_COORD: f32 = -4095.0;
+const MIN_COORD: f32 = -511.0;
 
 fn open_file(path: &str) -> Result<Vec<VCommand>, Box<dyn Error>> {
     let mut file = std::fs::File::open(path)?;
@@ -344,7 +400,7 @@ fn main() {
     if pipe_mode {
         let (mut reader, writer) = os_pipe::pipe().expect("Failed to create pipe");
 
-        start_window(options, None, true, fancy_mode);
+        start_window(options, None, true);
     } else {
         let input_file = matches.value_of("input").expect("Input file invalid");
 
@@ -358,7 +414,73 @@ fn main() {
         //println!("{:?}", command);
         //}
 
-        start_window(options, Some(commands_to_process), false, fancy_mode);
+        start_window(options, Some(commands_to_process), false);
+    }
+}
+
+struct Buffers {
+    buffer_a: Vec<VLine>,
+    buffer_b: Vec<VLine>,
+    buffer_a_halt: bool,
+    buffer_b_halt: bool,
+}
+
+impl Buffers {
+    pub fn new() -> Buffers {
+        Buffers {
+            buffer_a: Vec::new(),
+            buffer_b: Vec::new(),
+            buffer_a_halt: false,
+            buffer_b_halt: false,
+        }
+    }
+
+    pub fn get_buffer(&self, select: u8) -> Vec<VLine> {
+        if select == 0 {
+            self.buffer_a.clone()
+        } else {
+            self.buffer_b.clone()
+        }
+    }
+
+    pub fn set_buffer(&mut self, select: u8, buffer: Vec<VLine>) {
+        if select == 0 {
+            self.buffer_a = buffer;
+        } else {
+            self.buffer_b = buffer;
+        }
+    }
+
+    pub fn add_to_buffer(&mut self, select: u8, line: VLine) {
+        if select == 0 {
+            self.buffer_a.push(line);
+        } else {
+            self.buffer_b.push(line);
+        }
+    }
+
+    pub fn clear_buffer(&mut self, select: u8) {
+        if select == 0 {
+            self.buffer_a.clear();
+        } else {
+            self.buffer_b.clear();
+        }
+    }
+
+    pub fn set_halt(&mut self, select: u8, halt: bool) {
+        if select == 0 {
+            self.buffer_a_halt = halt;
+        } else {
+            self.buffer_b_halt = halt;
+        }
+    }
+
+    pub fn get_halt(&self, select: u8) -> bool {
+        if select == 0 {
+            self.buffer_a_halt
+        } else {
+            self.buffer_b_halt
+        }
     }
 }
 
@@ -366,7 +488,6 @@ fn start_window(
     options: Options,
     instructions: Option<Vec<VCommand>>,
     pipe_mode: bool,
-    fancy_mode: bool,
 ) {
     // Boilerplate window creation
     let window_size = glutin::dpi::PhysicalSize::new(800, 800);
@@ -391,18 +512,16 @@ fn start_window(
         windowed_context.window().scale_factor() as f32,
     );
 
-    let mut drawn_lines: Vec<VLine> = Vec::new();
 
-    let mut current_x = 0.;
-    let mut current_y = 0.;
-    let mut last_frame_time = Instant::now();
-    let mut halted = false;
     let mut commands_to_run = Vec::new();
     let stdin_channel = spawn_stdin_channel();
 
-    let mut buffer_0: Vec<VLine> = Vec::new();
-    let mut buffer_1: Vec<VLine> = Vec::new();
+    let mut current_x = 0.0;
+    let mut current_y = 0.0;
+
+    let mut buffers = Buffers::new();
     let mut buffer_select = 0;
+    let mut file = File::create("log.txt").expect("Could not create log file");
 
     el.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -417,168 +536,112 @@ fn start_window(
                 _ => (),
             },
             Event::RedrawRequested(_) => {
+                let dpi_factor = windowed_context.window().scale_factor();
+                let size = windowed_context.window().inner_size();
+                canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
+                canvas.clear_rect(
+                    0,
+                    0,
+                    size.width as u32,
+                    size.height as u32,
+                    Color::rgbf(0.0, 0.0, 0.0),
+                );
+
+                // Draw ui
+                if options.show_axis {
+                    draw_ui(&mut canvas);
+                }
+
+                if buffers.get_halt(buffer_select) {
+                    (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select)).unwrap_or((current_x, current_y));
+                }
 
                 if pipe_mode {
                     match stdin_channel.try_recv() {
                         Ok(buffer) => {
                             let command = VCommand::new_from_pipe(buffer).expect("Could not parse command");
-                            
                             commands_to_run.push(command);
                         }
-                        Err(TryRecvError::Empty) => {}
+                        Err(TryRecvError::Empty) => {
+                        }
                         Err(TryRecvError::Disconnected) => panic!("Channel disconnected"),
                     }
                 } else {
                     commands_to_run = instructions.as_ref().unwrap().to_vec();
                 }
 
-                if !halted {
-                    let dpi_factor = windowed_context.window().scale_factor();
-                    let size = windowed_context.window().inner_size();
-                    canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                    canvas.clear_rect(
-                        0,
-                        0,
-                        size.width as u32,
-                        size.height as u32,
-                        Color::rgbf(0.0, 0.0, 0.0),
-                    );
-    
-                    // Draw ui
-                    if options.show_axis {
-                        draw_ui(&mut canvas);
-                    }
-    
-                    // Get current time
-                    let now = Instant::now();
-    
-                    if fancy_mode {
-                        // First, fade all lines that have been drawn
-                        for line in drawn_lines.iter_mut() {
-                            let progress = line.update_progress(
-                                last_frame_time,
-                                options.speed_of_motor,
-                                canvas.width() as f32,
-                                canvas.height() as f32,
-                            );
-                            if progress == 1. {
-                                line.fade_if_old(now, options.fade_rate);
-                            }
-                            //println!("Prog: {}, Bright: {}, Dead: {}",progress,line.brightness,line.is_dead());
+                while !commands_to_run.is_empty() {
+                    let new_command = commands_to_run.remove(0);
+                
+
+                    // First, draw type
+                    match new_command.draw {
+                        Draw::DrawA => {
+                            buffer_select = 0;
                         }
-    
-                        // Then, remove dead lines
-                        //println!("All : {}",drawn_lines.len());
-                        drawn_lines.retain(|line| !line.is_dead());
-                        //println!("Trim: {}",drawn_lines.len());
-    
-                        // Draw all old lines
-                        for line in drawn_lines.iter() {
-                            draw_vector_line(&mut canvas, line);
+
+                        Draw::DrawB => {
+                            buffer_select = 1;
                         }
-    
-                    }
-    
-                    
-                    // Draw next new lines if time has elapsed
-                    if last_frame_time.elapsed() > Duration::from_secs_f32(options.frame_delay)
-                        || !fancy_mode
-                    {
-                        last_frame_time = Instant::now();
-    
-                        while !commands_to_run.is_empty() {
-                            let new_command = commands_to_run.remove(0);
-                            
+
+                        Draw::DrawSwitch => {
+                            buffer_select = (buffer_select + 1) % 2;
+                        }
+
+                        Draw::DrawSame => {
+
+                        }
+
+                        Draw::None => {
+                            // If it's not halt, then add line to current buffer
                             if new_command.halt {
-                                halted = true;
-                            } else if new_command.draw != Draw::None {
-                                if new_command.draw == Draw::DrawA {
-                                    buffer_select = 0;
-                                } else if new_command.draw == Draw::DrawB {
-                                    buffer_select = 1;
-                                } else if new_command.draw == Draw::DrawSwitch {
-                                    buffer_select = (buffer_select + 1) % 2;
-                                }
-
-                                if buffer_select == 0 {
-                                    for line in buffer_0.iter() {
-                                        draw_vector_line(&mut canvas, line.clone());
-                                    }
-                                } else {
-                                    for line in buffer_1.iter() {
-                                        draw_vector_line(&mut canvas, line.clone());
-                                    }
-                                }
+                                buffers.set_halt(buffer_select, true);
+                                file.write_all(format!("{:?}\n", &buffers.get_buffer(buffer_select)).as_bytes()).expect("Could not write to log file");
+                                file.flush().expect("Could not flush log file");
                             } else {
-                                if halted == true {
-                                    if buffer_select == 0 {
-                                        buffer_0.clear();
-                                    } else {
-                                        buffer_1.clear();
-                                    }
-
-                                    halted = false;
+                                // Clear if it's halted previously
+                                if buffers.get_halt(buffer_select) {
+                                    buffers.clear_buffer(buffer_select);
+                                    buffers.set_halt(buffer_select, false);
                                 }
 
-                                let mut line: VLine;
-                                //println!("Line from ({}, {})", current_x, current_y);
-        
-                                if new_command.halt {
-                                    //println!("HALTED");
-                                    halted = true;
-                                }
-        
-                                // If it's relative, then add current position to the command
-                                if new_command.is_relative() {
-                                    line = VLine::new(
-                                        current_x,
-                                        current_y,
-                                        current_x + new_command.x,
-                                        current_y + new_command.y,
-                                        new_command.brightness,
-                                    );
-                                    // Update current x/y
-                                    current_x = new_command.x + current_x;
-                                    current_y = new_command.y + current_y;
-                                } else {
-                                    line = VLine::new(
-                                        current_x,
-                                        current_y,
-                                        new_command.x,
-                                        new_command.y,
-                                        new_command.brightness,
-                                    );
-        
-                                    // Update current x/y
-                                    current_x = new_command.x;
-                                    current_y = new_command.y;
-                                }
-        
-                                if !fancy_mode {
-                                    line.finish();
-                                }
+                                let mut new_line = VLine::from_command(&new_command, current_x, current_y);
 
-                                if buffer_select == 0 {
-                                    buffer_0.push(line);
-                                } else {
-                                    buffer_1.push(line);
-                                }
+                                new_line.finish();
 
-                                
-                            }
+                                current_x = new_line.x2;
+                                current_y = new_line.y2;
+
+                                buffers.add_to_buffer(buffer_select, new_line);
+
+                                (current_x, current_y) = draw_buffer(&mut canvas, &buffers.get_buffer(buffer_select)).unwrap_or((current_x, current_y));                                
+                            }                            
                         }
                     }
-                    canvas.save();
-                    canvas.reset();
-                    canvas.restore();
-                    canvas.flush();
-                    windowed_context.swap_buffers().unwrap();
                 }
+                
+                canvas.save();
+                canvas.reset();
+                canvas.restore();
+                canvas.flush();
+                windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => windowed_context.window().request_redraw(),
             _ => (),
         }
     });
+}
+
+fn draw_buffer<T: Renderer>(canvas: &mut Canvas<T>, buffer: &Vec<VLine>) -> Option<(f32, f32)> {
+    for line in buffer {
+        draw_vector_line(canvas, line);
+    }
+
+    if buffer.is_empty() {
+        None
+    } else {
+        Some(buffer.last().unwrap().get_end_point())
+    }
 }
 
 fn draw_ui<T: Renderer>(canvas: &mut Canvas<T>) {
@@ -634,9 +697,9 @@ fn draw_vector_line<T: Renderer>(canvas: &mut Canvas<T>, line: &VLine) {
             0.,
         );
         let mut paint = Paint::color(Color::rgbf(
+            brightness as f32 / 1023.,
             brightness as f32 / 500.,
-            brightness as f32 / 255.,
-            brightness as f32 / 255.,
+            brightness as f32 / 500.,
         ));
         paint.set_line_width(2.);
         paint.set_anti_alias(true);

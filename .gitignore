@@ -1,1 +1,5 @@
 game/game
+.vscode/tasks.json
+vector-simulator/log.txt
+game/log.txt
+game/game.exe
