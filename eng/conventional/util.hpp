@@ -32,9 +32,8 @@ struct game_object {
     std::vector<triangle> tris;
 };
 
-/*
 
-vec4 operator*(mat4 m, vec4 vec) {
+vec4 mat4::operator*(mat4 m, vec4 vec) {
     float v[] = {vec.x, vec.y, vec.z, vec.w};
 
     return vec4 {
@@ -45,7 +44,6 @@ vec4 operator*(mat4 m, vec4 vec) {
     };
 }
 
-*/
 
 
 /*
