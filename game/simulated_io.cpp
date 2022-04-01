@@ -76,7 +76,7 @@ void restore_old_options() {
 }
 
 static inline int setup_stdin() {
-    // Set up stdin to be what we want
+    // Set up stdin to behave how we want (using termios)
     struct termios new_options;
     if (tcgetattr(STDIN_FILENO, &old_options) == -1) {
         fprintf(stderr, "Unexpected tcgetattr failure: %d\n", errno);
@@ -87,7 +87,7 @@ static inline int setup_stdin() {
     new_options.c_iflag = ISTRIP;
     new_options.c_oflag = 0;
     new_options.c_lflag = 0;
-    new_options.c_cc[VMIN] = 1;
+    new_options.c_cc[VMIN] = 0;
     new_options.c_cc[VTIME] = 0;
     if (tcsetattr(STDIN_FILENO, TCSANOW, &new_options) == -1) {
         fprintf(stderr, "Unexpected tcsetattr failure while creating terminal state: %d", errno);
@@ -115,6 +115,7 @@ void initialize_input_output() {
     }
     pipe_to_simulator_fd = pipe_fds[1];
     child_pid = ret_val;
+    close(pipe_fds[0]);
     if (setup_stdin() == -1) {
         goto fail;
     }
@@ -125,7 +126,10 @@ fail:
 }
 
 static inline void send(std::string data) {
-    while (write(pipe_to_simulator_fd, data.c_str(), data.length()) < 0) ;
+    if (write(pipe_to_simulator_fd, data.c_str(), data.length()) < 0) {
+        fprintf(stderr, "Failed to write to simulator: %s\r\n", strerror(errno));
+        exit(1);
+    }
 }
 
 static inline std::string number_to_binary(int16_t number, int16_t num_bits) {

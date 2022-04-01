@@ -10,6 +10,7 @@
 #include "rawio.h"
 
 #define FRAME_DELAY .03
+#define PLAYER_SIZE 50
 
 
 
@@ -123,10 +124,10 @@ int main() {
     while (1) {
         auto start = Clock::now();
         doNextFrame();
-        auto end = Clock::now();
-
-        takeInput();
         updateMoveVector();
+        updatePhysics();
+
+        auto end = Clock::now();
 
         std::chrono::duration<double> frameTimeObj = end - start;
         double frameTime = frameTimeObj.count();
