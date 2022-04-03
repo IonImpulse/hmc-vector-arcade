@@ -1,8 +1,15 @@
-render:
-	g++ -std=c++17 -o render  util.cpp render.cpp
+CXX=g++
+CXX_FLAGS=-Og -g -Wall -std=c++17 -Wpedantic
 
-test:
-	g++ -std=c++17 -o test main.cpp util.cpp
+%.o: %.cpp ${HEADERS}
+	${CXX} ${CXX_FLAGS} -c -o $@ $<
+
+
+test: main.o util.o
+	g++ -std=c++17 -o test $^
+
+render: render.o util.o simulated_io.o
+	g++ -std=c++17 -o render $^
 
 clean:
 	rm render test

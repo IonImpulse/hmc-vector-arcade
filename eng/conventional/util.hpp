@@ -95,6 +95,7 @@ class mat4 {
         uint8_t cols = 4;
 
         mat4(float init_values[4][4]);
+        mat4();
         ~mat4();
         void log();
 

@@ -6,6 +6,10 @@ vec3::vec3(float x, float y, float z) {
     elems = {x, y, z};
 }
 
+vec4::vec4(float x, float y, float z, float w) {
+    elems = {x, y, z, w};
+}
+
 mat3::mat3(float input[3][3]) {
     for (int row = 0; row < 3; row++) {
         for (int col = 0; col < 3; col++) {
@@ -23,6 +27,10 @@ mat4::mat4(float input[4][4]) {
             elems[row][col] = input[row][col];
         }
     }
+}
+
+mat4::mat4() {
+    elems = { {0} };
 }
 
 // Destructors (Currently all properties are stack initialized, so there's nothing to destroy!)
@@ -81,6 +89,10 @@ mat4& mat4::operator=(const mat4& other) {
 
 float vec3::operator[](uint8_t idx) {return elems[idx];}
 float vec4::operator[](uint8_t idx) {return elems[idx];}
+
+float vec3::operator[](uint8_t idx) const {return elems[idx];}
+float vec4::operator[](uint8_t idx) const {return elems[idx];}
+
 std::array<float,3> mat3::operator[](uint8_t idx) {return elems[idx];}
 std::array<float,4> mat4::operator[](uint8_t idx) {return elems[idx];}
 
@@ -163,6 +175,11 @@ vec3 vec3::cross(const vec3& other) {
 vec3 vec3::operator*(float scalar) { return vec3(elems[0]*scalar, elems[1]*scalar, elems[2]*scalar); }
 vec4 vec4::operator*(float scalar) { return vec4(elems[0]*scalar, elems[1]*scalar, elems[2]*scalar, elems[3]*scalar); }
 
+// Scalar division
+
+vec3 vec3::operator/(float scalar) { return vec3(elems[0]/scalar, elems[1]/scalar, elems[2]/scalar); }
+vec4 vec4::operator/(float scalar) { return vec4(elems[0]/scalar, elems[1]/scalar, elems[2]/scalar, elems[3]/scalar); }
+
 // Matrix-vector multiplication
 
 vec3 mat3::operator*(const vec3& other) {
@@ -185,5 +202,25 @@ vec4 mat4::operator*(const vec4& other) {
 // Matrix-Matrix multiplication (chonky)
 
 mat3 mat3::operator*(const mat3& other) {
+    mat3 result = mat3();
 
+    for (int row = 0; row < 3; row++) {
+        for(int col = 0; col < 3; col++) {
+            result[row][col] = elems[row][0] * other[0][col] + elems[row][1] * other[1][col] + elems[row][2] * elems[2][col];
+        }
+    }
+
+    return result;
+}
+
+mat4 mat4::operator*(const mat4& other) {
+    mat4 result = mat4();
+    
+    for (int row = 0; row < 3; row++) {
+        for(int col = 0; col < 3; col++) {
+            result[row][col] = elems[row][0] * other[0][col] + elems[row][1] * other[1][col] + elems[row][2] * elems[2][col];
+        }
+    }
+
+    return result;
 }
