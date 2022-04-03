@@ -2,111 +2,113 @@
 #define UTIL_HPP
 
 #include <array>
+#include <cstdio>
+#include <cmath>
 
-template <typename T> class vec3 {
+class vec3 {
     private:
-        std::array<T, 3> elems;
+        std::array<float, 3> elems;
     public:
         uint8_t length = 3;
 
-        vec3(T x, T y, T z);
+        vec3(float x, float y, float z);
         ~vec3();
         void log();
         
 
         // Basic operations
-        vec3<T>& operator=(const vec3<T> other);
-        void operator[](const uint8_t idx);
-        bool operator==(const vec3<T> other);
-        vec3<T>& norm();
+        vec3& operator=(const vec3& other);
+        float operator[](const uint8_t idx);
+        float operator[](const uint8_t idx) const;
+        bool operator==(const vec3& other);
+        vec3 norm();
         
         // Vector operations
-        vec3<T>& operator+(const vec3<T> other);
-        vec3& operator-(const vec3<T> other);
-        T dot(const vec3<T> other);
-        vec3& cross(const vec3<T> other);
+        vec3 operator+(const vec3& other);
+        vec3 operator-(const vec3& other);
+        float dot(const vec3& other);
+        vec3 cross(const vec3& other);
 
         // Scalar operations
-        vec3& operator*(T scalar);
-        vec3& operator/(T scalar); 
+        vec3 operator*(float scalar);
+        vec3 operator/(float scalar); 
 
 };
 
-template <typename T> class vec4 {
+class vec4 {
     private:
-        std::array<T, 4> elems;
-    private:
+        std::array<float, 4> elems;
+    public:
         uint8_t length = 4;
         
-        vec4(T x, T y, T z, T w);
+        vec4(float x, float y, float z, float w);
         ~vec4();
         void log();
 
         // Basic operations
-        vec4<T>& operator=(const vec4<T> other);
-        void operator[](const uint8_t idx);
-        bool operator==(const vec4<T> other);
-        vec4<T>& norm();
+        vec4& operator=(const vec4& other);
+        float operator[](const uint8_t idx);
+        float operator[](const uint8_t idx) const;
+        bool operator==(const vec4& other);
+        vec4 norm();
         
         // Vector operations
-        vec4<T>& operator+(const vec4<T> other);
-        vec4<T>& operator-(const vec4<T> other);
-        T dot(const vec4<T> other);
-        vec4<T>& cross(const vec4<T> other);
+        vec4 operator+(const vec4& other);
+        vec4 operator-(const vec4& other);
+        float dot(const vec4& other);
 
         // Scalar operations
-        vec4<T>& operator*(T scalar);
-        vec4<T>& operator/(T scalar); 
+        vec4 operator*(float scalar);
+        vec4 operator/(float scalar); 
 };
 
-template <typename T> class mat3 {
+class mat3 {
     private:
-        std::array<std::array<T, 3>, 3> elems;
+        std::array<std::array<float, 3>, 3> elems;
     public:
         uint8_t rows = 3;
         uint8_t cols = 3;
         
-        mat3(T init_values[3][3]);
+        mat3(float init_values[3][3]);
+        mat3();
+        ~mat3();
         void log();
 
         // Basic operations
-        mat3& operator=(const mat3<T> other);
-        void operator[](const uint8_t idx);
-        bool operator[](const mat3<T> other);
+        mat3& operator=(const mat3& other);
+        std::array<float,3> operator[](const uint8_t idx);
+        std::array<float,3> operator[](const uint8_t idx) const;
+        bool operator==(const mat3& other);
 
         // Vector operations
-        vec3<T>& operator*(const vec3<T> other);
+        vec3 operator*(const vec3& other);
         
         // Matrix operations
-        mat3<T>& operator*(const mat3<T> other);
+        mat3 operator*(const mat3& other);
 };
 
-template <typename T> class mat4 {
+class mat4 {
     private:
-        std::array<std::array<T, 4>, 4> elems;
+        std::array<std::array<float, 4>, 4> elems;
     public:
         uint8_t rows = 4;
         uint8_t cols = 4;
 
-        mat4(T init_values[4][4]);
+        mat4(float init_values[4][4]);
+        ~mat4();
         void log();
 
         // Basic operations
-        mat4<T>& operator=(const mat4<T> other);
-        void operator[](const uint8_t idx);
-        bool operator[](const mat3<T> other);
+        mat4& operator=(const mat4& other);
+        std::array<float,4> operator[](const uint8_t idx);
+        std::array<float,4> operator[](const uint8_t idx) const; 
+        bool operator==(const mat4& other);
 
         // Vector operations
-        vec4<T>& operator*(const vec4<T> other);
+        vec4 operator*(const vec4& other);
         
         // Matrix operations
-        mat4<T>& operator*(const mat4<T> other);
+        mat4 operator*(const mat4& other);
 };
-
-
-
-
-
-
 
 #endif
