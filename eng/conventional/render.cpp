@@ -5,11 +5,22 @@
 #include <unistd.h>
 #include <chrono>
 #include "util.hpp"
+#include <sstream>
 
 #define FRAME_DELAY 1
 #define SCREEN_HEIGHT 2400
 #define SCREEN_WIDTH 2400
 #define PI 3.141592f
+
+/*
+ * TODO
+ *
+ * Change to points and lines
+ * Implement screen clipping
+ * Make the darn thing work with the vector simulator
+ * DEMO!
+*/
+
 
 // Important Constants
 
@@ -24,21 +35,31 @@ uint8_t current_buffer = 0;
 game_object objects[255];
 std::ofstream* buffer_handle;
 
-void draw_triangle(triangle* tri) {
-    std::ofstream output ("buff0", std::ios::out);
-    
-    for (auto &point : tri -> points) {
-        output << "vec " << point.x <<  ' ' << point.y << ' ' << 255 << '\n'; 
-    }
-    output << "halt";
+std::string draw_triangle(triangle& tri) {
+    std::stringstream s("");
+    vec3* points = tri.points;
+
+    s << "vec " << points[1].x - points[0].x << ' ' << points[1].y - points[0].y << ' ' << 255 << '\n';
+    s << "vec " << points[2].x - points[1].x << ' ' << points[2].y - points[1].y << ' ' << 255 << '\n';
+    s << "vec " << points[0].x - points[2].x << ' ' << points[0].y - points[2].y << ' ' << 255 << '\n';
+
+    return s.str(); 
 }
 
-
-
-void render_frame() {
-    while(1){
-        std::cout << 0 << '\n';
+void render_frame(std::vector<game_object>& objects) {
+    std::ofstream OUT("buff0", std::ios::out);
+    
+    for (game_object& object : objects) {
+        for(triangle& tri: object.tris) {
+            std::string mapping = draw_triangle(tri);
+            OUT << mapping;
+        }
     }
+
+    OUT << "halt\n";
+    OUT.close();
+    
+    std::cout << "0\n";
 }
 
 int main(int argc, char** argv) {
@@ -72,15 +93,18 @@ int main(int argc, char** argv) {
 		};
 
     triangle t = {
-        vec3{0.0f, 0.0f, 0.0f}, vec3{1000.0f, 0.0f, 0.0f}, vec3{0.0f, 100.0f, 0.0f}
+        vec3{0.0f, 0.0f, 0.0f}, vec3{200.0f, 0.0f, 0.0f}, vec3{0.0f, 100.0f, 0.0f}
     };
 
-    draw_triangle(&t);
+    game_object g;
+    std::vector<triangle> tris; tris.push_back(t);
+    g.tris = tris;
+    std::vector<game_object> gs; gs.push_back(g);
 
     typedef std::chrono::high_resolution_clock Clock;
     while(1) {
         auto start = Clock::now();
-        render_frame();
+        render_frame(gs);
         auto end = Clock::now();
         std::chrono::duration<float> frame_time_counter = end - start;
         float frame_time = frame_time_counter.count();
