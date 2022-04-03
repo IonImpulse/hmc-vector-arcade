@@ -135,7 +135,8 @@ static inline void send(std::string data) {
 static inline std::string number_to_binary(int16_t number, int16_t num_bits) {
     std::string bits;
     for (int i=0; i<num_bits; i++) {
-        bits.insert(0, 1, (char)('0' + number%2));
+        bits.insert(0, 1, (char)('0' + (number & 1)));
+        number >>= 1;
     }
     return bits;
 }
