@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <cstdio>
 #include <cstring>
+#include <string>
 #include <csignal>
 #include <termios.h>
 
