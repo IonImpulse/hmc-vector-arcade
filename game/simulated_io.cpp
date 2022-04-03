@@ -162,8 +162,8 @@ static inline void draw_vector(const char* lead, int16_t x_position, int16_t y_p
 void draw_absolute_vector(int16_t x_position, int16_t y_position, int16_t brightness) {
     draw_vector("10", x_position, y_position, brightness);
 }
-void draw_relative_vector(int16_t x_position, int16_t y_position, int16_t brightness) {
-    draw_vector("11", x_position, y_position, brightness);
+void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness) {
+    draw_vector("11", delta_x, delta_y, brightness);
 }
 void draw_end_buffer() {
     send("0\n");

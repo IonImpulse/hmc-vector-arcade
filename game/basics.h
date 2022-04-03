@@ -22,21 +22,9 @@ class object2D {
         float ACCELERATION = 1; 
         float SIZE = 20;
 
-    object2D(float startx, float starty, float size)  
-        : SIZE{size} { 
-            pos.x =startx;
-        pos.y = starty;
-    }
+    object2D(float startx, float starty, float size);
 
-    void drawObject() {
-        draw_absolute_vector(pos.x, pos.y, 0);
-        draw_absolute_vector(pos.x + SIZE, pos.y, 1023);
-        draw_absolute_vector(pos.x + SIZE, pos.y + SIZE, 1023);
-        draw_absolute_vector(pos.x, pos.y + SIZE, 1023);
-        draw_absolute_vector(pos.x, pos.y, 1023);
-        draw_absolute_vector(-250,0,0);
-        draw_absolute_vector(250,0,255);
-    }
+    void drawObject();
 
 };
 

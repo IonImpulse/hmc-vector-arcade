@@ -7,7 +7,7 @@ all: sim_game
 %.o: %.cpp ${HEADERS}
 	${CXX} ${CXX_FLAGS} -c -o $@ $<
 
-sim_game: simulated_io.o game.o
+sim_game: simulated_io.o game.o enemy.o basics.o
 	${CXX} ${LD_FLAGS} -o $@ $^
 
 clean:

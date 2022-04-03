@@ -18,8 +18,8 @@ InputState get_inputs();
 void initialize_input_output();
 
 void draw_buffer_switch();
-void draw_relative_vector(int16_t x_position, int16_t y_position, int16_t brightness);
-void draw_absolute_vector(int16_t delta_x, int16_t delta_y, int16_t brightness);
+void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness);
+void draw_absolute_vector(int16_t x_position, int16_t y_position, int16_t brightness);
 void draw_end_buffer();
 
 #endif
