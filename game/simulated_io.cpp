@@ -135,7 +135,8 @@ static inline void send(std::string data) {
 static inline std::string number_to_binary(int16_t number, int16_t num_bits) {
     std::string bits;
     for (int i=0; i<num_bits; i++) {
-        bits.insert(0, 1, (char)('0' + number%2));
+        bits.insert(0, 1, (char)('0' + (number & 1)));
+        number >>= 1;
     }
     return bits;
 }
@@ -161,8 +162,8 @@ static inline void draw_vector(const char* lead, int16_t x_position, int16_t y_p
 void draw_absolute_vector(int16_t x_position, int16_t y_position, int16_t brightness) {
     draw_vector("10", x_position, y_position, brightness);
 }
-void draw_relative_vector(int16_t x_position, int16_t y_position, int16_t brightness) {
-    draw_vector("11", x_position, y_position, brightness);
+void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness) {
+    draw_vector("11", delta_x, delta_y, brightness);
 }
 void draw_end_buffer() {
     send("0\n");
