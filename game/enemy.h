@@ -21,32 +21,28 @@
 // } Enemy;
 
 
-class Enemy {
+class Enemy : public object2D
+{
     public: 
         Vec2 path[4];
-        Vec2 Velocity;
-        float x = 0;
-        float y = 256;
-        const float ENEMY_SIZE = 10;
+        
 
-        Enemy(float startx, float starty, Vec2 inPath[4]) {
-            path[4] = *inPath;
-            Velocity.x = (startx-inPath[0].x)*.1;
-            Velocity.y = (starty-inPath[0].y)*.1;
-            x = startx;
-            y = starty;
+        Enemy(float startx, float starty, float startSize): object2D::object2D(startx,starty,startSize) {
+            vel.x = (startx)*.1;
+            vel.y = (starty)*.1;
+           
         }
 
     void drawEnemy() {
        
-        absolute_vec(x, y, 0);
-        relative_vec(ENEMY_SIZE, 0, 900);
-        relative_vec(-(ENEMY_SIZE/2), ENEMY_SIZE, 1023);
-        absolute_vec(x, y, 1023);   
+        absolute_vec(pos.x, pos.y, 0);
+        relative_vec(SIZE, 0, 900);
+        relative_vec(-(SIZE/2), SIZE, 1023);
+        absolute_vec(pos.x, pos.y, 1023);   
     }
     void updateEnemy() {
-        x += Velocity.x; 
-        y += Velocity.y;
+        pos.x += vel.x; 
+        pos.y += vel.y;
         
     }
 

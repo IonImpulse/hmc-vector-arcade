@@ -3,43 +3,42 @@
 #include <unistd.h>
 #include <string>
 #include <bitset>
+#include <cmath>
 #include "wrapper.cpp"
 #include <conio.h>
+
+
 #include "enemy.h"
 #include "basics.h"
 #include "player.h"
+#include "scene.h"
 
+#include <vector>
 
 #define FRAME_DELAY .03
 
 
 
 // using namespace System;
-using namespace std;
 
-// typedef struct {
-//     float x, y, z, w;
-// } Coord;
-// typedef struct {
-//     Coord c1, c2, c3;
-// } Triangle;
-// typedef struct {
-//     Triangle* tri_list;
-// } Object;
 
-object2D* scene[20];
+
 
 Player player(0,0,20);
-
-
+Scene alpha(5); 
+int x = alpha.index;
+// alpha.addObject(object2D player);
+// alpha.printAllx();
 
 // Movement:
 float M_LEFT = 0;
 float M_UP = 0;
 float M_RIGHT = 0;
 float M_DOWN = 0;
+bool M_shoot = false;
  
 float ACCELERATION = 6; 
+
 
 void takeInput() {
     if(kbhit())
@@ -56,12 +55,44 @@ void takeInput() {
             }
             if (input == 97){ //pressed a
                M_LEFT = 1;
+
+            }
+            if (input == 32){
+                M_shoot = true;
             }
          
     } 
     
 
 }
+/////////////////////////////
+
+////////////////////////////
+bool checkCollision(object2D ob1, object2D ob2 ) {
+    int ob1Width = ob2.SIZE;
+    int ob1Hieght =ob2.SIZE ;
+    
+    int ob2Width = ob2.SIZE;
+    int ob2Hieght =ob2.SIZE ;
+
+    if (ob1.pos.x < ob2.pos.x + ob2Width &&
+        ob1.pos.x + ob1Width > ob2.pos.x &&
+        ob1.pos.y < ob2.pos.y + ob2Hieght &&
+        ob1.pos.y + ob1Hieght > ob2.pos.y  ){
+
+         std::cerr << "The enemy was hit" << std::endl;
+        return true;     
+       
+      
+    }
+   
+     return false; 
+
+}
+///////////////////////////
+
+//////////////////////////
+
 
 void updateMoveVector() {
    if (M_UP) {
@@ -85,40 +116,26 @@ void updateMoveVector() {
 
 void updatePhysics() {
     // player 
-    player.pos.x += player.vel.x;
-    player.pos.y += player.vel.y;
-
-    if(player.pos.x < -256) {
-        player.pos.x = -256;
-        player.vel.x = 0;
-    }
-    if((player.pos.x + player.SIZE) > 256) {
-        player.pos.x = 256 - player.SIZE;
-        player.vel.x = 0;
-    }
-    if(player.pos.y < -256) {
-        player.pos.y = -256;
-        player.vel.y = 0;
-    }
-    if((player.pos.y + player.SIZE) > 0) {
-        player.pos.y = 0 - player.SIZE;
-        player.vel.y = 0;
-    }
-
-    player.vel.x *= .9;
-    player.vel.y *= .9;
+    player.updatePhysics();
 
 
 }
 
-
 void doNextFrame() {
-    Vec2 point1 = {0,40};
-    Vec2 point2 = {-100,150};
-    Vec2 point3 = {0,50};
-    Vec2 point4 = {100,256};
-    Vec2 path[4] = {point1, point2, point3, point4};
-    Enemy baddie = Enemy(0,30,path);
+    
+    Enemy baddie = Enemy(0,30,30);
+
+    
+    if (M_shoot && !player.shooting) {
+        player.shoot();
+
+    }
+    if(player.shooting) {
+        player.proj.drawProj();
+        M_shoot = false;
+        checkCollision(player.proj, baddie);
+    }
+    
 
     draw_buffer_switch();  
     
