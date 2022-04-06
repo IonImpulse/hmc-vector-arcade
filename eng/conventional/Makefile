@@ -8,7 +8,7 @@ CXX_FLAGS=-Og -g -Wall -std=c++17 -Wpedantic
 test: main.o util.o
 	g++ -std=c++17 -o test $^
 
-render: render.o util.o simulated_io.o
+render: render.o simulated_io.o util.o game.o
 	g++ -std=c++17 -o render $^
 
 clean:

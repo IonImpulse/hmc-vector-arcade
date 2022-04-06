@@ -42,6 +42,7 @@ class vec4 {
         uint8_t length = 4;
         
         vec4(float x, float y, float z, float w);
+        vec4();
         ~vec4();
         void log();
 
@@ -76,8 +77,8 @@ class mat3 {
 
         // Basic operations
         mat3& operator=(const mat3& other);
-        std::array<float,3> operator[](const uint8_t idx);
-        std::array<float,3> operator[](const uint8_t idx) const;
+        std::array<float,3>& operator[](uint8_t idx);
+        const std::array<float,3>& operator[](uint8_t idx) const;
         bool operator==(const mat3& other);
 
         // Vector operations
@@ -101,8 +102,8 @@ class mat4 {
 
         // Basic operations
         mat4& operator=(const mat4& other);
-        std::array<float,4> operator[](const uint8_t idx);
-        std::array<float,4> operator[](const uint8_t idx) const; 
+        std::array<float,4>& operator[](uint8_t idx);
+        const std::array<float,4>& operator[](uint8_t idx) const; 
         bool operator==(const mat4& other);
 
         // Vector operations
@@ -111,5 +112,14 @@ class mat4 {
         // Matrix operations
         mat4 operator*(const mat4& other);
 };
+
+vec4 vec3_to_vec4(vec3);
+
+mat4 translation_matrix(float, float, float);
+
+mat4 x_rotation_matrix(float);
+mat4 y_rotation_matrix(float);
+mat4 z_rotation_matrix(float);
+
 
 #endif

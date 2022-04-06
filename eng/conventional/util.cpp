@@ -9,6 +9,9 @@ vec3::vec3(float x, float y, float z) {
 vec4::vec4(float x, float y, float z, float w) {
     elems = {x, y, z, w};
 }
+vec4::vec4() {
+    elems = {0.f, 0.f, 0.f, 0.f};
+}
 
 mat3::mat3(float input[3][3]) {
     for (int row = 0; row < 3; row++) {
@@ -18,7 +21,7 @@ mat3::mat3(float input[3][3]) {
     }
 }
 mat3::mat3() {
-    elems = { {0.0f} }; // Initialize everything to 0.0f
+    elems = { 0.0f }; // Initialize everything to 0.0f
 }
 
 mat4::mat4(float input[4][4]) {
@@ -30,7 +33,7 @@ mat4::mat4(float input[4][4]) {
 }
 
 mat4::mat4() {
-    elems = { {0} };
+    elems = { 0.0f };
 }
 
 // Destructors (Currently all properties are stack initialized, so there's nothing to destroy!)
@@ -93,8 +96,11 @@ float vec4::operator[](uint8_t idx) {return elems[idx];}
 float vec3::operator[](uint8_t idx) const {return elems[idx];}
 float vec4::operator[](uint8_t idx) const {return elems[idx];}
 
-std::array<float,3> mat3::operator[](uint8_t idx) {return elems[idx];}
-std::array<float,4> mat4::operator[](uint8_t idx) {return elems[idx];}
+std::array<float,3>& mat3::operator[](uint8_t idx) {return elems[idx];}
+std::array<float,4>& mat4::operator[](uint8_t idx) {return elems[idx];}
+
+const std::array<float,3>& mat3::operator[](uint8_t idx) const {return elems[idx];}
+const std::array<float,4>& mat4::operator[](uint8_t idx) const {return elems[idx];}
 
 // ==
 
@@ -223,4 +229,20 @@ mat4 mat4::operator*(const mat4& other) {
     }
 
     return result;
+}
+
+vec4 vec3_to_vec4(vec3 v) {
+    return vec4(v[0], v[1], v[2], 1);
+}
+
+
+mat4 translation_matrix(float delta_x, float delta_y, float delta_z) {
+    float init_values[4][4] = {
+        {1, 0, 0, delta_x},
+        {0, 1, 0, delta_y},
+        {0, 0, 1, delta_z},
+        {0, 0, 0,       1}
+    };
+
+    return mat4(init_values);
 }
