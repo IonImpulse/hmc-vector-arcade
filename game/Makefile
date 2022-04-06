@@ -1,14 +1,14 @@
 CXX=g++
-CXX_FLAGS=-Og -g
-HEADERS=rawio.h
+CXX_FLAGS=-Og -g -Wall -Wextra -Wpedantic
+HEADERS=rawio.h enemy.h player.h basics.h
 
-all: game
+all: sim_game
 
-%.o: %.c ${HEADERS}
+%.o: %.cpp ${HEADERS}
 	${CXX} ${CXX_FLAGS} -c -o $@ $<
 
-game: game.o
-	g++ -o game game.o
+sim_game: simulated_io.o game.o enemy.o basics.o
+	${CXX} ${LD_FLAGS} -o $@ $^
 
 clean:
-	rm game
+	rm sim_game *.o || true

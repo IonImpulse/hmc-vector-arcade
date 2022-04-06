@@ -7,8 +7,9 @@
 #include <bitset>
 #include <math.h>
 #include <string.h>
-#include "wrapper.cpp"
 #include "basics.h"
+
+#include "rawio.h"
 
 
 // typedef struct {
@@ -21,6 +22,7 @@
 // } Enemy;
 
 
+<<<<<<< HEAD
 class Enemy : public object2D
 {
     public: 
@@ -93,9 +95,22 @@ class Enemy : public object2D
 
 
 
+=======
+class Enemy {
+public: 
+    Vec2 path[5];
+    Vec2 Velocity;
+    int x = 0;
+    int y = 256;
+    const int ENEMY_SIZE = 10;
+>>>>>>> 59545079acc6b73c55c3559f0277c06a6838e1d0
 
+    Enemy(float startx, float starty, Vec2 inPath[4]);
 
+    void drawEnemy();
 
+    void updateEnemy();
 
+};
 
 #endif

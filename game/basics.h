@@ -1,7 +1,7 @@
 #ifndef BASICS
 #define BASICS 
 #include <string>
-#include "wrapper.cpp"
+#include "rawio.h"
 
 
 #define SCENE_SIZE 20
@@ -22,6 +22,7 @@ class object2D {
         float ACCELERATION = 1; 
         float SIZE = 20;
 
+<<<<<<< HEAD
     object2D(float startx, float starty, float size, std::string inName)  
         : SIZE{size} { 
         name = inName;
@@ -34,16 +35,11 @@ class object2D {
         float ACCELERATION = 1; 
         float SIZE = 20;
     }
+=======
+    object2D(float startx, float starty, float size);
+>>>>>>> 59545079acc6b73c55c3559f0277c06a6838e1d0
 
-    void drawObject() {
-        absolute_vec(pos.x, pos.y, 0);
-        absolute_vec(pos.x + SIZE, pos.y, 1023);
-        absolute_vec(pos.x + SIZE, pos.y + SIZE, 1023);
-        absolute_vec(pos.x, pos.y + SIZE, 1023);
-        absolute_vec(pos.x, pos.y, 1023);
-        absolute_vec(-250,0,0);
-        absolute_vec(250,0,255);
-    }
+    void drawObject();
 
     void handleCollision() {
         std::cerr <<  name;
