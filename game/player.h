@@ -3,6 +3,7 @@
 #include "basics.h"
 #include <string>
 #include "projectile.h"
+#include "scene.h"
 
 class Player : public object2D
 {
@@ -11,8 +12,9 @@ class Player : public object2D
         bool shooting = false;
         Projectile proj = Projectile();
     
-    Player(float startx, float starty, float startSize): 
-                object2D::object2D(startx,starty,startSize) {
+    Player(float startx, float starty, float startSize, std::string inName): 
+                object2D::object2D(startx,starty,startSize, inName) {
+                addProjectile(&proj);
     }
 
     void drawPlayer() {
@@ -20,10 +22,12 @@ class Player : public object2D
     }
     
     void shoot() {
-        proj = Projectile(pos.x + SIZE/2, pos.y + SIZE, 3, 1.5707);
+        proj.pos.x = pos.x + SIZE/2;
+        proj.pos.y = pos.y + SIZE;
+
         shooting = true;
-        proj.vel.x += vel.x*.1;
-        proj.vel.y += vel.y*.1;
+        proj.vel.x = 0 + vel.x*.2;
+        proj.vel.y = 10 + vel.y*.2;
     }
 
     void updatePhysics() {
@@ -52,23 +56,8 @@ class Player : public object2D
     vel.y *= .9;
 
     /// Projectile 
-    if (shooting) {
-        proj.pos.x += proj.vel.x;
-        proj.pos.y += proj.vel.y;
+    shooting = proj.updateProj();
 
-        // out of bounds 
-        if(proj.pos.y > ( 256 + proj.SIZE) || proj.pos.y < -( 256 + proj.SIZE)) {
-            shooting = false; 
-            proj.vel.x = 0;
-            proj.vel.y = 0;
-        }  
-        if(proj.pos.x > ( 256 + proj.SIZE) || proj.pos.x < -( 256 + proj.SIZE)) {
-            shooting = false; 
-            proj.vel.x = 0;
-            proj.vel.y = 0;
-        }  
-
-    }
     }
 
 

@@ -7,28 +7,24 @@
 #include "wrapper.cpp"
 #include <conio.h>
 
-
+#include "scene.h"
 #include "enemy.h"
 #include "basics.h"
 #include "player.h"
-#include "scene.h"
+
 
 #include <vector>
 
-#define FRAME_DELAY .03
 
 
 
-// using namespace System;
+///////////////////
+///////////////
 
-
-
-
-Player player(0,0,20);
-Scene alpha(5); 
-int x = alpha.index;
-// alpha.addObject(object2D player);
-// alpha.printAllx();
+ Player player = Player(0,0,20,"player");
+Enemy baddie = Enemy(20,30,30,"baddie");
+//////////////
+//////////////////
 
 // Movement:
 float M_LEFT = 0;
@@ -67,28 +63,8 @@ void takeInput() {
 }
 /////////////////////////////
 
-////////////////////////////
-bool checkCollision(object2D ob1, object2D ob2 ) {
-    int ob1Width = ob2.SIZE;
-    int ob1Hieght =ob2.SIZE ;
-    
-    int ob2Width = ob2.SIZE;
-    int ob2Hieght =ob2.SIZE ;
+/////////////////////s///////
 
-    if (ob1.pos.x < ob2.pos.x + ob2Width &&
-        ob1.pos.x + ob1Width > ob2.pos.x &&
-        ob1.pos.y < ob2.pos.y + ob2Hieght &&
-        ob1.pos.y + ob1Hieght > ob2.pos.y  ){
-
-         std::cerr << "The enemy was hit" << std::endl;
-        return true;     
-       
-      
-    }
-   
-     return false; 
-
-}
 ///////////////////////////
 
 //////////////////////////
@@ -118,23 +94,24 @@ void updatePhysics() {
     // player 
     player.updatePhysics();
 
-
 }
 
-void doNextFrame() {
-    
-    Enemy baddie = Enemy(0,30,30);
-
-    
-    if (M_shoot && !player.shooting) {
+void handlePlayerProj() { 
+     if (M_shoot && !player.shooting) {
         player.shoot();
+    }
 
-    }
+
     if(player.shooting) {
-        player.proj.drawProj();
+        
         M_shoot = false;
-        checkCollision(player.proj, baddie);
+         // std::cerr << "I was hit" << std::endl;
     }
+}
+void doNextFrame() {
+
+    
+   
     
 
     draw_buffer_switch();  
@@ -142,6 +119,11 @@ void doNextFrame() {
     player.drawObject();
     baddie.drawEnemy();
     baddie.updateEnemy();
+    handlePlayerProj();
+
+    drawAllProjectiles();
+    
+
 
     halt();
     
@@ -154,19 +136,30 @@ int main() {
     //     Triangle{Coord{1, 0, 0}, Coord{1, 1, 0}, Coord{0,1,0}}
     // };
 
-    
+    addEntity(&player);
+    addProjectile(&(player.proj));
+    addEntity(&baddie);
+
+
     // Render loop
     typedef std::chrono::high_resolution_clock Clock;
     while (1) {
+        
+        
+
+
         auto start = Clock::now();
-        doNextFrame();
-        auto end = Clock::now();
-
-
         takeInput();
         updateMoveVector();
         updatePhysics();
-        
+        checkAllCollisions();
+        doNextFrame();
+        updateTimer();
+        auto end = Clock::now();
+  
+
+
+
 
 
         std::chrono::duration<double> frameTimeObj = end - start;

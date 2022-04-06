@@ -2,36 +2,119 @@
 #define SCENE
 #include "basics.h"
 #include <unordered_map>
+#include <vector>
+#include "projectile.h"
 
-#define SCENE_SIZE 20
 
 
+struct Scene {
+        //16 x 16 ,  -8 -> 8 (256/32)
+        object2D* entities[SCENE_SIZE];
+        int entIn = 0 ;
+        bool entFull = false;
+        int currentFrame = 0;
+        int currentTime = 0; 
 
-class Scene {
-    public: 
-        // 16 x 16 ,  -4 -> 4 
-        //std::unordered_map<std::pair<int,int>, int> umap;
-        int index=0; 
 
-    Scene(int in) {
-        //std::pair<int,int> firstVal (1,1);
-        // umap[firstVal] = 10;
-        index = in;
-    }
-
-    void printAllx() {
-        std::cerr<<"All x positions"<<std::endl;
-
-       for(int i = 0; i < index; i++) {
-          // std::cerr<<   space[i].pos.x <<std::endl;
-          
-       }
-
-    }
-     void addObject(object2D object) {
-       //space[index] = object; 
-       ++index ;
-    }
+        Projectile* projectiles[SCENE_SIZE*3];
+        int projIn = 0 ;
+        bool projFull = false;
+         //3 bullets per entity. 
+        // std::unordered_map<std::pair<int,int>, Projectile> projectiles;
 
 };
+struct Scene scene;
+
+
+void addEntity(object2D* entity){
+        scene.entities[scene.entIn] = entity;
+        if(scene.entIn == SCENE_SIZE ){
+           scene.entFull = true; 
+        }
+        scene.entIn = (scene.entIn + 1) % SCENE_SIZE;
+
+        //project player entity
+        if (scene.entIn == 0){
+                scene.entIn++;
+        }
+}
+
+void drawAllProjectiles() {
+        int endIndex = scene.projIn;
+        if (scene.projFull) {
+                endIndex = SCENE_SIZE*3;
+        }
+        for (int i = 0; i < endIndex; i++) {
+                scene.projectiles[i]->drawProj();
+        }
+}
+
+
+void addProjectile(Projectile* proj){
+       scene.projectiles[scene.projIn] = proj;
+        if(scene.projIn == (SCENE_SIZE *3)){
+           scene.projFull = true; 
+        }
+        scene.projIn = (scene.projIn + 1) % (SCENE_SIZE*3);
+
+        //project player entity
+}
+
+
+bool checkCollision(object2D* entity, object2D* proj ) {
+    int ob1Width = entity->SIZE;
+    int ob1Hieght = entity->SIZE ;
+    
+    int ob2Width = proj->SIZE;
+    int ob2Hieght =proj->SIZE ;
+        
+
+
+    if (entity->pos.x < proj->pos.x + ob2Width &&
+        entity->pos.x + ob1Width > proj->pos.x &&
+        entity->pos.y < proj->pos.y + ob2Hieght &&
+        entity->pos.y + ob1Hieght > proj->pos.y  ){
+
+        entity->handleCollision();
+        return true;     
+       
+      
+    }
+   
+     return false; 
+
+}
+void updateTimer() {
+        scene.currentFrame++;
+        scene. currentTime += FRAME_DELAY;
+}
+
+void  checkAllCollisions() { 
+
+
+        int entities;
+        if (!scene.entFull) {
+                entities = scene.entIn;
+        } else {
+                entities = SCENE_SIZE;
+        }
+         int projs;
+        if (!scene.projFull) {
+                projs = scene.projIn;
+        } else {
+                projs = SCENE_SIZE*3;
+        }
+
+
+        for (int e = 0; e < entities; e++) {
+                for (int p = 0; p < projs; p++) {
+                
+                   checkCollision(scene.entities[e], scene.projectiles[p]);
+                }
+        }
+
+}
+
+
+
 #endif
