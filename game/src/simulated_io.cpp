@@ -5,7 +5,7 @@
 #include <csignal>
 #include <termios.h>
 
-#include "rawio.h"
+#include "include/rawio.h"
 
 #define BUF_SIZE 256
 
@@ -15,7 +15,7 @@ int child_pid;
 struct InputState get_inputs() {
     struct InputState inputs;
     char buf[BUF_SIZE];
-    bool w,a,s,d;
+    bool w,a,s,d,space;
     while (read(STDIN_FILENO, buf, BUF_SIZE-1) > 0) {
         buf[BUF_SIZE-1] = '\0';
         if (strstr(buf, "\003")) {
@@ -35,6 +35,9 @@ struct InputState get_inputs() {
         if (strcasestr(buf, "d")) {
             d = true;
         }
+        if (strcasestr(buf, " ")) {
+            space = true;
+        }
     }
     inputs.xpos = 0;
     inputs.ypos = 0;
@@ -43,6 +46,7 @@ struct InputState get_inputs() {
     if (a) inputs.xpos += 1.0;
     if (d) inputs.xpos -= 1.0;
     inputs.buttons = 0;
+    if (space) inputs.buttons |= 1;
     return inputs;
 }
 

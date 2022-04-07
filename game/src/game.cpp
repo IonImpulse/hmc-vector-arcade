@@ -3,42 +3,24 @@
 #include <unistd.h>
 #include <string>
 #include <bitset>
-<<<<<<< HEAD
 #include <cmath>
-#include "wrapper.cpp"
-#include <conio.h>
-
-#include "scene.h"
-=======
->>>>>>> 59545079acc6b73c55c3559f0277c06a6838e1d0
-#include "enemy.h"
-#include "basics.h"
-#include "player.h"
-
-#include "rawio.h"
-
-<<<<<<< HEAD
 #include <vector>
-=======
+
+#include "include/scene.h"
+#include "include/enemy.h"
+#include "include/basics.h"
+#include "include/player.h"
+
+#include "include/rawio.h"
+
 #define FRAME_DELAY .03
 #define PLAYER_SIZE 50
 
 
->>>>>>> 59545079acc6b73c55c3559f0277c06a6838e1d0
-
-
-<<<<<<< HEAD
-
-=======
-object2D* scene[20];
-
-Player player(0,0,20);
->>>>>>> 59545079acc6b73c55c3559f0277c06a6838e1d0
-
 ///////////////////
 ///////////////
 
- Player player = Player(0,0,20,"player");
+Player player = Player(0,0,20,"player");
 Enemy baddie = Enemy(20,30,30,"baddie");
 //////////////
 //////////////////
@@ -54,31 +36,6 @@ float ACCELERATION = 6;
 
 
 void takeInput() {
-<<<<<<< HEAD
-    if(kbhit())
-        {
-            int input = _getch();
-            if (input == 100){ //pressed d 
-                M_RIGHT = 1; 
-            }
-             if (input == 115){ //pressed s
-                M_DOWN = 1; 
-            }
-             if (input == 119){ //pressed w
-                M_UP = 1;
-            }
-            if (input == 97){ //pressed a
-               M_LEFT = 1;
-
-            }
-            if (input == 32){
-                M_shoot = true;
-            }
-         
-    } 
-    
-
-=======
     InputState input = get_inputs();
     if (input.ypos < 0) {
         M_DOWN = 1;
@@ -90,7 +47,9 @@ void takeInput() {
     } else if (input.xpos > 0) {
         M_RIGHT = 1;
     }
->>>>>>> 59545079acc6b73c55c3559f0277c06a6838e1d0
+    if (input.buttons){
+        M_shoot = true;
+    }
 }
 /////////////////////////////
 
@@ -139,11 +98,6 @@ void handlePlayerProj() {
     }
 }
 void doNextFrame() {
-
-    
-   
-    
-
     draw_buffer_switch();  
     
     player.drawObject();
@@ -153,10 +107,7 @@ void doNextFrame() {
 
     drawAllProjectiles();
     
-
-
     draw_end_buffer();
-    
 }
 
 int main() {
@@ -165,20 +116,15 @@ int main() {
     //     Triangle{Coord{0, 0, 0}, Coord{1, 0, 0}, Coord{0, 1, 0}}, 
     //     Triangle{Coord{1, 0, 0}, Coord{1, 1, 0}, Coord{0,1,0}}
     // };
-<<<<<<< HEAD
 
     addEntity(&player);
     addProjectile(&(player.proj));
     addEntity(&baddie);
-
+    initialize_input_output();
 
     // Render loop
     typedef std::chrono::high_resolution_clock Clock;
     while (1) {
-        
-        
-
-
         auto start = Clock::now();
         takeInput();
         updateMoveVector();
@@ -186,23 +132,6 @@ int main() {
         checkAllCollisions();
         doNextFrame();
         updateTimer();
-        auto end = Clock::now();
-  
-
-
-
-=======
-    initialize_input_output();
-    
-    // Render loop
-    typedef std::chrono::high_resolution_clock Clock;
-    while (1) {
-        auto start = Clock::now();
-        doNextFrame();
-        updateMoveVector();
-        updatePhysics();
->>>>>>> 59545079acc6b73c55c3559f0277c06a6838e1d0
-
         auto end = Clock::now();
 
         std::chrono::duration<double> frameTimeObj = end - start;
