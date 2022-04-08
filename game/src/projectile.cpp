@@ -1,7 +1,7 @@
 #include <math.h>
 
-#include "include/basics.h"
-#include "include/projectile.h"
+#include "../include/basics.h"
+#include "../include/projectile.h"
 
 Projectile::Projectile():  object2D::object2D(-260,-260,3) { }
 

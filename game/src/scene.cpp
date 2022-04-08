@@ -1,4 +1,4 @@
-#include "include/scene.h"
+#include "../include/scene.h"
 
 struct Scene scene;
 

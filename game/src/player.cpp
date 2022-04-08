@@ -1,4 +1,4 @@
-#include "include/player.h"
+#include "../include/player.h"
 #include <string>
 
 Player::Player(float startx, float starty, float startSize, std::string inName): 

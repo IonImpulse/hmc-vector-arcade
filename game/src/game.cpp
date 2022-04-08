@@ -1,19 +1,17 @@
 #include <iostream>
-#include <chrono>
 #include <unistd.h>
 #include <string>
 #include <bitset>
 #include <cmath>
 #include <vector>
 
-#include "include/scene.h"
-#include "include/enemy.h"
-#include "include/basics.h"
-#include "include/player.h"
+#include "../include/scene.h"
+#include "../include/enemy.h"
+#include "../include/basics.h"
+#include "../include/player.h"
 
-#include "include/rawio.h"
+#include "../include/rawio.h"
 
-#define FRAME_DELAY .03
 #define PLAYER_SIZE 50
 
 
@@ -123,26 +121,18 @@ int main() {
     initialize_input_output();
 
     // Render loop
-    typedef std::chrono::high_resolution_clock Clock;
     while (1) {
-        auto start = Clock::now();
+        set_sleep_time_ms(FRAME_DELAY_MS);
+
         takeInput();
         updateMoveVector();
         updatePhysics();
         checkAllCollisions();
         doNextFrame();
         updateTimer();
-        auto end = Clock::now();
 
-        std::chrono::duration<double> frameTimeObj = end - start;
-        double frameTime = frameTimeObj.count();
-        if (frameTime > FRAME_DELAY) {
+        if (!sleep_until_set_time()) {
             std::cerr<<"Frame computation too long!"<<std::endl;
-        }
-        else {
-            unsigned int sleep_dur_us = (FRAME_DELAY-frameTime)*1e6;
-            // std::cout << sleep_dur_us << std::endl;
-            usleep(sleep_dur_us);
         }
     }
 }

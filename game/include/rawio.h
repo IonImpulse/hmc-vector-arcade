@@ -22,4 +22,7 @@ void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness);
 void draw_absolute_vector(int16_t x_position, int16_t y_position, int16_t brightness);
 void draw_end_buffer();
 
+void set_sleep_time_ms(uint32_t milliseconds);
+bool sleep_until_set_time();
+
 #endif

@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
 
-#include "include/basics.h"
+#include "../include/basics.h"
 
 object2D::object2D(float startx, float starty, float size)  
     : SIZE{size} { 
@@ -9,10 +9,10 @@ object2D::object2D(float startx, float starty, float size)
     pos.y = starty;
 }
 object2D::object2D() {
-    Vec2 pos = {1,2};
-    Vec2 vel = {0,0}; 
-    float ACCELERATION = 1; 
-    float SIZE = 20;
+    pos = {1,2};
+    vel = {0,0}; 
+    ACCELERATION = 1; 
+    SIZE = 20;
 }
 
 void object2D::drawObject() {

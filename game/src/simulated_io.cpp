@@ -1,11 +1,12 @@
 #include <unistd.h>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <string>
 #include <csignal>
 #include <termios.h>
 
-#include "include/rawio.h"
+#include "../include/rawio.h"
 
 #define BUF_SIZE 256
 
@@ -172,4 +173,19 @@ void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness) 
 }
 void draw_end_buffer() {
     send("0\n");
+}
+
+typedef std::chrono::high_resolution_clock Clock;
+static std::chrono::time_point<Clock> target_time;
+void set_sleep_time_ms(uint32_t milliseconds) {
+    target_time = Clock::now() + std::chrono::milliseconds(milliseconds);
+}
+bool sleep_until_set_time() {
+    auto now = Clock::now();
+    if (now > target_time) {
+        return false;
+    }
+    std::chrono::nanoseconds sleep_duration = target_time - now;
+    usleep(sleep_duration.count() / 1000);
+    return true;
 }

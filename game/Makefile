@@ -1,5 +1,5 @@
 CXX=g++
-CXX_FLAGS=-Og -g -Wall -Wextra -Wpedantic -I.
+CXX_FLAGS=-Og -g -Wall -Wextra -Wpedantic
 HEADERS=include/rawio.h include/enemy.h include/player.h include/basics.h include/projectile.h include/player.h
 
 all: sim_game

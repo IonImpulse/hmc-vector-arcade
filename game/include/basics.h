@@ -4,8 +4,9 @@
 
 
 #define SCENE_SIZE 20
-#define FRAME_DELAY .03
 
+#define FRAME_DELAY_MS 30
+#define FRAME_DELAY (FRAME_DELAY_MS / 100.0)
 
 typedef struct {
     float x = 0;

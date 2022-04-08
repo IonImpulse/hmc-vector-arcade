@@ -1,6 +1,6 @@
-#include "include/enemy.h"
-#include "include/basics.h"
-#include "include/scene.h"
+#include "../include/enemy.h"
+#include "../include/basics.h"
+#include "../include/scene.h"
 
 Enemy::Enemy(float startx, float starty, float startSize, std::string inName)
     : object2D::object2D(startx,starty,startSize)
