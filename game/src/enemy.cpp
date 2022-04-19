@@ -3,7 +3,7 @@
 #include "../include/scene.h"
 
 Enemy::Enemy(float startx, float starty, float startSize, std::string inName)
-    : object2D::object2D(startx,starty,startSize)
+    : object2D::object2D(startx,starty,startSize, inName)
 {
     vel.x = (startx)*.1;
     vel.y = (starty)*.1;

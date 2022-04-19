@@ -2,7 +2,7 @@
 #include <string>
 
 Player::Player(float startx, float starty, float startSize, std::string inName): 
-            object2D::object2D(startx,starty,startSize) {
+            object2D::object2D(startx,starty,startSize, inName) {
             addProjectile(&proj);
 }
 

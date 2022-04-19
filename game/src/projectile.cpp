@@ -3,10 +3,10 @@
 #include "../include/basics.h"
 #include "../include/projectile.h"
 
-Projectile::Projectile():  object2D::object2D(-260,-260,3) { }
+Projectile::Projectile():  object2D::object2D(-260,-260,3, "proj") { }
 
 Projectile::Projectile(float startx, float starty, float startSize, float angle):
-            object2D::object2D(startx,starty,startSize) {
+            object2D::object2D(startx,starty,startSize, "proj") {
     vel.x = 10*cos(angle); 
     vel.y = 10*sin(angle);
 }

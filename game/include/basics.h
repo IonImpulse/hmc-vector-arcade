@@ -23,7 +23,7 @@ class object2D {
         float SIZE = 20;
 
     object2D();
-    object2D(float startx, float starty, float size);
+    object2D(float startx, float starty, float size, std::string inName);
 
     void drawObject();
 

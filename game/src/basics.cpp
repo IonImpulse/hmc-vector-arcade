@@ -3,8 +3,9 @@
 
 #include "../include/basics.h"
 
-object2D::object2D(float startx, float starty, float size)  
+object2D::object2D(float startx, float starty, float size, std::string inName)  
     : SIZE{size} { 
+        name = inName;
         pos.x =startx;
     pos.y = starty;
 }
