@@ -116,7 +116,7 @@ void initialize_input_output() {
         close(pipe_fds[0]);
         close(pipe_fds[1]);
         execv(SIMULATOR_PATH, SIMULATOR_ARGS);
-        fprintf(stderr, "Failed to exec\n");
+        fprintf(stderr, "Failed to exec simulator: %s\r\n", strerror(errno));
         exit(1);
     }
     pipe_to_simulator_fd = pipe_fds[1];
