@@ -62,15 +62,7 @@ void incrementCounter() {
 
 void strobeSID() {
     GPIO->output_val &= ~(1<<22);
-
-    for (volatile int i=0; i<1e2; i++) {}
-    GPIO->output_val |= 1<<19;
-    for (volatile int i=0; i<1e2; i++) {}
-    GPIO->output_val &= ~(1<<19);
-    for (volatile int i=0; i<1e2; i++) {}
-
     GPIO->output_val |= 1<<22;
-    for (volatile int i=0; i<1e2; i++) {}
 }
 
 void setSIDreg(const char addr, const char byte) {
@@ -91,7 +83,7 @@ void startSIDclock() {
     //GPIO->out_xor|=1<<19;
 }
 int main(void) {
-    GPIO->iof_en=0;
+    GPIO->iof_en=0; // reset GPIO register to 0
     GPIO->output_en |= -1;
     startSIDclock();
     while (1) {

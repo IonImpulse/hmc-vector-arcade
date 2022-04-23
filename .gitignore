@@ -1,5 +1,9 @@
-game/game
 .vscode/tasks.json
 vector-simulator/log.txt
+game/game
 game/log.txt
 game/game.exe
+*/.vscode
+*/.pio
+*/*/.vscode
+*/*/.pio

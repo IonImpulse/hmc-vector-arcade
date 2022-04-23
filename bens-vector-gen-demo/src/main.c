@@ -74,6 +74,7 @@ int rampDir=1;
 int x,y;
 
 void updateRamp(int ramp) {
+    ramp = (ramp < 0x7FF) ? ramp : 0x7FF;
     ramp = rampDir ? -ramp : ramp;
     ramp ^= 0x800; // invert MSB to be consistent with AM6012PC DAC
     sendByte(6, ramp>>4);
@@ -116,7 +117,7 @@ void updatePos(const int newX, const int newY) {
     int distance = approx_distance(newX-x+512, newY-y+512);
     x = newX+512;
     y = newY+512;
-    if (rampDir) {
+    if (rampDir==0) {
         sendByte(5, x>>2);
         sendByte(2, y>>2);
         sendByte(4, ((x&0x3)<<2)|(y&0x3));
@@ -125,7 +126,8 @@ void updatePos(const int newX, const int newY) {
         sendByte(0, y>>2);
         sendByte(1, ((x&0x3)<<2)|(y&0x3));
     }
-    int rampSpeed = (15*1024)/distance;
+    //int rampSpeed = (15*1024)/distance;
+    int rampSpeed = (32*1024)/distance;
     updateRamp(rampSpeed);
     waitRampDone();
 }
@@ -135,6 +137,7 @@ int main(void) {
     GPIO->iof_en=0; // reset GPIO register to 0
     GPIO->output_en |= (-1 & (~0x3));
     GPIO->input_en |= 0x3;
+    GPIO->pue |= 0x3;
     sendByte(0,0x55);
     PRCI->hfrosccfg &= ~5; // set internal ring oscillator to ~12MHz
     PRCI->hfrosccfg |= 5;
@@ -155,7 +158,8 @@ int main(void) {
     x=0;
     y=0;
     while (1) {
-        for (volatile int i=-400; i<400; i++) {
+        
+        /*for (volatile int i=-400; i<400; i++) {
             for (volatile int j=0;j<10;j++) {
                 if (abs(i%50)>25) 
                     updatePos(100+i, 0);
@@ -176,6 +180,74 @@ int main(void) {
                 updatePos(-511,-511);
                 updatePos(511,-511);
             }
-        }
+        }*/
+        int i = -400;
+        updatePos(100+i, 0);
+        updatePos(80+i, 30);
+        updatePos(20+i, 40);
+        updatePos(-50+i, 10);
+        updatePos(-100+i, -50);
+        updatePos(-90+i, 0);
+        updatePos(-100+i, 50);
+        updatePos(-50+i, -10);
+        updatePos(-30+i, -20);
+        updatePos(20+i, -40);
+        updatePos(80+i, -30);
+        updatePos(511,511);
+        updatePos(-511,511);
+        updatePos(-511,-511);
+        updatePos(511,-511);/*
+        i=-400;
+        updatePos(100+i, 0);
+        updatePos(80+i, 30);
+        updatePos(20+i, 40);
+        updatePos(-50+i, 10);
+        updatePos(-100+i, -50);
+        updatePos(-90+i, 0);
+        updatePos(-100+i, 50);
+        updatePos(-50+i, -10);
+        updatePos(-30+i, -20);
+        updatePos(20+i, -40);
+        updatePos(80+i, -30);
+        updatePos(511,511);
+        updatePos(-511,511);
+        updatePos(-511,-511);
+        updatePos(511,-511);
+        i=400;
+        updatePos(100+i, 0);
+        updatePos(80+i, 30);
+        updatePos(20+i, 40);
+        updatePos(-50+i, 10);
+        updatePos(-100+i, -50);
+        updatePos(-90+i, 0);
+        updatePos(-100+i, 50);
+        updatePos(-50+i, -10);
+        updatePos(-30+i, -20);
+        updatePos(20+i, -40);
+        updatePos(80+i, -30);
+        updatePos(511,511);
+        updatePos(-511,511);
+        updatePos(-511,-511);
+        updatePos(511,-511);
+        updatePos(511,511);
+        updatePos(-511,511);
+        updatePos(-511,-511);
+        updatePos(511,511);
+        updatePos(511,-511);
+        updatePos(0,0);*/
+        /*updatePos(511,0);
+        updatePos(0,0);
+        updatePos(-256,0);
+        updatePos(-384,0);
+        updatePos(-448,0);
+        updatePos(-480,0);
+        updatePos(-496,0);
+        updatePos(-504,0);
+        updatePos(-508,0);
+        updatePos(-510,0);*/
+        /*updatePos(10,11);
+        updatePos(-10,10);
+        updatePos(-10,-10);
+        updatePos(10,-10);*/
     }
 }
