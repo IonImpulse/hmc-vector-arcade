@@ -5,6 +5,7 @@
 #include <string>
 #include <csignal>
 #include <termios.h>
+#include <iostream>
 
 #include "../include/rawio.h"
 
@@ -175,12 +176,21 @@ void draw_end_buffer() {
     send("0\n");
 }
 
+void request_halt() {
+    // do nothing; this is for embedded system vector generator
+}
+
+bool is_halted() {
+    // assume vector simulator is always ready to switch buffers
+    return true;
+}
+
 typedef std::chrono::high_resolution_clock Clock;
 static std::chrono::time_point<Clock> target_time;
-void set_sleep_time_ms(uint32_t milliseconds) {
+void start_timer(uint32_t milliseconds) {
     target_time = Clock::now() + std::chrono::milliseconds(milliseconds);
 }
-bool sleep_until_set_time() {
+bool timer_done() {
     auto now = Clock::now();
     if (now > target_time) {
         return false;
@@ -188,4 +198,12 @@ bool sleep_until_set_time() {
     std::chrono::nanoseconds sleep_duration = target_time - now;
     usleep(sleep_duration.count() / 1000);
     return true;
+}
+
+void printChar(char data) {
+    std::cout<<data;
+}
+
+void sendString(const char* txStr) {
+    std::cout<<txStr;
 }

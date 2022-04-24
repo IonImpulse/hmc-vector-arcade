@@ -1,5 +1,3 @@
-#include <iostream> // <-- UHHH why does this even compile for the embedded system???
-#include <unistd.h> // <-- UHHH why does this even compile for the embedded system???
 #include <string>
 #include <bitset>
 #include <cmath>
@@ -106,6 +104,7 @@ void doNextFrame() {
 
 int main() {
     initialize_input_output();
+    sendString("Welcome to HMC Vector Arcade!\n\r");
     // for the time being, these add statements are screwing up the picture for some reason
     //addEntity(&player);
     //addProjectile(&(player.proj));
@@ -113,7 +112,7 @@ int main() {
 
     // Render loop
     while (1) {
-        start_timer(5);//FRAME_DELAY_MS);
+        start_timer(FRAME_DELAY_MS);
         takeInput();
         updateMoveVector();
         updatePhysics();
@@ -126,7 +125,7 @@ int main() {
         draw_buffer_switch(); // deactivates the halted state and halt request
 
         if (timer_done()) {
-            sendString("Frame computation too long!");
+            sendString("Frame computation too long!\n\r");
         } else {
             // we don't want to be requesting halt right now
             // because the vector generator may need to draw multiple times
