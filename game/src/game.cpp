@@ -1,5 +1,5 @@
-#include <iostream>
-#include <unistd.h>
+#include <iostream> // <-- UHHH why does this even compile for the embedded system???
+#include <unistd.h> // <-- UHHH why does this even compile for the embedded system???
 #include <string>
 #include <bitset>
 #include <cmath>
@@ -95,44 +95,43 @@ void handlePlayerProj() {
          // std::cerr << "I was hit" << std::endl;
     }
 }
-void doNextFrame() {
-    draw_buffer_switch();  
-    
+void doNextFrame() {    
     player.drawObject();
     baddie.drawEnemy();
     baddie.updateEnemy();
     handlePlayerProj();
-
     drawAllProjectiles();
-    
     draw_end_buffer();
 }
 
 int main() {
-    
-    // Triangle tris[] {
-    //     Triangle{Coord{0, 0, 0}, Coord{1, 0, 0}, Coord{0, 1, 0}}, 
-    //     Triangle{Coord{1, 0, 0}, Coord{1, 1, 0}, Coord{0,1,0}}
-    // };
-
-    addEntity(&player);
-    addProjectile(&(player.proj));
-    addEntity(&baddie);
     initialize_input_output();
+    // for the time being, these add statements are screwing up the picture for some reason
+    //addEntity(&player);
+    //addProjectile(&(player.proj));
+    //addEntity(&baddie);
 
     // Render loop
     while (1) {
-        set_sleep_time_ms(FRAME_DELAY_MS);
-
+        start_timer(5);//FRAME_DELAY_MS);
         takeInput();
         updateMoveVector();
         updatePhysics();
         checkAllCollisions();
         doNextFrame();
         updateTimer();
+        request_halt(); // if draw time and compute time are comparable, consider moving this up above some of the computations
+        // however if the computations are really long and the draw time is small, then you'd risk activating spot-killer
+        while(!is_halted()) {}
+        draw_buffer_switch(); // deactivates the halted state and halt request
 
-        if (!sleep_until_set_time()) {
-            std::cerr<<"Frame computation too long!"<<std::endl;
+        if (timer_done()) {
+            sendString("Frame computation too long!");
+        } else {
+            // we don't want to be requesting halt right now
+            // because the vector generator may need to draw multiple times
+            // while waiting out the frame delay
+            while (!timer_done()) {}
         }
     }
 }

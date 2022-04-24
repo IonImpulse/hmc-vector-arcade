@@ -62,7 +62,7 @@ bool checkCollision(object2D* entity, object2D* proj ) {
 }
 void updateTimer() {
         scene.currentFrame++;
-        scene. currentTime += FRAME_DELAY;
+        scene.currentTime += FRAME_DELAY;
 }
 
 void  checkAllCollisions() { 

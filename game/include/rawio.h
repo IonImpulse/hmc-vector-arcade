@@ -21,8 +21,12 @@ void draw_buffer_switch();
 void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness);
 void draw_absolute_vector(int16_t x_position, int16_t y_position, int16_t brightness);
 void draw_end_buffer();
+void request_halt();
+bool is_halted();
 
-void set_sleep_time_ms(uint32_t milliseconds);
-bool sleep_until_set_time();
+void start_timer(uint32_t milliseconds);
+bool timer_done();
 
+void printChar(char data);
+void sendString(const char* txStr);
 #endif
