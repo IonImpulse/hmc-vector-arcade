@@ -38,8 +38,8 @@ uint16_t curr_y=0;
 uint16_t curr_z=0;
 int curr_shift=0;
 
-bool halt_requested=0; // game program raises halt_requested when it wants to swap buffers
 bool halted=1; // vector generator raises halted to signify that it is ready to swap buffers
+int halt_state=0;
 
 InputState get_inputs() {
     InputState state = { .xpos=0, .ypos=0, .buttons=0};
@@ -53,12 +53,30 @@ void initialize_input_output() {
 
 void get_next_vector() {
     // Read in next vector
-    curr_x = readBuff->x[readPtr];
-    curr_y = readBuff->y[readPtr];
-    curr_z = readBuff->z[readPtr];
-    readPtr++;
+    if (halted) {
+        // If we're halted, we need to draw invisible garbage
+        // to prevent the spot killer circuit from thinking our signal is dead
+        if (halt_state) {
+            curr_x = 200;
+            curr_y = 200;
+            curr_z = BLANK;
+        } else {
+            curr_x = 512;
+            curr_y = 512;
+            curr_z = BLANK | LD_POS;
+        }
+        halt_state ^= 1;
+    } else {
+        curr_x = readBuff->x[readPtr];
+        curr_y = readBuff->y[readPtr];
+        curr_z = readBuff->z[readPtr];
+        readPtr++;
+    }
 
     // Binary Normalization Step
+    //   If the distance integer can be doubled without affecting the sign bit,
+    //   do so, and halve the number of clock pulses.
+    //   This ensures the drawing speed is about the same for both long and short vectors.
     uint16_t mag_x = curr_x & 0x1FF;
     uint16_t mag_y = curr_y & 0x1FF;
     curr_shift = 0;
@@ -84,7 +102,6 @@ void draw_buffer_switch() {
     readPtr=0;
     writePtr=0;
     halted=0;
-    halt_requested=0;
     // load in initial vector to get things started
     get_next_vector();
     // now generate an update to start the interrupt cycle
@@ -94,8 +111,8 @@ void draw_buffer_switch() {
 void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness) {
     uint16_t signMagX = (delta_x>=0) ? (uint16_t)(delta_x) : NEG|(uint16_t)(-delta_x);
     uint16_t signMagY = (delta_y>=0) ? (uint16_t)(delta_y) : NEG|(uint16_t)(-delta_y);
-    writeBuff->x[writePtr] = signMagX;//((brightness>>4)<<12) | signMagX;
-    writeBuff->y[writePtr] = signMagY;//((brightness&0xF)<<12) | signMagY;
+    writeBuff->x[writePtr] = ((brightness>>4)<<12) | signMagX;
+    writeBuff->y[writePtr] = signMagY;
     writeBuff->z[writePtr] = 0;
     writePtr++;
     abs_x += delta_x;
@@ -117,15 +134,13 @@ void draw_end_buffer() {
     writeBuff->length = writePtr;
 }
 
-bool is_halted() {return halted;}
-void request_halt() {halt_requested=1;}
+bool is_halted() {return halted && (halt_state==0);}
 
 // This is the main function for handling drawing stuff
 extern "C" void TIM5_IRQHandler() {
     //sendString("cheese");
     // Clear interrupt flag
     VEC_TIMER->SR &= ~(TIM_SR_UIF);
-    if (halted) return;
     // Output the previous vector's data by strobing shift reg latch
     digitalWrite(X_SHIFT_REG_LD_GPIO, X_SHIFT_REG_LD_PIN, GPIO_HIGH);
     digitalWrite(Y_SHIFT_REG_LD_GPIO, Y_SHIFT_REG_LD_PIN, GPIO_HIGH);
@@ -133,6 +148,7 @@ extern "C" void TIM5_IRQHandler() {
     digitalWrite(Y_SHIFT_REG_LD_GPIO, Y_SHIFT_REG_LD_PIN, GPIO_LOW);
     // Strobe color latch if we need to
     if (curr_z&LD_COL) {
+        // Hmm latch doesn't seem to like this...
         digitalWrite(COLOR_LD_GPIO, COLOR_LD_PIN, GPIO_HIGH);
         digitalWrite(COLOR_LD_GPIO, COLOR_LD_PIN, GPIO_LOW);
     }
@@ -155,8 +171,7 @@ extern "C" void TIM5_IRQHandler() {
         } else {
             digitalWrite(BLANKb_GPIO,BLANKb_PIN,GPIO_HIGH);
         }
-        // Activate GOb for 1024 pulses
-        // This runs the BRM's and Up/Down counters so that they draw out a line
+        // Activate GOb for 1024 / normalization_factor to draw out vector
         // The compare functionality needs a few cycles to get ready after the timer is enabled,
         // hence the offset by 5 ticks.
         generateDuration(VEC_TIMER, (1024>>curr_shift)+5, 5);
@@ -166,13 +181,8 @@ extern "C" void TIM5_IRQHandler() {
 
     // Was this the last vector?
     if (readPtr > readBuff->length) {
-        if (halt_requested) {
-            // Halt if the main code is saying it wants to swap buffers
-            halted=1;
-        } else {
-            // Otherwise redraw the current frame
-            readPtr=0;
-        }
+        // Show that vector generator has completed frame
+        halted=1;
     }
 }
 

@@ -105,10 +105,10 @@ void doNextFrame() {
 int main() {
     initialize_input_output();
     sendString("Welcome to HMC Vector Arcade!\n\r");
-    // for the time being, these add statements are screwing up the picture for some reason
-    //addEntity(&player);
+
+    addEntity(&player);
     //addProjectile(&(player.proj));
-    //addEntity(&baddie);
+    addEntity(&baddie);
 
     // Render loop
     while (1) {
@@ -119,17 +119,12 @@ int main() {
         checkAllCollisions();
         doNextFrame();
         updateTimer();
-        request_halt(); // if draw time and compute time are comparable, consider moving this up above some of the computations
-        // however if the computations are really long and the draw time is small, then you'd risk activating spot-killer
-        while(!is_halted()) {}
-        draw_buffer_switch(); // deactivates the halted state and halt request
+        while(!is_halted()) {} // wait until frame has finished drawing, if it hasn't already
+        draw_buffer_switch(); // deactivates the halted state
 
         if (timer_done()) {
             sendString("Frame computation too long!\n\r");
         } else {
-            // we don't want to be requesting halt right now
-            // because the vector generator may need to draw multiple times
-            // while waiting out the frame delay
             while (!timer_done()) {}
         }
     }

@@ -16,7 +16,7 @@
 #define COUNT_LDb_GPIO        GPIOA
 #define COLOR_LD_PIN          PIN_A8  // yellow wire
 #define COLOR_LD_GPIO         GPIOA
-#define BLANKb_PIN            PIN_B4  // dark green wire
+#define BLANKb_PIN            PIN_B4  // brown wire
 #define BLANKb_GPIO           GPIOB
 #define X_SHIFT_REG_CLK_PIN   PIN_A5  // orange wire
 #define X_SHIFT_REG_CLK_GPIO  GPIOA

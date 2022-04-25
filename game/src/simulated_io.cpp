@@ -176,10 +176,6 @@ void draw_end_buffer() {
     send("0\n");
 }
 
-void request_halt() {
-    // do nothing; this is for embedded system vector generator
-}
-
 bool is_halted() {
     // assume vector simulator is always ready to switch buffers
     return true;
