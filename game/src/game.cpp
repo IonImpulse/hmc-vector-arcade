@@ -10,13 +10,13 @@
 
 #include "../include/rawio.h"
 
-#define PLAYER_SIZE 50
+#define PLAYER_SIZE 30
 
 ///////////////////
 ///////////////
 
 Player player = Player(0,0,PLAYER_SIZE,"player");
-Enemy baddie = Enemy(0,0,30,"baddie");
+Enemy baddie = Enemy(0,10,30,"baddie");
 //////////////
 //////////////////
 
@@ -32,7 +32,9 @@ float ACCELERATION = 6;
 
 void takeInput() {
     InputState input = get_inputs();
+    
     if (input.ypos < 0) {
+       
         M_DOWN = 1;
     } else if (input.ypos > 0) {
         M_UP = 1;
@@ -95,6 +97,10 @@ void handlePlayerProj() {
 void doNextFrame() {    
     player.drawObject();
     baddie.drawEnemy();
+
+    draw_absolute_vector(10, 10, 0);
+    draw_absolute_vector(10, 20, 990);
+
     baddie.updateEnemy();
     handlePlayerProj();
     drawAllProjectiles();
