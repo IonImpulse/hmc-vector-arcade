@@ -12,12 +12,11 @@
 
 #define PLAYER_SIZE 50
 
-
 ///////////////////
 ///////////////
 
-Player player = Player(0,0,20,"player");
-Enemy baddie = Enemy(20,30,30,"baddie");
+Player player = Player(0,0,PLAYER_SIZE,"player");
+Enemy baddie = Enemy(0,0,30,"baddie");
 //////////////
 //////////////////
 
@@ -102,12 +101,15 @@ void doNextFrame() {
     draw_end_buffer();
 }
 
+
+
+
+
 int main() {
     initialize_input_output();
     sendString("Welcome to HMC Vector Arcade!\n\r");
 
     addEntity(&player);
-    //addProjectile(&(player.proj));
     addEntity(&baddie);
 
     // Render loop
