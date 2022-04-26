@@ -25,6 +25,7 @@ struct Scene {
         unsigned int level = 0;
 
 };
+
 void spawnEnemy(int startx,int starty, int startsize, std::string name);
 
 void addEntity(object2D* entity);
@@ -42,4 +43,8 @@ void updateTimer();
 void  checkAllCollisions();
 
 void deleteAll();
+
+bool everyX(int x);
+
+
 #endif

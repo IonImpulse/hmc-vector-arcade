@@ -15,7 +15,7 @@
 ///////////////////
 ///////////////
 
-Player player = Player(0,0,PLAYER_SIZE,"player");
+Player player = Player(0,-20,PLAYER_SIZE,"player");
 
 //////////////
 //////////////////
@@ -76,11 +76,6 @@ void updateMoveVector() {
    }
 }
    
-void updatePhysics() {
-    // player 
-    player.updatePhysics();
-
-}
 
 void handlePlayerProj() { 
      if (M_shoot && !player.shooting) {
@@ -127,7 +122,6 @@ int main() {
         start_timer(FRAME_DELAY_MS);
         takeInput();
         updateMoveVector();
-        updatePhysics();
         checkAllCollisions();
         doNextFrame();
         updateTimer();

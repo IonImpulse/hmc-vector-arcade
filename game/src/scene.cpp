@@ -98,6 +98,10 @@ void updateTimer() {
         scene.currentTime += FRAME_DELAY;
 }
 
+bool everyX(int x) {
+        return ((scene.currentFrame % x) == 0);
+}
+
 void  checkAllCollisions() { 
 
 

@@ -1,5 +1,8 @@
 #include "../include/player.h"
+#include "../include/scene.h"
 #include <string>
+#include <iostream>
+#include <math.h>
 
 Player::Player(float startx, float starty, float startSize, std::string inName): 
             object2D::object2D(startx,starty,startSize, inName) {
@@ -25,8 +28,12 @@ void Player::shoot() {
 void Player::updatePhysics() {
 
     // Player random walk since input doesnt work 
-    
-
+    if (everyX(100)) {
+        float angle = (rand() % 314)*.01;
+        std::cerr << angle;
+        vel.x -= 10*cos(angle);
+        vel.y += 10*sin(angle);
+    }
     //
     // player 
     pos.x += vel.x;
