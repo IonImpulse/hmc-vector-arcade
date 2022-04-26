@@ -20,6 +20,9 @@ void Enemy::drawObject() {
     
 }
 
+void Enemy::hitReact() { 
+    life -= 1;
+}
 
 void Enemy::updatePhysics() {
 

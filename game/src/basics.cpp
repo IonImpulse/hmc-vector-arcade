@@ -33,6 +33,11 @@ void object2D::drawObject() {
     
 }
 void object2D::handleCollision() {
+    hitReact();
     std::cerr <<  name;
     std::cerr <<  " was hit" << std::endl;
+}
+
+void object2D::hitReact() {
+    
 }

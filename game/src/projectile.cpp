@@ -21,6 +21,10 @@ void Projectile::drawProj() {
     }  
 }
 
+void Projectile::hitReact() {
+
+}
+
 void Projectile::updatePhysics() {
      
     pos.x += vel.x;

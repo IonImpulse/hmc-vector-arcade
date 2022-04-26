@@ -44,6 +44,8 @@ class object2D {
     
     void handleCollision();
 
+    virtual void hitReact();
+
 };
 
 #endif

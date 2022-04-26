@@ -11,7 +11,21 @@ Player::Player(float startx, float starty, float startSize, std::string inName):
 
 void Player::drawObject() {
     
-    object2D::drawObject();
+    if (invuln){
+        draw_absolute_vector(pos.x, pos.y, 0);
+        draw_absolute_vector(pos.x + SIZE, pos.y, 500);
+        draw_absolute_vector(pos.x + SIZE, pos.y + SIZE, 500);
+        draw_absolute_vector(pos.x, pos.y + SIZE, 500);
+        draw_absolute_vector(pos.x, pos.y, 500);
+    } else {
+        object2D::drawObject();
+    }
+
+}
+
+void Player::hitReact() {
+    invuln = true;
+
 }
 
 void Player::shoot() {

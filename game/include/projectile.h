@@ -15,6 +15,8 @@ class Projectile : public object2D
     void drawProj();
 
     void updatePhysics();
+
+    void hitReact();
 };
 
 

@@ -22,6 +22,7 @@ public:
     const int ENEMY_SIZE = 10;
     bool shooting;
     Projectile proj = Projectile();
+    int life = 2;
 
     Enemy(float startx, float starty, float startSize, std::string inName);
 
@@ -30,6 +31,8 @@ public:
     void updatePhysics();
 
     void shoot();
+
+    void hitReact();
 };
 
 #endif
