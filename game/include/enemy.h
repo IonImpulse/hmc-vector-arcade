@@ -18,7 +18,7 @@ public:
     Vec2 path[5];
     Vec2 Velocity;
     int x = 0;
-    int y = 256;
+    int y = 10;
     const int ENEMY_SIZE = 10;
     bool shooting;
     Projectile proj = Projectile();

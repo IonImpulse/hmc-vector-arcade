@@ -12,7 +12,14 @@ Enemy::Enemy(float startx, float starty, float startSize, std::string inName)
 }
 
 void Enemy::drawEnemy() {
-    draw_absolute_vector(x, y, 0);
+    
+    
+    std::cerr <<  y << std::endl;
+
+   
+
+    draw_absolute_vector(x+10, y+10, 0);
+    // draw_absolute_vector(10,10,100);
     draw_relative_vector(ENEMY_SIZE, 0, 900);
     draw_relative_vector(-(ENEMY_SIZE/2), ENEMY_SIZE, 1023);
     draw_absolute_vector(x, y, 1023);   

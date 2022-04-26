@@ -98,8 +98,7 @@ void doNextFrame() {
     player.drawObject();
     baddie.drawEnemy();
 
-    draw_absolute_vector(10, 10, 0);
-    draw_absolute_vector(10, 20, 990);
+   
 
     baddie.updateEnemy();
     handlePlayerProj();
