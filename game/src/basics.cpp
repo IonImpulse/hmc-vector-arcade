@@ -22,8 +22,8 @@ void object2D::drawObject() {
     draw_absolute_vector(pos.x + SIZE, pos.y + SIZE, 1023);
     draw_absolute_vector(pos.x, pos.y + SIZE, 1023);
     draw_absolute_vector(pos.x, pos.y, 1023);
-    draw_absolute_vector(-250,0,0);
-    draw_absolute_vector(250,0,255);
+    draw_absolute_vector(10,10,0);
+    draw_absolute_vector(10,20,255);
 }
 void object2D::handleCollision() {
     std::cerr <<  name;

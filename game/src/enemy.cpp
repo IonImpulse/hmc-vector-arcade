@@ -12,18 +12,22 @@ Enemy::Enemy(float startx, float starty, float startSize, std::string inName)
 }
 
 void Enemy::drawEnemy() {
-    draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 0);
+    draw_absolute_vector(pos.x, pos.y+ SIZE, 0);
     draw_relative_vector(SIZE/2, -SIZE, 1023);
     draw_relative_vector(SIZE/2, SIZE, 1023);
     draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 1023);   
 }
 void Enemy::updateEnemy() {
+   
     pos.x += vel.x; 
     pos.y += vel.y;
+ 
     
     if(pos.x < LEFT_X) {
         pos.x = LEFT_X;
         vel.x = -vel.x;
+        std::cerr << pos.x;
+        
     }
     if((pos.x + SIZE) > RIGHT_X) {
         pos.x = RIGHT_X - SIZE;
@@ -38,6 +42,9 @@ void Enemy::updateEnemy() {
         pos.y = SPLIT ;
         vel.y = -vel.y;
     }
+
+
+
 
     if(!shooting && pos.y > SPLIT + 100) {
         shoot();

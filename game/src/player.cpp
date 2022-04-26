@@ -16,7 +16,7 @@ void Player::shoot() {
     
     proj.visibility = true;
     shooting = true;
-    
+
     proj.vel.x = 0 + vel.x*.2;
     proj.vel.y = 10 + vel.y*.2;
 }

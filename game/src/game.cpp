@@ -100,7 +100,14 @@ void doNextFrame() {
     baddie.updateEnemy();
     handlePlayerProj();
     drawAllProjectiles();
+
+    draw_absolute_vector(LEFT_X,SPLIT ,0);
+    draw_absolute_vector(RIGHT_X,SPLIT,255);
+
+
     draw_end_buffer();
+
+    
 }
 
 

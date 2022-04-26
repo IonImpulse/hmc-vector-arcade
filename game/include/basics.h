@@ -15,6 +15,7 @@
 #define RIGHT_X 256 
 #define SPLIT 0
 
+//20
 #define FRAME_DELAY_MS 20
 #define FRAME_DELAY (FRAME_DELAY_MS / 100.0)
 
