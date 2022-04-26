@@ -1,4 +1,6 @@
 #include "../include/scene.h"
+#include <iostream>
+
 
 struct Scene scene;
 
@@ -9,13 +11,15 @@ void addEntity(object2D* entity){
         }
         scene.entIn = (scene.entIn + 1) % SCENE_SIZE;
 
-        //project player entity
+        //protect player entity
         if (scene.entIn == 0){
                 scene.entIn++;
         }
 }
 
 void drawAllProjectiles() {
+        std::cerr << scene.projIn;
+
         int endIndex = scene.projIn;
         if (scene.projFull) {
                 endIndex = SCENE_SIZE*3;

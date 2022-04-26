@@ -12,6 +12,10 @@ Projectile::Projectile(float startx, float starty, float startSize, float angle)
 }
 
 void Projectile::drawProj() {
+    visibility = true;
+
+
+
     if (visibility) {
         object2D::drawObject();
     }  

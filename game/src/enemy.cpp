@@ -18,7 +18,8 @@ void Enemy::drawEnemy() {
     draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 1023);   
 }
 void Enemy::updateEnemy() {
-   
+
+
     pos.x += vel.x; 
     pos.y += vel.y;
  
@@ -26,8 +27,6 @@ void Enemy::updateEnemy() {
     if(pos.x < LEFT_X) {
         pos.x = LEFT_X;
         vel.x = -vel.x;
-        std::cerr << pos.x;
-        
     }
     if((pos.x + SIZE) > RIGHT_X) {
         pos.x = RIGHT_X - SIZE;
@@ -42,9 +41,6 @@ void Enemy::updateEnemy() {
         pos.y = SPLIT ;
         vel.y = -vel.y;
     }
-
-
-
 
     if(!shooting && pos.y > SPLIT + 100) {
         shoot();
