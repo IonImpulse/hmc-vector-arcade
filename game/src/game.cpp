@@ -10,13 +10,13 @@
 
 #include "../include/rawio.h"
 
-#define PLAYER_SIZE 30
+
 
 ///////////////////
 ///////////////
 
 Player player = Player(0,0,PLAYER_SIZE,"player");
-Enemy baddie = Enemy(0,10,30,"baddie");
+Enemy baddie = Enemy(12,10,20,"baddie");
 //////////////
 //////////////////
 
@@ -97,9 +97,6 @@ void handlePlayerProj() {
 void doNextFrame() {    
     player.drawObject();
     baddie.drawEnemy();
-
-   
-
     baddie.updateEnemy();
     handlePlayerProj();
     drawAllProjectiles();

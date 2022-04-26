@@ -5,50 +5,44 @@
 Enemy::Enemy(float startx, float starty, float startSize, std::string inName)
     : object2D::object2D(startx,starty,startSize, inName)
 {
-    vel.x = (startx)*.1;
-    vel.y = (starty)*.1;
+    vel.x = (startx)*.2;
+    vel.y = (starty)*.2;
     addProjectile(&proj);
 
 }
 
 void Enemy::drawEnemy() {
-    
-    
-    std::cerr <<  y << std::endl;
-
-   
-
-    draw_absolute_vector(x+10, y+10, 0);
-    // draw_absolute_vector(10,10,100);
-    draw_relative_vector(ENEMY_SIZE, 0, 900);
-    draw_relative_vector(-(ENEMY_SIZE/2), ENEMY_SIZE, 1023);
-    draw_absolute_vector(x, y, 1023);   
+    draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 0);
+    draw_relative_vector(SIZE/2, -SIZE, 1023);
+    draw_relative_vector(SIZE/2, SIZE, 1023);
+    draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 1023);   
 }
 void Enemy::updateEnemy() {
     pos.x += vel.x; 
     pos.y += vel.y;
     
-    if(pos.x < -256) {
-        pos.x = -256;
+    if(pos.x < LEFT_X) {
+        pos.x = LEFT_X;
         vel.x = -vel.x;
     }
-    if((pos.x + SIZE) > 256) {
-        pos.x = 256 - SIZE;
+    if((pos.x + SIZE) > RIGHT_X) {
+        pos.x = RIGHT_X - SIZE;
         vel.x = -vel.x;
     }
-    if((pos.y + SIZE) > 256) {
-        pos.y = 256-SIZE;
+    if((pos.y + SIZE) > TOP_Y) {
+
+        pos.y = TOP_Y - SIZE;
         vel.y = -vel.y;
     }
-    if((pos.y) < 0) {
-        pos.y = 0 ;
+    if((pos.y) < SPLIT) {
+        pos.y = SPLIT ;
         vel.y = -vel.y;
     }
 
-    if(!shooting && pos.y > 100) {
+    if(!shooting && pos.y > SPLIT + 100) {
         shoot();
     }
-
+    
     shooting = proj.updateProj();
 }
  void Enemy::shoot() {
@@ -56,6 +50,6 @@ void Enemy::updateEnemy() {
     proj.pos.y = pos.y;
     proj.vel.x = 0+.5*vel.x; 
     proj.vel.y = -10+.5*vel.y; 
-    
+    proj.visibility = true;
     shooting = true;
 }

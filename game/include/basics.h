@@ -5,6 +5,16 @@
 
 #define SCENE_SIZE 20
 
+#define PLAYER_SIZE 30
+
+// vector sim -256 to 256
+//cabinet is -512 to 511
+#define TOP_Y 256
+#define BOT_Y -256 
+#define LEFT_X -256
+#define RIGHT_X 256 
+#define SPLIT 0
+
 #define FRAME_DELAY_MS 20
 #define FRAME_DELAY (FRAME_DELAY_MS / 100.0)
 
@@ -19,6 +29,7 @@ class object2D {
         std::string name;
         Vec2 pos;
         Vec2 vel; 
+        bool visibility = true;
         float ACCELERATION = 1; 
         float SIZE = 20;
 

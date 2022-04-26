@@ -12,23 +12,27 @@ Projectile::Projectile(float startx, float starty, float startSize, float angle)
 }
 
 void Projectile::drawProj() {
-    object2D::drawObject();
+    if (visibility) {
+        object2D::drawObject();
+    }  
 }
+
 bool Projectile::updateProj() {
      
     pos.x += vel.x;
     pos.y += vel.y;
 
     // out of bounds 
-    if(pos.y > ( 256 + SIZE) || pos.y < -( 256 + SIZE)) {
-         
+    if(pos.y > ( TOP_Y - SIZE) || pos.y < BOT_Y) {
         vel.x = 0;
         vel.y = 0;
+        visibility = false;
         return false;
     }  
-    if(pos.x > ( 256 + SIZE) || pos.x < -( 256 + SIZE)) {
+    if(pos.x > ( RIGHT_X - SIZE) || pos.x < LEFT_X ) {
         vel.x = 0;
         vel.y = 0;
+        visibility = false;
         return false;
     }  
     return true;

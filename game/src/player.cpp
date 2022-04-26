@@ -13,8 +13,10 @@ void Player::drawPlayer() {
 void Player::shoot() {
     proj.pos.x = pos.x + SIZE/2;
     proj.pos.y = pos.y + SIZE;
-
+    
+    proj.visibility = true;
     shooting = true;
+    
     proj.vel.x = 0 + vel.x*.2;
     proj.vel.y = 10 + vel.y*.2;
 }
@@ -24,21 +26,21 @@ void Player::updatePhysics() {
     pos.x += vel.x;
     pos.y += vel.y;
 
-    if(pos.x < -256) {
-        pos.x = -256;
+    if(pos.x < LEFT_X) {
+        pos.x = LEFT_X;
         vel.x = 0;
     }
-    if((pos.x + SIZE) > 256) {
-        pos.x = 256 - SIZE;
+    if((pos.x + SIZE) > RIGHT_X) {
+        pos.x = RIGHT_X - SIZE;
         vel.x = 0;
     }
-    if(pos.y < -256) {
+    if(pos.y < BOT_Y) {
         pos.y = -256;
         vel.y = 0;
     }
-    if((pos.y + SIZE) > 0) {
-        pos.y = 0 - SIZE;
-        vel.y = 0;
+    if((pos.y + SIZE) > SPLIT) {
+        pos.y = SPLIT - SIZE;
+        vel.y = SPLIT;
     }
 
     vel.x *= .9;
