@@ -22,8 +22,10 @@ struct Scene {
         bool projFull = false;
          //3 bullets per entity. 
         // std::unordered_map<std::pair<int,int>, Projectile> projectiles;
+        unsigned int level = 0;
 
 };
+void spawnEnemy(int startx,int starty, int startsize, std::string name);
 
 void addEntity(object2D* entity);
 
@@ -39,4 +41,5 @@ void updateTimer();
 
 void  checkAllCollisions();
 
+void deleteAll();
 #endif

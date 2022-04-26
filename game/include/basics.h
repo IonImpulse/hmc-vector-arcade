@@ -36,6 +36,7 @@ class object2D {
 
     object2D();
     object2D(float startx, float starty, float size, std::string inName);
+    virtual ~object2D();
 
     virtual void drawObject();
 

@@ -15,6 +15,7 @@ object2D::object2D() {
     ACCELERATION = 1; 
     SIZE = 20;
 }
+object2D::~object2D(){}
 
 
 void object2D::updatePhysics() { 

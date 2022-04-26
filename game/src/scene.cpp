@@ -1,10 +1,12 @@
 #include "../include/scene.h"
 #include <iostream>
+#include "../include/enemy.h"
 
 
 struct Scene scene;
 
 void addEntity(object2D* entity){
+        delete scene.entities[scene.entIn];
         scene.entities[scene.entIn] = entity;
         if(scene.entIn == SCENE_SIZE ){
            scene.entFull = true; 
@@ -15,7 +17,17 @@ void addEntity(object2D* entity){
         if (scene.entIn == 0){
                 scene.entIn++;
         }
+        
+        
 }
+
+void spawnEnemy(int startx,int starty,  int startsize, std::string name) {
+        Enemy * p1 = new Enemy(startx,starty,startsize,name);
+        addEntity(p1);
+        addProjectile(&(p1->proj));
+}
+
+
 
 void doAllProjectiles() {
 
@@ -45,7 +57,8 @@ void doAllEntities() {
 
 
 void addProjectile(Projectile* proj){
-       scene.projectiles[scene.projIn] = proj;
+        delete scene.projectiles[scene.projIn];
+        scene.projectiles[scene.projIn] = proj;
         if(scene.projIn == (SCENE_SIZE *3)){
            scene.projFull = true; 
         }
@@ -53,6 +66,8 @@ void addProjectile(Projectile* proj){
 
         //project player entity
 }
+
+
 
 
 bool checkCollision(object2D* entity, object2D* proj ) {
@@ -107,5 +122,14 @@ void  checkAllCollisions() {
                 }
         }
 
+}
+
+void deleteAll() {
+        for (int i = 0; i < SCENE_SIZE; i++) {
+                delete scene.entities[i];
+        }
+        for (int i = 0; i < SCENE_SIZE*3; i++) {
+                delete scene.projectiles[i];
+        }
 }
 

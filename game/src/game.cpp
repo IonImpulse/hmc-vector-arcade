@@ -119,7 +119,7 @@ int main() {
 
     addEntity(&player);
     addEntity(&baddie);
-    addProjectile(&baddie.proj);
+    
 
 
     // Render loop
