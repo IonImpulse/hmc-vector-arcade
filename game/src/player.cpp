@@ -6,7 +6,7 @@
 
 Player::Player(float startx, float starty, float startSize, std::string inName): 
             object2D::object2D(startx,starty,startSize, inName) {
-            vel.x = 10;
+            
 }
 
 void Player::drawObject() {
@@ -28,10 +28,10 @@ void Player::shoot() {
 void Player::updatePhysics() {
 
     // Player random walk since input doesnt work 
-    if (everyX(100)) {
-        float angle = (rand() % 314)*.01;
+    if (everyX(20)) {
+        float angle = (rand() % (2*314))*.01;
         std::cerr << angle;
-        vel.x -= 10*cos(angle);
+        vel.x += 10*cos(angle);
         vel.y += 10*sin(angle);
     }
     //
