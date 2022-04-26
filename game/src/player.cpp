@@ -23,6 +23,11 @@ void Player::shoot() {
 }
 
 void Player::updatePhysics() {
+
+    // Player random walk since input doesnt work 
+    
+
+    //
     // player 
     pos.x += vel.x;
     pos.y += vel.y;

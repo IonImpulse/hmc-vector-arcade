@@ -16,6 +16,8 @@ void Enemy::drawObject() {
     draw_relative_vector(SIZE/2, -SIZE, 1023);
     draw_relative_vector(SIZE/2, SIZE, 1023);
     draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 1023);   
+
+    
 }
 
 
@@ -52,7 +54,7 @@ void Enemy::updatePhysics() {
 }
  void Enemy::shoot() {
     proj.pos.x = pos.x + SIZE/2;
-    proj.pos.y = pos.y;
+    proj.pos.y = pos.y - proj.SIZE;
     proj.vel.x = 0+.5*vel.x; 
     proj.vel.y = -10+.5*vel.y; 
     proj.visibility = true;

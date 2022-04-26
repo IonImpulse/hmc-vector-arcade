@@ -16,7 +16,7 @@
 #define SPLIT 0
 
 //20
-#define FRAME_DELAY_MS 20
+#define FRAME_DELAY_MS 70
 #define FRAME_DELAY (FRAME_DELAY_MS / 100.0)
 
 typedef struct {

@@ -17,7 +17,6 @@
 
 Player player = Player(0,0,PLAYER_SIZE,"player");
 
-Enemy baddie = Enemy(12,10,20,"baddie");
 //////////////
 //////////////////
 
@@ -117,8 +116,9 @@ int main() {
     initialize_input_output();
     sendString("Welcome to HMC Vector Arcade!\n\r");
 
+    spawnEnemy(12,10,20,"basic");
     addEntity(&player);
-    addEntity(&baddie);
+    addProjectile(&player.proj);
     
 
 
@@ -140,4 +140,5 @@ int main() {
             while (!timer_done()) {}
         }
     }
+    deleteAll();
 }
