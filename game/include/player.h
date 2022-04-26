@@ -14,7 +14,7 @@ public:
     
     Player(float startx, float starty, float startSize, std::string inName);
 
-    void drawPlayer();
+    void drawObject();
     
     void shoot();
 

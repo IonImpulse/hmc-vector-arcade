@@ -25,9 +25,9 @@ public:
 
     Enemy(float startx, float starty, float startSize, std::string inName);
 
-    void drawEnemy();
+    void drawObject();
 
-    void updateEnemy();
+    void updatePhysics();
 
     void shoot();
 };

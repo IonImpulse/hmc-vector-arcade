@@ -17,8 +17,7 @@ void addEntity(object2D* entity){
         }
 }
 
-void drawAllProjectiles() {
-        std::cerr << scene.projIn;
+void doAllProjectiles() {
 
         int endIndex = scene.projIn;
         if (scene.projFull) {
@@ -26,8 +25,23 @@ void drawAllProjectiles() {
         }
         for (int i = 0; i < endIndex; i++) {
                 scene.projectiles[i]->drawProj();
+                scene.projectiles[i]->updatePhysics();
+
         }
 }
+
+void doAllEntities() {
+
+        int endIndex = scene.entIn;
+        if (scene.entFull) {
+                endIndex = SCENE_SIZE*3;
+        }
+        for (int i = 0; i < endIndex; i++) {
+                scene.entities[i]->drawObject();
+                scene.entities[i]->updatePhysics();
+        }
+}
+
 
 
 void addProjectile(Projectile* proj){

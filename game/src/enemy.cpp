@@ -11,13 +11,15 @@ Enemy::Enemy(float startx, float starty, float startSize, std::string inName)
 
 }
 
-void Enemy::drawEnemy() {
+void Enemy::drawObject() {
     draw_absolute_vector(pos.x, pos.y+ SIZE, 0);
     draw_relative_vector(SIZE/2, -SIZE, 1023);
     draw_relative_vector(SIZE/2, SIZE, 1023);
     draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 1023);   
 }
-void Enemy::updateEnemy() {
+
+
+void Enemy::updatePhysics() {
 
 
     pos.x += vel.x; 
@@ -46,7 +48,7 @@ void Enemy::updateEnemy() {
         shoot();
     }
     
-    shooting = proj.updateProj();
+    shooting = proj.visibility;
 }
  void Enemy::shoot() {
     proj.pos.x = pos.x + SIZE/2;

@@ -9,12 +9,13 @@
 
 struct Scene {
         //16 x 16 ,  -8 -> 8 (256/32)
+
+
         object2D* entities[SCENE_SIZE];
         int entIn = 0 ;
         bool entFull = false;
         int currentFrame = 0;
-        int currentTime = 0; 
-
+        int currentTime = 0;
 
         Projectile* projectiles[SCENE_SIZE*3];
         int projIn = 0 ;
@@ -26,7 +27,9 @@ struct Scene {
 
 void addEntity(object2D* entity);
 
-void drawAllProjectiles();
+void doAllProjectiles();
+
+void doAllEntities();
 
 void addProjectile(Projectile* proj);
 

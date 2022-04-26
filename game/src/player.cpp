@@ -6,7 +6,8 @@ Player::Player(float startx, float starty, float startSize, std::string inName):
             addProjectile(&proj);
 }
 
-void Player::drawPlayer() {
+void Player::drawObject() {
+    
     object2D::drawObject();
 }
 
@@ -47,6 +48,6 @@ void Player::updatePhysics() {
     vel.y *= .9;
 
     /// Projectile 
-    shooting = proj.updateProj();
+    shooting = proj.visibility;
 
     }

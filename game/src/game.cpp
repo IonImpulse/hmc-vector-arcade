@@ -16,6 +16,7 @@
 ///////////////
 
 Player player = Player(0,0,PLAYER_SIZE,"player");
+
 Enemy baddie = Enemy(12,10,20,"baddie");
 //////////////
 //////////////////
@@ -94,20 +95,18 @@ void handlePlayerProj() {
          // std::cerr << "I was hit" << std::endl;
     }
 }
+
 void doNextFrame() {    
-    player.drawObject();
-    baddie.drawEnemy();
-    baddie.updateEnemy();
+    
+   
     handlePlayerProj();
-    drawAllProjectiles();
+    doAllProjectiles();
+    doAllEntities();
 
     draw_absolute_vector(LEFT_X,SPLIT ,0);
     draw_absolute_vector(RIGHT_X,SPLIT,255);
 
-
     draw_end_buffer();
-
-    
 }
 
 

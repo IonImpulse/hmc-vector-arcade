@@ -16,6 +16,12 @@ object2D::object2D() {
     SIZE = 20;
 }
 
+
+void object2D::updatePhysics() { 
+    return;
+}
+
+
 void object2D::drawObject() {
     draw_absolute_vector(pos.x, pos.y, 0);
     draw_absolute_vector(pos.x + SIZE, pos.y, 1023);

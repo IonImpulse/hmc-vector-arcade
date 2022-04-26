@@ -37,8 +37,10 @@ class object2D {
     object2D();
     object2D(float startx, float starty, float size, std::string inName);
 
-    void drawObject();
+    virtual void drawObject();
 
+    virtual void updatePhysics();
+    
     void handleCollision();
 
 };
