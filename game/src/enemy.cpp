@@ -17,11 +17,43 @@ void Enemy::drawObject() {
     draw_relative_vector(SIZE/2, SIZE, 1023);
     draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 1023);   
 
+    // damage 
+    int brightnessRatio = 1023 - ((life/lifeMax)*1023) ;
+    draw_absolute_vector(pos.x, pos.y+ SIZE, 0);
+    draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, brightnessRatio);
+    draw_relative_vector(-SIZE/4,+SIZE/4, brightnessRatio);
+     draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, brightnessRatio);
+
+
     
 }
 
 void Enemy::hitReact() { 
     life -= 1;
+    if (life == 0){ 
+        life = lifeMax ; 
+        visibility = false;
+
+        // explosion 
+        // draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, 0);
+        // draw_relative_vector(+SIZE*2,+SIZE*2, 1024);
+        //  draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, 0);
+        // draw_relative_vector(-SIZE*2,-SIZE*2, 1024);
+        //  draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, 0);
+        // draw_relative_vector(-SIZE*2,+SIZE*2, 1024);
+        //  draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, 0);
+        // draw_relative_vector(+SIZE*2,-SIZE*2, 1024);
+        //  draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, 0);
+        // draw_relative_vector(-SIZE*4,0, 1024);
+        //  draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, 0);
+        // draw_relative_vector(+SIZE*4,0, 1024);
+        //  draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, 0);
+        // draw_relative_vector(0,+SIZE*4, 1024);
+        //  draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, 0);
+        // draw_relative_vector(0,-SIZE*4, 1024);
+
+
+    }
 }
 
 void Enemy::updatePhysics() {

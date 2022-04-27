@@ -23,6 +23,7 @@ public:
     bool shooting;
     Projectile proj = Projectile();
     int life = 2;
+    int lifeMax = 2;
 
     Enemy(float startx, float starty, float startSize, std::string inName);
 

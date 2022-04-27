@@ -29,14 +29,16 @@ void Player::hitReact() {
 }
 
 void Player::shoot() {
-    proj.pos.x = pos.x + SIZE/2;
-    proj.pos.y = pos.y + SIZE;
+    if (visibility && !invuln) {
+        proj.pos.x = pos.x + SIZE/2;
+        proj.pos.y = pos.y + SIZE;
     
-    proj.visibility = true;
-    shooting = true;
+        proj.visibility = true;
+        shooting = true;
 
-    proj.vel.x = 0 + vel.x*.2;
-    proj.vel.y = 10 + vel.y*.2;
+        proj.vel.x = 0 + vel.x*.2;
+        proj.vel.y = 10 + vel.y*.2;
+    }
 }
 
 void Player::updatePhysics() {

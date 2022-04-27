@@ -36,9 +36,10 @@ void doAllProjectiles() {
                 endIndex = SCENE_SIZE*3;
         }
         for (int i = 0; i < endIndex; i++) {
-                scene.projectiles[i]->drawProj();
-                scene.projectiles[i]->updatePhysics();
-
+                if (scene.projectiles[i]->visibility) {
+                        scene.projectiles[i]->drawProj();
+                        scene.projectiles[i]->updatePhysics();
+                }
         }
 }
 
@@ -53,8 +54,10 @@ void doAllEntities() {
                 endIndex = SCENE_SIZE*3;
         }
         for (int i = 0; i < endIndex; i++) {
-                scene.entities[i]->drawObject();
-                scene.entities[i]->updatePhysics();
+                if (scene.entities[i]->visibility) {
+                        scene.entities[i]->drawObject();
+                        scene.entities[i]->updatePhysics();  
+                }
         }
 }
 
@@ -82,17 +85,16 @@ bool checkCollision(object2D* entity, object2D* proj ) {
     int ob2Hieght =proj->SIZE ;
         
 
-
-    if (entity->pos.x < proj->pos.x + ob2Width &&
-        entity->pos.x + ob1Width > proj->pos.x &&
-        entity->pos.y < proj->pos.y + ob2Hieght &&
-        entity->pos.y + ob1Hieght > proj->pos.y  ){
-
-        entity->handleCollision();
-        return true;     
-       
-      
-    }
+        if(entity->visibility && proj->visibility) {
+                if (entity->pos.x < proj->pos.x + ob2Width &&
+                        entity->pos.x + ob1Width > proj->pos.x &&
+                         entity->pos.y < proj->pos.y + ob2Hieght &&
+                        entity->pos.y + ob1Hieght > proj->pos.y  ){
+        
+                        entity->handleCollision();
+                        return true;     
+         }
+        }
    
      return false; 
 

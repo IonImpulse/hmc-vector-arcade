@@ -113,6 +113,8 @@ int main() {
 
     spawnEnemy(12,10,20,"basic");
     spawnEnemy(-100,10,20,"basic");
+    spawnEnemy(30,30,20,"basic");
+
 
     addEntity(&player);
     addProjectile(&player.proj);
