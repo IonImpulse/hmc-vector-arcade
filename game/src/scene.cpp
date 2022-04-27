@@ -42,6 +42,10 @@ void doAllProjectiles() {
         }
 }
 
+unsigned long long int getFrame() {
+        return scene.currentFrame; 
+}
+
 void doAllEntities() {
 
         int endIndex = scene.entIn;
@@ -98,7 +102,7 @@ void updateTimer() {
         scene.currentTime += FRAME_DELAY;
 }
 
-bool everyX(int x) {
+bool everyX(unsigned long long int x) {
         return ((scene.currentFrame % x) == 0);
 }
 

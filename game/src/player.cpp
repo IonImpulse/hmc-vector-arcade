@@ -25,7 +25,7 @@ void Player::drawObject() {
 
 void Player::hitReact() {
     invuln = true;
-
+    invTrigger = getFrame() + 10;
 }
 
 void Player::shoot() {
@@ -41,8 +41,9 @@ void Player::shoot() {
 
 void Player::updatePhysics() {
 
+
     // Player random walk since input doesnt work 
-    if (everyX(20)) {
+    if ((getFrame() % 20 )== 0) {
         float angle = (rand() % (2*314))*.01;
         std::cerr << angle;
         vel.x += 10*cos(angle);
@@ -75,5 +76,11 @@ void Player::updatePhysics() {
 
     /// Projectile 
     shooting = proj.visibility;
+
+    //invulnerability
+    if (invTrigger <= getFrame()){
+        invuln = false; 
+    }
+
 
     }

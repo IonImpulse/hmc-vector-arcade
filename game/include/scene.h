@@ -14,8 +14,8 @@ struct Scene {
         object2D* entities[SCENE_SIZE];
         int entIn = 0 ;
         bool entFull = false;
-        int currentFrame = 0;
-        int currentTime = 0;
+        unsigned long long int currentFrame = 0;
+        unsigned long long int currentTime = 0;
 
         Projectile* projectiles[SCENE_SIZE*3];
         int projIn = 0 ;
@@ -25,6 +25,8 @@ struct Scene {
         unsigned int level = 0;
 
 };
+
+unsigned long long int getFrame();
 
 void spawnEnemy(int startx,int starty, int startsize, std::string name);
 
@@ -44,7 +46,7 @@ void  checkAllCollisions();
 
 void deleteAll();
 
-bool everyX(int x);
+bool everyX(unsigned long long int x);
 
 
 #endif
