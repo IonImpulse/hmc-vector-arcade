@@ -16,7 +16,7 @@
 #define SPLIT 0
 
 //20
-#define FRAME_DELAY_MS 20
+#define FRAME_DELAY_MS 70
 #define FRAME_DELAY (FRAME_DELAY_MS / 100.0)
 
 typedef struct {
@@ -36,10 +36,15 @@ class object2D {
 
     object2D();
     object2D(float startx, float starty, float size, std::string inName);
+    virtual ~object2D();
 
-    void drawObject();
+    virtual void drawObject();
 
+    virtual void updatePhysics();
+    
     void handleCollision();
+
+    virtual void hitReact();
 
 };
 

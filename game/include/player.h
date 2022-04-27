@@ -11,14 +11,20 @@ public:
     //int team = 1;
     bool shooting = false;
     Projectile proj = Projectile();
+
+    int life = 5;
+    bool invuln = false;
+    unsigned long long int invTrigger = 0;
     
     Player(float startx, float starty, float startSize, std::string inName);
 
-    void drawPlayer();
+    void drawObject();
     
     void shoot();
 
     void updatePhysics();
+
+    void hitReact();
 };
 
 

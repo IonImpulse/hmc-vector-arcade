@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 
+
 #include "../include/basics.h"
 
 object2D::object2D(float startx, float starty, float size, std::string inName)  
@@ -15,6 +16,13 @@ object2D::object2D() {
     ACCELERATION = 1; 
     SIZE = 20;
 }
+object2D::~object2D(){}
+
+
+void object2D::updatePhysics() { 
+    return;
+}
+
 
 void object2D::drawObject() {
     draw_absolute_vector(pos.x, pos.y, 0);
@@ -25,6 +33,11 @@ void object2D::drawObject() {
     
 }
 void object2D::handleCollision() {
+    hitReact();
     std::cerr <<  name;
     std::cerr <<  " was hit" << std::endl;
+}
+
+void object2D::hitReact() {
+    
 }

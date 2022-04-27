@@ -22,14 +22,18 @@ public:
     const int ENEMY_SIZE = 10;
     bool shooting;
     Projectile proj = Projectile();
+    int life = 2;
+    int lifeMax = 2;
 
     Enemy(float startx, float starty, float startSize, std::string inName);
 
-    void drawEnemy();
+    void drawObject();
 
-    void updateEnemy();
+    void updatePhysics();
 
     void shoot();
+
+    void hitReact();
 };
 
 #endif

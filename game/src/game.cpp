@@ -15,8 +15,8 @@
 ///////////////////
 ///////////////
 
-Player player = Player(0,0,PLAYER_SIZE,"player");
-Enemy baddie = Enemy(12,10,20,"baddie");
+Player player = Player(0,-120,PLAYER_SIZE,"player");
+
 //////////////
 //////////////////
 
@@ -76,11 +76,6 @@ void updateMoveVector() {
    }
 }
    
-void updatePhysics() {
-    // player 
-    player.updatePhysics();
-
-}
 
 void handlePlayerProj() { 
      if (M_shoot && !player.shooting) {
@@ -94,20 +89,18 @@ void handlePlayerProj() {
          // std::cerr << "I was hit" << std::endl;
     }
 }
+
 void doNextFrame() {    
-    player.drawObject();
-    baddie.drawEnemy();
-    baddie.updateEnemy();
+    
+   
     handlePlayerProj();
-    drawAllProjectiles();
+    doAllProjectiles();
+    doAllEntities();
 
     draw_absolute_vector(LEFT_X,SPLIT ,0);
     draw_absolute_vector(RIGHT_X,SPLIT,255);
 
-
     draw_end_buffer();
-
-    
 }
 
 
@@ -118,9 +111,14 @@ int main() {
     initialize_input_output();
     sendString("Welcome to HMC Vector Arcade!\n\r");
 
+    spawnEnemy(12,10,20,"basic");
+    spawnEnemy(-100,10,20,"basic");
+    spawnEnemy(30,30,20,"basic");
+
+
     addEntity(&player);
-    addEntity(&baddie);
-    addProjectile(&baddie.proj);
+    addProjectile(&player.proj);
+    
 
 
     // Render loop
@@ -128,7 +126,6 @@ int main() {
         start_timer(FRAME_DELAY_MS);
         takeInput();
         updateMoveVector();
-        updatePhysics();
         checkAllCollisions();
         doNextFrame();
         updateTimer();
@@ -141,4 +138,5 @@ int main() {
             while (!timer_done()) {}
         }
     }
+    deleteAll();
 }

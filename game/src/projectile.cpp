@@ -21,7 +21,11 @@ void Projectile::drawProj() {
     }  
 }
 
-bool Projectile::updateProj() {
+void Projectile::hitReact() {
+
+}
+
+void Projectile::updatePhysics() {
      
     pos.x += vel.x;
     pos.y += vel.y;
@@ -31,14 +35,14 @@ bool Projectile::updateProj() {
         vel.x = 0;
         vel.y = 0;
         visibility = false;
-        return false;
+        
     }  
     if(pos.x > ( RIGHT_X - SIZE) || pos.x < LEFT_X ) {
         vel.x = 0;
         vel.y = 0;
         visibility = false;
-        return false;
+        
     }  
-    return true;
+  
 
 }

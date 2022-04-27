@@ -1,10 +1,12 @@
 #include "../include/scene.h"
 #include <iostream>
+#include "../include/enemy.h"
 
 
 struct Scene scene;
 
 void addEntity(object2D* entity){
+        delete scene.entities[scene.entIn];
         scene.entities[scene.entIn] = entity;
         if(scene.entIn == SCENE_SIZE ){
            scene.entFull = true; 
@@ -15,23 +17,55 @@ void addEntity(object2D* entity){
         if (scene.entIn == 0){
                 scene.entIn++;
         }
+        
+        
 }
 
-void drawAllProjectiles() {
-        std::cerr << scene.projIn;
+void spawnEnemy(int startx,int starty,  int startsize, std::string name) {
+        Enemy * p1 = new Enemy(startx,starty,startsize,name);
+        addEntity(p1);
+        addProjectile(&(p1->proj));
+}
+
+
+
+void doAllProjectiles() {
 
         int endIndex = scene.projIn;
         if (scene.projFull) {
                 endIndex = SCENE_SIZE*3;
         }
         for (int i = 0; i < endIndex; i++) {
-                scene.projectiles[i]->drawProj();
+                if (scene.projectiles[i]->visibility) {
+                        scene.projectiles[i]->drawProj();
+                        scene.projectiles[i]->updatePhysics();
+                }
+        }
+}
+
+unsigned long long int getFrame() {
+        return scene.currentFrame; 
+}
+
+void doAllEntities() {
+
+        int endIndex = scene.entIn;
+        if (scene.entFull) {
+                endIndex = SCENE_SIZE*3;
+        }
+        for (int i = 0; i < endIndex; i++) {
+                if (scene.entities[i]->visibility) {
+                        scene.entities[i]->drawObject();
+                        scene.entities[i]->updatePhysics();  
+                }
         }
 }
 
 
+
 void addProjectile(Projectile* proj){
-       scene.projectiles[scene.projIn] = proj;
+        delete scene.projectiles[scene.projIn];
+        scene.projectiles[scene.projIn] = proj;
         if(scene.projIn == (SCENE_SIZE *3)){
            scene.projFull = true; 
         }
@@ -39,6 +73,8 @@ void addProjectile(Projectile* proj){
 
         //project player entity
 }
+
+
 
 
 bool checkCollision(object2D* entity, object2D* proj ) {
@@ -49,17 +85,16 @@ bool checkCollision(object2D* entity, object2D* proj ) {
     int ob2Hieght =proj->SIZE ;
         
 
-
-    if (entity->pos.x < proj->pos.x + ob2Width &&
-        entity->pos.x + ob1Width > proj->pos.x &&
-        entity->pos.y < proj->pos.y + ob2Hieght &&
-        entity->pos.y + ob1Hieght > proj->pos.y  ){
-
-        entity->handleCollision();
-        return true;     
-       
-      
-    }
+        if(entity->visibility && proj->visibility) {
+                if (entity->pos.x < proj->pos.x + ob2Width &&
+                        entity->pos.x + ob1Width > proj->pos.x &&
+                         entity->pos.y < proj->pos.y + ob2Hieght &&
+                        entity->pos.y + ob1Hieght > proj->pos.y  ){
+        
+                        entity->handleCollision();
+                        return true;     
+         }
+        }
    
      return false; 
 
@@ -67,6 +102,10 @@ bool checkCollision(object2D* entity, object2D* proj ) {
 void updateTimer() {
         scene.currentFrame++;
         scene.currentTime += FRAME_DELAY;
+}
+
+bool everyX(unsigned long long int x) {
+        return ((scene.currentFrame % x) == 0);
 }
 
 void  checkAllCollisions() { 
@@ -93,5 +132,14 @@ void  checkAllCollisions() {
                 }
         }
 
+}
+
+void deleteAll() {
+        for (int i = 0; i < SCENE_SIZE; i++) {
+                delete scene.entities[i];
+        }
+        for (int i = 0; i < SCENE_SIZE*3; i++) {
+                delete scene.projectiles[i];
+        }
 }
 
