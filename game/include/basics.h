@@ -9,10 +9,10 @@
 
 // vector sim -256 to 256
 //cabinet is -512 to 511
-#define TOP_Y 256
-#define BOT_Y -256 
-#define LEFT_X -256
-#define RIGHT_X 256 
+#define TOP_Y 511
+#define BOT_Y -511 
+#define LEFT_X -511
+#define RIGHT_X 511 
 #define SPLIT 0
 
 //20

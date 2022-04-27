@@ -273,10 +273,10 @@ impl VLine {
     }
 }
 
-/// Max value for signed 12-bit integer.
-const MAX_COORD: f32 = 511.0;
-/// Min value for signed 12-bit integer.
-const MIN_COORD: f32 = -511.0;
+/// Max value for signed 10-bit integer.
+const MAX_COORD: f32 = 1023.0;
+/// Min value for signed 10-bit integer.
+const MIN_COORD: f32 = -1023.0;
 
 fn open_file(path: &str) -> Result<Vec<VCommand>, Box<dyn Error>> {
     let mut file = std::fs::File::open(path)?;
