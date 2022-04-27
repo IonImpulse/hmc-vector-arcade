@@ -9,6 +9,7 @@ Projectile::Projectile(float startx, float starty, float startSize, float angle)
             object2D::object2D(startx,starty,startSize, "proj") {
     vel.x = 10*cos(angle); 
     vel.y = 10*sin(angle);
+    visibility = false;
 }
 
 void Projectile::drawProj() {
