@@ -119,8 +119,8 @@ int main() {
     addProjectile(&player.proj);
 
     //spawnEnemy(12,10,20,"basic");
-    spawnEnemy(-4,10,20,"basic");
-    spawnEnemy(10,5,20,"basic");
+    spawnEnemy(-4,10,40,"basic");
+    spawnEnemy(10,5,40,"basic");
 
 
     
