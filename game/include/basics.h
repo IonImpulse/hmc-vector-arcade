@@ -18,6 +18,7 @@
 //20
 #define FRAME_DELAY_MS 70
 #define FRAME_DELAY (FRAME_DELAY_MS / 100.0)
+#define FPS 50
 
 typedef struct {
     float x = 0;

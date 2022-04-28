@@ -4,6 +4,8 @@
 #include <iostream>
 #include <math.h>
 
+#define INVTIME 1
+
 Player::Player(float startx, float starty, float startSize, std::string inName): 
             object2D::object2D(startx,starty,startSize, inName) {
             
@@ -25,7 +27,7 @@ void Player::drawObject() {
 
 void Player::hitReact() {
     invuln = true;
-    invTrigger = getFrame() + 10;
+    invTrigger = getFrame() + FPS*INVTIME;
 }
 
 void Player::shoot() {
