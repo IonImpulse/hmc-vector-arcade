@@ -8,7 +8,7 @@
 #define PLAYER_SIZE 30
 
 // vector sim -256 to 256
-//cabinet is -512 to 511
+//cabinet is -511 to 511
 #define TOP_Y 511
 #define BOT_Y -511 
 #define LEFT_X -511
