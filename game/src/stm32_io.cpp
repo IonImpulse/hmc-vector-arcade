@@ -20,7 +20,7 @@ size_t writePtr;
 typedef struct {
     uint16_t x[BUFFER_SIZE];
     uint16_t y[BUFFER_SIZE];
-    uint16_t z[BUFFER_SIZE];
+    char z[BUFFER_SIZE];
     size_t length;
 } vector_buffer;
 vector_buffer buff0;
@@ -56,39 +56,68 @@ void get_next_vector() {
     if (halted) {
         // If we're halted, we need to draw invisible garbage
         // to prevent the spot killer circuit from thinking our signal is dead
-        if (halt_state) {
+        switch (halt_state) {
+        case 0:
+            curr_x = 612;
+            curr_y = 612;
+            curr_z = LD_POS | BLANK;
+            halt_state=1;
+            break;
+        case 1:
+            curr_x = NEG|200;
+            curr_y = 0;
+            curr_z = BLANK;
+            halt_state=2;
+            break;
+        case 2:
+            curr_x = 0;
+            curr_y = NEG|200;
+            curr_z = BLANK;
+            halt_state=3;
+            break;
+        case 3:
             curr_x = 200;
+            curr_y = 0;
+            curr_z = BLANK;
+            halt_state=4;
+            break;
+        case 4:
+            curr_x = 0;
             curr_y = 200;
             curr_z = BLANK;
-        } else {
-            curr_x = 512;
-            curr_y = 512;
-            curr_z = BLANK | LD_POS;
+            halt_state=1;
+            break;
         }
-        halt_state ^= 1;
     } else {
         curr_x = readBuff->x[readPtr];
         curr_y = readBuff->y[readPtr];
         curr_z = readBuff->z[readPtr];
         readPtr++;
     }
+    if (curr_z&LD_POS) {
+        // Load Absolute Position
+        SPIsend(X_SPI,curr_x);
+        SPIsend(Y_SPI,curr_y);
+    } else {
+        // Draw Vector
+        //
+        // Binary Normalization Step
+        //   If the distance integer can be doubled without affecting the sign bit,
+        //   do so, and halve the number of clock pulses.
+        //   This ensures the drawing speed is about the same for both long and short vectors.
+        uint16_t mag_x = curr_x & 0x3FF;
+        uint16_t mag_y = curr_y & 0x3FF;
+        curr_shift = 0;
+        while ((mag_x<0x1FF)&&(mag_y<0x1FF)&&(curr_shift<9)) {
+            mag_x <<= 1;
+            mag_y <<= 1;
+            curr_shift += 1;
+        }
 
-    // Binary Normalization Step
-    //   If the distance integer can be doubled without affecting the sign bit,
-    //   do so, and halve the number of clock pulses.
-    //   This ensures the drawing speed is about the same for both long and short vectors.
-    uint16_t mag_x = curr_x & 0x1FF;
-    uint16_t mag_y = curr_y & 0x1FF;
-    curr_shift = 0;
-    while (((mag_x & 0x100)==0)&&((mag_y & 0x100)==0)&&(curr_shift<7)) {
-        mag_x <<= 1;
-        mag_y <<= 1;
-        curr_shift += 1;
+        // Send out the next vector over SPI
+        SPIsend(X_SPI,(curr_x&0xFC00)|mag_x);
+        SPIsend(Y_SPI,(curr_y&0xFC00)|mag_y);
     }
-
-    // Send out the next vector over SPI
-    SPIsend(X_SPI,(curr_x&0xFE00)|mag_x);
-    SPIsend(Y_SPI,(curr_y&0xFE00)|mag_y);
 }
 
 void draw_buffer_switch() {
@@ -102,7 +131,8 @@ void draw_buffer_switch() {
     readPtr=0;
     writePtr=0;
     halted=0;
-    // load in initial vector to get things started
+    load_abs_pos(0,0);
+    load_abs_pos(0,0);
     get_next_vector();
     // now generate an update to start the interrupt cycle
     generateDuration(VEC_TIMER, 20, 20);
@@ -123,24 +153,31 @@ void draw_absolute_vector(int16_t x_position, int16_t y_position, int16_t bright
     int16_t delta_x = x_position - abs_x;
     int16_t delta_y = y_position - abs_y;
     draw_relative_vector(delta_x, delta_y, brightness);
+    abs_x=x_position;
+    abs_y=y_position;
+}
+
+void load_abs_pos(int16_t x_position, int16_t y_position) {
+    draw_absolute_vector(x_position, y_position, 0);
+    writeBuff->x[writePtr] = (uint16_t)(x_position+512);
+    writeBuff->y[writePtr] = (uint16_t)(y_position+512);
+    writeBuff->z[writePtr] = LD_POS | BLANK;
+    writePtr++;
 }
 
 void draw_end_buffer() {
-    // absolute load counters to center of screen
-    writeBuff->x[writePtr] = 512;
-    writeBuff->y[writePtr] = 512;
-    writeBuff->z[writePtr] = LD_POS | BLANK;
-    writePtr++;
+    load_abs_pos(0,0);
     writeBuff->length = writePtr;
 }
 
-bool is_halted() {return halted && (halt_state==0);}
+bool is_halted() {return halted;}
 
 // This is the main function for handling drawing stuff
 extern "C" void TIM5_IRQHandler() {
-    //sendString("cheese");
     // Clear interrupt flag
     VEC_TIMER->SR &= ~(TIM_SR_UIF);
+    // Make sure shift register has time to finish
+    for (volatile int i=0;i<10;i++) {}
     // Output the previous vector's data by strobing shift reg latch
     digitalWrite(X_SHIFT_REG_LD_GPIO, X_SHIFT_REG_LD_PIN, GPIO_HIGH);
     digitalWrite(Y_SHIFT_REG_LD_GPIO, Y_SHIFT_REG_LD_PIN, GPIO_HIGH);
@@ -163,7 +200,7 @@ extern "C" void TIM5_IRQHandler() {
         
         // Give some time for the beam to settle
         // but set compare value CCR1 so that GOb never activates and accidentally draws a vector
-        generateDuration(VEC_TIMER, 1028, 1028);
+        generateDuration(VEC_TIMER, 100, 100);
     } else {
         // Blank colors if we need to
         if (curr_z&BLANK) {
@@ -182,6 +219,9 @@ extern "C" void TIM5_IRQHandler() {
     // Was this the last vector?
     if (readPtr > readBuff->length) {
         // Show that vector generator has completed frame
+        if (halted==0) {
+            halt_state=0;
+        }
         halted=1;
     }
 }

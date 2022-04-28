@@ -9,6 +9,8 @@
 #include "../include/player.h"
 
 #include "../include/rawio.h"
+// Debug
+//#include "../include/stm32_helper.h"
 
 
 
@@ -93,35 +95,33 @@ void handlePlayerProj() {
 void doNextFrame() {    
     
    
-    handlePlayerProj();
-    doAllProjectiles();
+    //handlePlayerProj();
+    //doAllProjectiles();
     doAllEntities();
 
-    draw_absolute_vector(LEFT_X,SPLIT ,0);
-    draw_absolute_vector(RIGHT_X,SPLIT,255);
+    draw_absolute_vector(-512,0,0);
+    draw_relative_vector(1023,0,255);
 
     draw_end_buffer();
 }
-
-
-
 
 
 int main() {
     initialize_input_output();
     sendString("Welcome to HMC Vector Arcade!\n\r");
 
-    spawnEnemy(12,10,20,"basic");
-    spawnEnemy(-100,10,20,"basic");
-    spawnEnemy(30,30,20,"basic");
+    //spawnEnemy(12,10,20,"basic");
+    spawnEnemy(-4,10,20,"basic");
+    spawnEnemy(10,5,20,"basic");
 
 
-    addEntity(&player);
-    addProjectile(&player.proj);
+    //addEntity(&player);
+    //addProjectile(&player.proj);
     
 
 
     // Render loop
+    
     while (1) {
         start_timer(FRAME_DELAY_MS);
         takeInput();
