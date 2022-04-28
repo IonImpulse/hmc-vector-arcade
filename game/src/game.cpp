@@ -17,7 +17,6 @@
 ///////////////////
 ///////////////
 
-Player player = Player(0,-120,PLAYER_SIZE,"player");
 
 //////////////
 //////////////////
@@ -59,33 +58,39 @@ void takeInput() {
 //////////////////////////
 
 
-void updateMoveVector() {
+void updateMoveVector(Player* player) {
    if (M_UP) {
-       player.vel.y += ACCELERATION*M_UP; 
+       player->vel.y += ACCELERATION*M_UP; 
        M_UP *= .5;
    }
    if (M_DOWN) {
-       player.vel.y -= ACCELERATION*M_DOWN;
+       player->vel.y -= ACCELERATION*M_DOWN;
        M_DOWN *= .5; 
    }
    if (M_LEFT) {
-       player.vel.x -= ACCELERATION*M_LEFT;
+       player->vel.x -= ACCELERATION*M_LEFT;
        M_LEFT *= .5; 
    }
    if (M_RIGHT) {
-       player.vel.x += ACCELERATION*M_RIGHT;
+       player->vel.x += ACCELERATION*M_RIGHT;
        M_RIGHT  *= .5; 
+   }
+   if (player->vel.x > PLAYER_SPEED){
+       player->vel.x = PLAYER_SPEED;
+   }
+    if (player->vel.y > PLAYER_SPEED){
+       player->vel.y = PLAYER_SPEED;
    }
 }
    
 
-void handlePlayerProj() { 
-     if (M_shoot && !player.shooting) {
-        player.shoot();
+void handlePlayerProj(Player* player) { 
+     if (M_shoot && !player->shooting) {
+        player->shoot();
     }
 
 
-    if(player.shooting) {
+    if(player->shooting) {
         
         M_shoot = false;
          // std::cerr << "I was hit" << std::endl;
@@ -94,8 +99,7 @@ void handlePlayerProj() {
 
 void doNextFrame() {    
     
-   
-    handlePlayerProj();
+ 
     doAllProjectiles();
     doAllEntities();
 
@@ -110,13 +114,15 @@ int main() {
     initialize_input_output();
     sendString("Welcome to HMC Vector Arcade!\n\r");
 
+    Player player = Player(0,-120,PLAYER_SIZE,"player");
+    addEntity(&player); // player must be added first 
+    addProjectile(&player.proj);
+
     //spawnEnemy(12,10,20,"basic");
     spawnEnemy(-4,10,20,"basic");
     spawnEnemy(10,5,20,"basic");
 
 
-    addEntity(&player);
-    addProjectile(&player.proj);
     
 
 
@@ -125,7 +131,9 @@ int main() {
     while (1) {
         start_timer(FRAME_DELAY_MS);
         takeInput();
-        updateMoveVector();
+        handlePlayerProj(&player);
+
+        updateMoveVector(&player);
         checkAllCollisions();
         doNextFrame();
         updateTimer();

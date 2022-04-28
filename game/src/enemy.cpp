@@ -79,7 +79,7 @@ void Enemy::updatePhysics() {
         vel.y = -vel.y;
     }
 
-    if(!shooting && pos.y > SPLIT + 100) {
+    if(!shooting && (pos.y > SPLIT + 100)) {
         shoot();
     }
     
@@ -95,7 +95,7 @@ void Enemy::updatePhysics() {
          proj.pos.x = pos.x + SIZE/2;
         proj.pos.y = pos.y - proj.SIZE;
         proj.vel.x = 0+.5*vel.x; 
-        proj.vel.y = -10+.5*vel.y; 
+        proj.vel.y = -(PROJECTILE_SPEED )+.5*vel.y; 
         proj.visibility = true;
         shooting = true;
     }

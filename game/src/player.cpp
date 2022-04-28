@@ -39,7 +39,7 @@ void Player::shoot() {
         shooting = true;
 
         proj.vel.x = 0 + vel.x*.2;
-        proj.vel.y = 10 + vel.y*.2;
+        proj.vel.y = PROJECTILE_SPEED + vel.y*.2;
     }
 }
 
@@ -47,13 +47,12 @@ void Player::updatePhysics() {
 
 
     // Player random walk since input doesnt work 
-    if ((getFrame() % 20 )== 0) {
+    if ((getFrame() % 50 )== 0) {
         static int angle=0;
-        //float angle = (rand() % (2*314))*.01;
-        //std::cerr << angle;
         angle++;
-        vel.x += 10*cos(angle);
-        vel.y += 10*sin(angle);
+
+        vel.x += PLAYER_SPEED*cos(angle);
+        vel.y += PLAYER_SPEED*sin(angle);
     }
     //
     // player 
