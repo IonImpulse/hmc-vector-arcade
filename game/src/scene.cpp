@@ -8,12 +8,35 @@ struct Scene scene;
 void handleLevel() {
          // Ok so this checks if the victory condition is complete and moves to the next level. 
         // for all but start and gameover this is all the enemies are dead
-        if(scene.level != 0 ) {
+        if(scene.level == 0 ) {
+                //hide all 
                 //render title 
                 // tick down enemies as a clock system before level 1,
+                if(getFrame() % 50 == 0) {
+                        static int i = 0;
+                        i+=1; 
+                        if( i > 5) {
+                                i = 0;
+                                scene.level += 1;
+                        }
+                }
                 // have button press render to start. 
 
         }  else if (scene.level == -1) { 
+                //hide all 
+                //render title 
+
+                if(getFrame() % 50 == 0) {
+                        
+                        static int i = 0;
+                        i+=1; 
+                        if( i > 5) {
+                                i = 0;
+                                scene.level += 1;
+                                 //initializeNextScene();
+
+                        }
+                }
                 
 
 
@@ -36,6 +59,7 @@ void handleLevel() {
                 ///r GAME OVER 
                 if (scene.gameOver ) {
                         scene.gameOverTrigger = getFrame() + 3*FPS;
+                        //hideAll();
                         //run annimation whipe
                         scene.gameOver = false;
                 } if (scene.gameOverTrigger > getFrame()) {
@@ -48,15 +72,14 @@ void handleLevel() {
 
 }
 
-void gameOver(){  scene.gameOver = true ;} 
+void gameOver(){ 
+        sendString("Game Over");
+        scene.gameOver = true;
+} 
 
-unsigned int getLevel() {
-        return scene.level;
-}
+unsigned int getLevel() { return scene.level; }
 
-void killEnemy() {
-        scene.enemies-=1;
-}
+void killEnemy() { scene.enemies-=1; }
 
 
 void addEntity(object2D* entity){

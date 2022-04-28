@@ -52,7 +52,7 @@ struct InputState get_inputs() {
     return inputs;
 }
 
-char SIMULATOR_PATH[]{ "../vector-simulator/target/release/vector-simulator" };
+char SIMULATOR_PATH[]{ "../vector-simulator/target/release/vector-simulator.exe" };
 // Do some hacky stuff to make g++ not complain about converting string constants to `char*`
 char SIMULATOR_ARG_1[]{ "-p" };
 char SIMULATOR_ARG_2[]{ "-d" };

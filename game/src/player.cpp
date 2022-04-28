@@ -28,6 +28,10 @@ void Player::drawObject() {
 void Player::hitReact() {
     invuln = true;
     invTrigger = getFrame() + FPS*INVTIME;
+    life -= 1;
+    if (life == 0) { 
+        gameOver();
+    }
 }
 
 void Player::shoot() {

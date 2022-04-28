@@ -45,6 +45,7 @@ void Enemy::hitReact() {
         if (life == 0){ 
             life = lifeMax ; 
             visibility = false;
+            killEnemy();
         }
         invuln = true;
         invTrigger = getFrame() + FPS*ENEMYSTUNTIME;
