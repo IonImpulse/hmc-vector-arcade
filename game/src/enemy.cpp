@@ -18,11 +18,11 @@ void Enemy::drawObject() {
     //draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 1023);   
 
     // damage 
-    /*int brightnessRatio = 1023 - ((life/lifeMax)*1023) ;
+    int brightnessRatio = 1023 - ((life/lifeMax)*1023) ;
     draw_absolute_vector(pos.x, pos.y+ SIZE, 0);
     draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, brightnessRatio);
     draw_relative_vector(-SIZE/4,+SIZE/4, brightnessRatio);
-    draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, brightnessRatio);*/
+    draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, brightnessRatio);
 
 
     

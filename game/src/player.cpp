@@ -46,8 +46,10 @@ void Player::updatePhysics() {
 
     // Player random walk since input doesnt work 
     if ((getFrame() % 20 )== 0) {
-        float angle = (rand() % (2*314))*.01;
-        std::cerr << angle;
+        static int angle=0;
+        //float angle = (rand() % (2*314))*.01;
+        //std::cerr << angle;
+        angle++;
         vel.x += 10*cos(angle);
         vel.y += 10*sin(angle);
     }

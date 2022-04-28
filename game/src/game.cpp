@@ -95,8 +95,8 @@ void handlePlayerProj() {
 void doNextFrame() {    
     
    
-    //handlePlayerProj();
-    //doAllProjectiles();
+    handlePlayerProj();
+    doAllProjectiles();
     doAllEntities();
 
     draw_absolute_vector(-512,0,0);
@@ -115,8 +115,8 @@ int main() {
     spawnEnemy(10,5,20,"basic");
 
 
-    //addEntity(&player);
-    //addProjectile(&player.proj);
+    addEntity(&player);
+    addProjectile(&player.proj);
     
 
 
