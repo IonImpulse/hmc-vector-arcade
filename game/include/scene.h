@@ -22,15 +22,20 @@ struct Scene {
         bool projFull = false;
          //3 bullets per entity. 
         // std::unordered_map<std::pair<int,int>, Projectile> projectiles;
-        unsigned int level = 0;
+        int level = 0;
         int enemies = 0;
+        bool gameOver = false;
         bool nextSceneAnimation = false; 
         unsigned long long int nextSceneTrigger = 0;
+        unsigned long long int gameOverTrigger = 0;
+
         // -1 gameover 
         // 0 start screen 
         //
 
 };
+void gameOver(); 
+
 unsigned int getLevel() ;
 
 void killEnemy() ;
@@ -41,7 +46,7 @@ void spawnEnemy(int startx,int starty, int startsize, std::string name);
 
 void addEntity(object2D* entity);
 
-void initializeLevel();
+void handleLevel();
 
 void doAllProjectiles();
 

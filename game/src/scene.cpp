@@ -5,30 +5,50 @@
 
 struct Scene scene;
 
-void initializeLevel() {
-        // Ok so this checks if the victory condition is complete and moves to the next level. 
+void handleLevel() {
+         // Ok so this checks if the victory condition is complete and moves to the next level. 
         // for all but start and gameover this is all the enemies are dead
+        if(scene.level != 0 ) {
+                //render title 
+                // tick down enemies as a clock system before level 1,
+                // have button press render to start. 
 
-        if (scene.enemies == 0) {
-                scene.nextSceneAnimation = true; 
-                scene.nextSceneTrigger = getFrame() + 3*FPS;
+        }  else if (scene.level == -1) { 
+                
+
+
+        } else {
+                        // normal level time: 
+                if (scene.enemies == 0) {
+                        scene.nextSceneAnimation = true; 
+                        scene.nextSceneTrigger = getFrame() + 3*FPS;
+                }
+                if (scene.nextSceneAnimation) {
+                        //run annimation whipe
+                }
+                if (scene.nextSceneTrigger > getFrame()) {
+                        scene.level += 1;
+                        scene.nextSceneAnimation = false; 
+                        //initializeNextScene();
+
+                }
+
+                ///r GAME OVER 
+                if (scene.gameOver ) {
+                        scene.gameOverTrigger = getFrame() + 3*FPS;
+                        //run annimation whipe
+                        scene.gameOver = false;
+                } if (scene.gameOverTrigger > getFrame()) {
+                        scene.level = -1;
+                }
+
+                
+                
         }
-        if (scene.nextSceneAnimation) {
-                //run annimation whipe
-        }
-        if (scene.nextSceneTrigger > getFrame()) {
-                scene.level += 1;
-                scene.nextSceneAnimation = false; 
-        }
-
-
-
-
-
-
-
 
 }
+
+void gameOver(){  scene.gameOver = true ;} 
 
 unsigned int getLevel() {
         return scene.level;
@@ -116,10 +136,10 @@ bool checkCollision(object2D* entity, object2D* proj ) {
     int ob1Hieght = entity->SIZE ;
     
     int ob2Width = proj->SIZE;
-    int ob2Hieght =proj->SIZE;
+    int ob2Hieght =proj->SIZE + proj->vel.y/2;
+    // The proj.vel.y addition is to offset the fact the projects move vertically verry fast 
+    // and could jump over and enemy. 
 
-    int backBoxWidth = -proj->vel.x;
-    int backBoxHieght = -proj->vel.y;
 
         if(entity->visibility && proj->visibility) {
                 if (entity->pos.x < proj->pos.x + ob2Width &&
