@@ -130,6 +130,8 @@ int main() {
     
     while (1) {
         start_timer(FRAME_DELAY_MS);
+        initializeLevel();
+
         takeInput();
         handlePlayerProj(&player);
 

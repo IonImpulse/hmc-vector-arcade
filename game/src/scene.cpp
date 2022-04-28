@@ -5,6 +5,40 @@
 
 struct Scene scene;
 
+void initializeLevel() {
+        // Ok so this checks if the victory condition is complete and moves to the next level. 
+        // for all but start and gameover this is all the enemies are dead
+
+        if (scene.enemies == 0) {
+                scene.nextSceneAnimation = true; 
+                scene.nextSceneTrigger = getFrame() + 3*FPS;
+        }
+        if (scene.nextSceneAnimation) {
+                //run annimation whipe
+        }
+        if (scene.nextSceneTrigger > getFrame()) {
+                scene.level += 1;
+                scene.nextSceneAnimation = false; 
+        }
+
+
+
+
+
+
+
+
+}
+
+unsigned int getLevel() {
+        return scene.level;
+}
+
+void killEnemy() {
+        scene.enemies-=1;
+}
+
+
 void addEntity(object2D* entity){
         delete scene.entities[scene.entIn];
         scene.entities[scene.entIn] = entity;
@@ -82,8 +116,10 @@ bool checkCollision(object2D* entity, object2D* proj ) {
     int ob1Hieght = entity->SIZE ;
     
     int ob2Width = proj->SIZE;
-    int ob2Hieght =proj->SIZE ;
-        
+    int ob2Hieght =proj->SIZE;
+
+    int backBoxWidth = -proj->vel.x;
+    int backBoxHieght = -proj->vel.y;
 
         if(entity->visibility && proj->visibility) {
                 if (entity->pos.x < proj->pos.x + ob2Width &&
