@@ -47,21 +47,24 @@ void render_frame(mat4& projection_matrix, int num_objects, Entity* game_objects
             vec4 current_point = vec3_to_vec4(current_entity.model.points[point_idx]);
             vec3 translation = current_entity.position;
 
+            current_point = current_entity.orientation * current_point;
             current_point = translation_matrix(translation[0], translation[1], translation[2]) * current_point;
+
+            current_point.log();
+            sleep(1);
 
             current_point = projection_matrix*current_point;
             current_point = current_point/current_point[3];
-            current_point = current_point*255;
+            //current_point = current_point*255;
 
             points[point_idx] = current_point;
         }
 
 
         for(int connection_idx = 0; connection_idx < current_entity.model.num_connections; connection_idx++) {
-            printf("reached\n"); 
 
-            int index_1 = current_entity.model.connections[connection_idx][0];
-            int index_2 = current_entity.model.connections[connection_idx][1];
+            int index_1 = current_entity.model.connections[2*connection_idx];
+            int index_2 = current_entity.model.connections[2*connection_idx + 1];
             
             vec3 point_1 = current_entity.model.points[index_1];
             vec3 point_2 = current_entity.model.points[index_2];
@@ -81,22 +84,33 @@ int main(int argc, char** argv) {
     float projection_matrix_init_values[4][4] = { 
         {ASP*F,  0.f,  0.f,                                               0.f},
         {0.f,    F,    0.f,                                               0.f},
-        {0.f,    0.f,  FAR_PLANE/(FAR_PLANE-CLOSE_PLANE), -(CLOSE_PLANE*FAR_PLANE)/(FAR_PLANE-CLOSE_PLANE)},
-        {0.f,    0.f,  1.f,  0.f}
+        {0.f,    0.f,  FAR_PLANE/(FAR_PLANE-CLOSE_PLANE), 1.f},
+        {0.f,    0.f,  -(CLOSE_PLANE*FAR_PLANE)/(FAR_PLANE-CLOSE_PLANE),  0.f}
     };
     mat4 projection_matrix = mat4(projection_matrix_init_values);
 
-    vec3 p1 = vec3(0, 0, 2);
-    vec3 p2 = vec3(1, 0, 2);
-    vec3 points[2] = {p1, p2};
-    
-    const int** connections = {{0, 1}};
-    Model M = {2, points, 1, connections};
-    Entity E = {M, mat4(), vec3(1, 1, 0)};
-    Entity E_list[1] = {E};
+    vec3 p0 = vec3(0, 0, 0);
+    vec3 p1 = vec3(50, 0, 0);
+    vec3 p2 = vec3(0, 50, 0);
+    vec3 p3 = vec3(50, 50, 0);
+    vec3 p4 = vec3(0, 0, 50);
+    vec3 p5 = vec3(50, 0, 50);
+    vec3 p6 = vec3(0, 50, 50);
+    vec3 p7 = vec3(50, 50, 50);
 
+    
+    int connections[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 0, 4, 1, 5, 2, 6, 3, 7};
+    vec3 points[8] = {p0, p1, p2, p3, p4, p5, p6, p7};
+
+    float theta = 0.f; 
 
     while(1) {
+        theta += PI/180.f;
+        Model M = Model{8, points, 12, connections}; 
+        mat4 rotation = x_rotation_matrix(theta);        
+
+        Entity E = {M, rotation, vec3(50.f, -100.f, 50.f)};
+        Entity E_list[1] = {E};
         
         render_frame(projection_matrix, 1, E_list);
         draw_buffer_switch();

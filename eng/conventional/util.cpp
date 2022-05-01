@@ -246,3 +246,34 @@ mat4 translation_matrix(float delta_x, float delta_y, float delta_z) {
 
     return mat4(init_values);
 }
+
+mat4 x_rotation_matrix(float theta) {
+    float init_values[4][4] = {
+        { 1.f, 0.f, 0.f, 0.f },
+        { 0.f, cos(theta), -sin(theta), 0.f },
+        { 0.f, sin(theta), cos(theta), 0.f },
+        { 0.f, 0.f, 0.f, 1.f }
+    };
+
+    return mat4(init_values);
+}
+
+mat4 y_rotation_matrix(float theta) {
+    float init_values[4][4] = {
+        { cos(theta), 0.f, sin(theta), 0.f },
+        { 0.f, 1.f, 0.f, 0.f },
+        { -sin(theta), 0.f, cos(theta), 0.f },
+        { 0.f, 0.f, 0.f, 1.f }
+    };
+    return mat4(init_values);
+}
+
+mat4 z_rotation_matrix(float theta) {
+    float init_values[4][4] = {
+        { cos(theta), -sin(theta), 0.f, 0.f },
+        { sin(theta), cos(theta), 0.f,  0.f },
+        { 0.f, 0.f, 1.f, 0.f }, 
+        { 0.f, 0.f, 0.f, 1.f }
+    };
+    return mat4(init_values);
+}
