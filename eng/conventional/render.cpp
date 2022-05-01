@@ -49,13 +49,10 @@ void render_frame(mat4& projection_matrix, int num_objects, Entity* game_objects
 
             current_point = current_entity.orientation * current_point;
             current_point = translation_matrix(translation[0], translation[1], translation[2]) * current_point;
-
-            current_point.log();
-            sleep(1);
-
+            
             current_point = projection_matrix*current_point;
             current_point = current_point/current_point[3];
-            //current_point = current_point*255;
+            current_point = current_point*128;
 
             points[point_idx] = current_point;
         }
@@ -66,8 +63,10 @@ void render_frame(mat4& projection_matrix, int num_objects, Entity* game_objects
             int index_1 = current_entity.model.connections[2*connection_idx];
             int index_2 = current_entity.model.connections[2*connection_idx + 1];
             
-            vec3 point_1 = current_entity.model.points[index_1];
-            vec3 point_2 = current_entity.model.points[index_2];
+            vec4 point_1 = points[index_1];
+            vec4 point_2 = points[index_2];
+            
+            //printf("(%.3f, %.3f) --> (%.3f, %.3f)\n", point_1[0], point_1[1], point_2[0], point_2[1]);
 
             draw_absolute_vector(point_1[0], point_1[1], 0);
             draw_absolute_vector(point_2[0], point_2[1], 255); 
@@ -84,8 +83,8 @@ int main(int argc, char** argv) {
     float projection_matrix_init_values[4][4] = { 
         {ASP*F,  0.f,  0.f,                                               0.f},
         {0.f,    F,    0.f,                                               0.f},
-        {0.f,    0.f,  FAR_PLANE/(FAR_PLANE-CLOSE_PLANE), 1.f},
-        {0.f,    0.f,  -(CLOSE_PLANE*FAR_PLANE)/(FAR_PLANE-CLOSE_PLANE),  0.f}
+        {0.f,    0.f,  FAR_PLANE/(FAR_PLANE-CLOSE_PLANE), -(CLOSE_PLANE*FAR_PLANE)/(FAR_PLANE-CLOSE_PLANE)},
+        {0.f,    0.f,  1.f,  0.f}
     };
     mat4 projection_matrix = mat4(projection_matrix_init_values);
 
@@ -107,9 +106,9 @@ int main(int argc, char** argv) {
     while(1) {
         theta += PI/180.f;
         Model M = Model{8, points, 12, connections}; 
-        mat4 rotation = x_rotation_matrix(theta);        
+        mat4 rotation = y_rotation_matrix(theta);        
 
-        Entity E = {M, rotation, vec3(50.f, -100.f, 50.f)};
+        Entity E = {M, rotation, vec3(0.f, 0.f, 100.f)};
         Entity E_list[1] = {E};
         
         render_frame(projection_matrix, 1, E_list);
