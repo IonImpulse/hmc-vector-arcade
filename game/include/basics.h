@@ -5,8 +5,10 @@
 
 #define SCENE_SIZE 20
 
-#define PLAYER_SIZE 30
-#define PLAYER_SPEED 15
+#define PLAYER_SIZE 50
+#define PROJECTILE_SIZE 6
+
+#define PLAYER_SPEED 5
 #define PROJECTILE_SPEED 10
 // vector sim -256 to 256
 //cabinet is -511 to 511
@@ -32,6 +34,7 @@ class object2D {
         std::string name;
         Vec2 pos;
         Vec2 vel; 
+
         bool visibility = true;
         float ACCELERATION = 1; 
         float SIZE = 20;
