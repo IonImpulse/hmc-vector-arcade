@@ -188,8 +188,6 @@ bool everyX(unsigned long long int x) {
 }
 
 void  checkAllCollisions() { 
-
-
         int entities;
         if (!scene.entFull) {
                 entities = scene.entIn;
@@ -222,3 +220,30 @@ void deleteAll() {
         }
 }
 
+void hideAll(){ 
+        int entities;
+        if (!scene.entFull) {
+                entities = scene.entIn;
+        } else {
+                entities = SCENE_SIZE;
+        }
+         int projs;
+        if (!scene.projFull) {
+                projs = scene.projIn;
+        } else {
+                projs = SCENE_SIZE*3;
+        }
+
+
+        for (int e = 0; e < entities; e++) {
+                scene.entities[e]->visibility = false;
+        }
+        for (int p = 0; p < projs; p++) {
+                scene.projectiles[p]->visibility = false;
+        }
+
+}       
+
+void initializeNextScene() { 
+        // deleteEnemies(); 
+}
