@@ -8,7 +8,7 @@ class Model {
         const int num_points;
         const vec3* points;
         const int num_connections;
-        const int** connections; // Please do not mess up the format. This will pretty easily create UB if you do
+        const int* connections; // Please do not mess up the format. This will pretty easily create UB if you do
 };
 
 class Entity {
