@@ -1,5 +1,6 @@
 .vscode/tasks.json
 vector-simulator/log.txt
+eng/conventional/log.txt
 game/game
 game/log.txt
 game/game.exe
