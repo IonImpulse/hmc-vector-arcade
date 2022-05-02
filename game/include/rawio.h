@@ -13,6 +13,7 @@ struct InputState {
     uint32_t buttons;
 };
 
+void refresh_inputs();
 InputState get_inputs();
 
 void initialize_input_output();

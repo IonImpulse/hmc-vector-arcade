@@ -33,6 +33,7 @@ float ACCELERATION = 6;
 
 void takeInput() {
     InputState input = get_inputs();
+    refresh_inputs();
     
     if (input.ypos < 0) {
        

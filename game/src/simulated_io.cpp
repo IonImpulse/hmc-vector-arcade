@@ -103,6 +103,10 @@ static inline int setup_stdin() {
     return 0;
 }
 
+void refresh_inputs() {
+    // only used in embedded sys
+}
+
 void initialize_input_output() {
     int pipe_fds[2], ret_val;
     if (pipe(pipe_fds) == -1) {

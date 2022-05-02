@@ -354,6 +354,7 @@ void configureDMA1() {
     DMA1_Stream6->CR |= DMA_SxCR_MINC; // increment memory pointer
     DMA1_Stream6->CR |= 1<<DMA_SxCR_DIR_Pos; // memory to peripheral
 }
+
 int sendString_USART2(const char* txStr){
     /* txStr must be null-terminated */
     int txStrLen = strlen(txStr);
@@ -371,6 +372,37 @@ int sendString_USART2(const char* txStr){
     USART2->SR &= ~USART_SR_TC;       // clear TC flag
     DMA1_Stream6->CR |= DMA_SxCR_EN;  // enable channel
     return 0;
+}
+
+
+
+
+
+
+
+
+
+
+/////////
+// ADC //
+/////////
+void configureADC() {
+    // Pin 11 is x position of joystick, pin 12 is y position
+    ADC1->CR2 |= ADC_CR2_ADON;
+    ADC1->SQR1 |= (0b1 << ADC_SQR1_L_Pos) & ADC_SQR1_L_Msk; // 2 conversions
+    ADC1->SQR3 |= ((11 << ADC_SQR3_SQ1_Pos) & ADC_SQR3_SQ1_Msk) | ((12 << ADC_SQR3_SQ2_Pos) & ADC_SQR3_SQ2_Msk); // use channels ADC1_IN12 and ADC1_IN11
+    ADC1->CR1 |= ADC_CR1_SCAN;
+    ADC1->CR2 |= ADC_CR2_EOCS;
+}
+
+void adc_start_conversion() {
+    ADC1->CR2 &= ~ADC_CR2_CONT_Msk; //single conversion mode
+    ADC1->CR2 |= ADC_CR2_SWSTART; //start converison on regular channels
+}
+
+uint32_t read_adc() {
+    while(!(ADC1->SR & ADC_SR_EOC)); //wait for end of conversion
+    return ADC1->DR;
 }
 
 
@@ -426,6 +458,10 @@ void initalize_embedded_system() {
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
     configureDMA1();
 
+    /* Configure ADC for X and Y joysticks */
+    RCC->APB2ENR  |= RCC_APB2ENR_ADC1EN;
+    configureADC();
+
     /* Configure GPIO */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
@@ -452,4 +488,8 @@ void initalize_embedded_system() {
     alternateFunctionMode(SOUND_SHIFT_REG_CLK_GPIO, SOUND_SHIFT_REG_CLK_PIN, 5);   // SPI2_SCK
     alternateFunctionMode(SOUND_SHIFT_REG_DATA_GPIO, SOUND_SHIFT_REG_DATA_PIN, 5); // SPI2_MOSI
     alternateFunctionMode(SOUND_SHIFT_REG_NSS_GPIO, SOUND_SHIFT_REG_NSS_PIN, 5);   // SPI2_NSS
+    // Analog Joystick signals
+    pinMode(JOYSTICK_X_GPIO, JOYSTICK_X_PIN, GPIO_ANALOG); // ADC1_IN11
+    pinMode(JOYSTICK_Y_GPIO, JOYSTICK_Y_PIN, GPIO_ANALOG); // ADC1_IN12
+    pinMode(JOYSTICK_BTN_GPIO, JOYSTICK_BTN_PIN, GPIO_INPUT);
 }
