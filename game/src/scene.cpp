@@ -188,8 +188,6 @@ bool everyX(unsigned long long int x) {
 }
 
 void  checkAllCollisions() { 
-
-
         int entities;
         if (!scene.entFull) {
                 entities = scene.entIn;
@@ -222,3 +220,52 @@ void deleteAll() {
         }
 }
 
+void deleteEnemies() {
+        // saves the player 
+        for (int i = 1; i < SCENE_SIZE; i++) {
+                delete scene.entities[i];
+        }
+        for (int i = 1; i < SCENE_SIZE*3; i++) {
+                delete scene.projectiles[i];
+        }
+}
+
+void hideAll(){ 
+        int entities;
+        if (!scene.entFull) {
+                entities = scene.entIn;
+        } else {
+                entities = SCENE_SIZE;
+        }
+         int projs;
+        if (!scene.projFull) {
+                projs = scene.projIn;
+        } else {
+                projs = SCENE_SIZE*3;
+        }
+
+
+        for (int e = 0; e < entities; e++) {
+                scene.entities[e]->visibility = false;
+        }
+        for (int p = 0; p < projs; p++) {
+                scene.projectiles[p]->visibility = false;
+        }
+
+}       
+
+void initializeNextScene() { 
+        deleteEnemies();
+        object2D* player = scene.entities[0] ;
+        player->pos.x = 0;
+        player->pos.y = -100;
+        player->vel.x = 0;
+        player->vel.y = 0;
+        player->visibility = true;
+        
+
+        for (int i = 0; i < scene.level+1; i++) {
+                spawnEnemy( i*10, i*10, 20, "baddie");
+        }
+
+}

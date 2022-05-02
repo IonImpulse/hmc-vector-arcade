@@ -17,15 +17,15 @@ void Enemy::drawObject() {
     int brightnessScale;
 
     if(invuln) {
-         brightnessScale = .5; 
+         brightnessScale = 500; 
     }
     else {
-         brightnessScale = 1;
+         brightnessScale = 1023;
     }
     draw_absolute_vector(pos.x,pos.y+SIZE,0);
-    draw_relative_vector(SIZE/2, -SIZE, 1022*brightnessScale);
-    draw_relative_vector(SIZE/2, SIZE, 1022*brightnessScale);
-    draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, 1023);   
+    draw_relative_vector(SIZE/2, -SIZE, brightnessScale);
+    draw_relative_vector(SIZE/2, SIZE, brightnessScale);
+    draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, brightnessScale);   
 
     // damage 
     int brightnessRatio = 1023 - ((life/lifeMax)*1023) ;

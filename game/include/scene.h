@@ -62,7 +62,12 @@ void  checkAllCollisions();
 
 void deleteAll();
 
+void deleteEnemies();
+
 bool everyX(unsigned long long int x);
 
+void hideAll(); 
+
+void initializeNextScene();
 
 #endif

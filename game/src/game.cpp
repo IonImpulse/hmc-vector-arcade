@@ -26,7 +26,7 @@ float M_LEFT = 0;
 float M_UP = 0;
 float M_RIGHT = 0;
 float M_DOWN = 0;
-bool M_shoot = false;
+bool M_shoot = true;
  
 float ACCELERATION = 6; 
 
