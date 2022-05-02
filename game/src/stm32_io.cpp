@@ -41,14 +41,42 @@ int curr_shift=0;
 bool halted=1; // vector generator raises halted to signify that it is ready to swap buffers
 int halt_state=0;
 
+#define DEBUG_OUTPUT 1
+
 InputState get_inputs() {
     InputState state = { .xpos=0, .ypos=0, .buttons=0};
-    // TODO retreive the data from the joystick and/or buttons
+    ADC1->CR2 &= ~ADC_CR2_CONT_Msk; //single conversion mode
+    ADC1->CR2 |= ADC_CR2_SWSTART; //start converison on regular channels
+
+    while(!(ADC1->SR & ADC_SR_EOC)); //wait for end of conversion 
+    state.xpos = ((float)((ADC1->DR & ADC_DR_DATA_Msk) >> ADC_DR_DATA_Pos)) / 4096.0;
+
+    while(!(ADC1->SR & ADC_SR_EOC));
+    state.ypos = ((float)((ADC1->DR & ADC_DR_DATA_Msk) >> ADC_DR_DATA_Pos)) / 4096.0;
+
+    // TODO retreive the data from the buttons (if we have any)
+
+#if DEBUG_OUTPUT
+    char data[256];
+    snprintf(data, 256, "x: %d.%02d, y: %d.%02d\n",
+            (int)state.xpos, ((int)(state.xpos * 100)) % 100,
+           (int)state.ypos, ((int)(state.ypos * 100)) % 100);
+    sendString(data);
+#endif
+
     return state;
 }
 
 void initialize_input_output() {
     initalize_embedded_system();
+    // Configure ADC
+    RCC->APB2ENR  |= RCC_APB2ENR_ADC1EN;
+    // Pin 11 is x position of joystick, pin 12 is y position
+    ADC1->CR2 |= ADC_CR2_ADON;
+    ADC1->SQR1 |= (0b1 << ADC_SQR1_L_Pos) & ADC_SQR1_L_Msk; // 2 conversions
+    ADC1->SQR3 |= ((11 << ADC_SQR3_SQ1_Pos) & ADC_SQR3_SQ1_Msk) | ((12 << ADC_SQR3_SQ2_Pos) & ADC_SQR3_SQ2_Msk);
+    ADC1->CR1 |= ADC_CR1_SCAN;
+    ADC1->CR2 |= ADC_CR2_EOCS;
 }
 
 void get_next_vector() {
