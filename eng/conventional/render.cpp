@@ -89,26 +89,35 @@ int main(int argc, char** argv) {
     mat4 projection_matrix = mat4(projection_matrix_init_values);
 
     vec3 p0 = vec3(0, 0, 0);
-    vec3 p1 = vec3(50, 0, 0);
-    vec3 p2 = vec3(0, 50, 0);
-    vec3 p3 = vec3(50, 50, 0);
-    vec3 p4 = vec3(0, 0, 50);
-    vec3 p5 = vec3(50, 0, 50);
-    vec3 p6 = vec3(0, 50, 50);
-    vec3 p7 = vec3(50, 50, 50);
+    vec3 p1 = vec3(100, 0, 0);
+    vec3 p2 = vec3(0, 100, 0);
+    vec3 p3 = vec3(100, 100, 0);
+    vec3 p4 = vec3(0, 0, 100);
+    vec3 p5 = vec3(100, 0, 100);
+    vec3 p6 = vec3(0, 100, 100);
+    vec3 p7 = vec3(100, 100, 100);
+
+    vec3 a0 = vec3(25, 25, 25);
+    vec3 a1 = vec3(75, 25, 25);
+    vec3 a2 = vec3(25, 75, 25);
+    vec3 a3 = vec3(75, 75, 25);
+    vec3 a4 = vec3(25, 25, 75);
+    vec3 a5 = vec3(75, 25, 75);
+    vec3 a6 = vec3(25, 75, 75);
+    vec3 a7 = vec3(75, 75, 75); 
 
     
-    int connections[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 0, 4, 1, 5, 2, 6, 3, 7};
-    vec3 points[8] = {p0, p1, p2, p3, p4, p5, p6, p7};
+    int connections[68] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 0, 4, 1, 5, 2, 6, 3, 7, 8, 9, 9, 11, 11, 10, 10, 8, 12, 13, 13, 15, 15, 14, 14, 12, 8, 12, 9, 13, 10, 14, 11, 15,  0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15};
+    vec3 points[16] = {p0, p1, p2, p3, p4, p5, p6, p7, a0, a1, a2, a3, a4, a5, a6, a7};
 
     float theta = 0.f; 
 
     while(1) {
-        theta += PI/180.f;
-        Model M = Model{8, points, 12, connections}; 
+        theta += 2*PI/180.f;
+        Model M = Model{16, points, 34, connections}; 
         mat4 rotation = y_rotation_matrix(theta);        
 
-        Entity E = {M, rotation, vec3(0.f, 0.f, 100.f)};
+        Entity E = {M, rotation, vec3(0.f, -50.f, 200.f)};
         Entity E_list[1] = {E};
         
         render_frame(projection_matrix, 1, E_list);

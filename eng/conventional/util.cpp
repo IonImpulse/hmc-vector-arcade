@@ -224,7 +224,7 @@ mat4 mat4::operator*(const mat4& other) {
     
     for (int row = 0; row < 3; row++) {
         for(int col = 0; col < 3; col++) {
-            result[row][col] = elems[row][0] * other[0][col] + elems[row][1] * other[1][col] + elems[row][2] * elems[2][col];
+            result[row][col] = elems[row][0] * other[0][col] + elems[row][1] * other[1][col] + elems[row][2] * other[2][col] + elems[row][3] * other[3][col];
         }
     }
 
