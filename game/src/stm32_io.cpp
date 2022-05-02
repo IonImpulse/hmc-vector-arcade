@@ -41,17 +41,12 @@ int curr_shift=0;
 bool halted=1; // vector generator raises halted to signify that it is ready to swap buffers
 int halt_state=0;
 
-#define DEBUG_OUTPUT 1
-
-void refresh_inputs() {
-    // this function starts the ADC conversions so that they are probably finished by the time get_inputs() is called
-    adc_start_conversion();
-}
+#define DEBUG_OUTPUT 0
 
 InputState get_inputs() {
     InputState state = { .xpos=0, .ypos=0, .buttons=0};
-    state.xpos = ((float)(read_adc())) / 4096.0;
-    state.ypos = ((float)(read_adc())) / 4096.0;
+    state.xpos = ((float)(read_adc_x())) / 4096.0;
+    state.ypos = ((float)(read_adc_y())) / 4096.0;
 
     // TODO retreive the data from the buttons (if we have any)
 

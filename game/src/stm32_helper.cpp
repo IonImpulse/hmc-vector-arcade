@@ -388,23 +388,29 @@ int sendString_USART2(const char* txStr){
 /////////
 void configureADC() {
     // Pin 11 is x position of joystick, pin 12 is y position
+    ADC->CCR |= 0b11 << ADC_CCR_ADCPRE_Pos; // adcclk = pclk2/8
     ADC1->CR2 |= ADC_CR2_ADON;
-    ADC1->SQR1 |= (0b1 << ADC_SQR1_L_Pos) & ADC_SQR1_L_Msk; // 2 conversions
-    ADC1->SQR3 |= ((11 << ADC_SQR3_SQ1_Pos) & ADC_SQR3_SQ1_Msk) | ((12 << ADC_SQR3_SQ2_Pos) & ADC_SQR3_SQ2_Msk); // use channels ADC1_IN12 and ADC1_IN11
-    ADC1->CR1 |= ADC_CR1_SCAN;
-    ADC1->CR2 |= ADC_CR2_EOCS;
+    ADC1->SQR1 |= (0 << ADC_SQR1_L_Pos); // 1 conversion
+    ADC1->CR2 |= ADC_CR2_EOCS; // stop after every conversion
 }
 
-void adc_start_conversion() {
-    ADC1->CR2 &= ~ADC_CR2_CONT_Msk; //single conversion mode
-    ADC1->CR2 |= ADC_CR2_SWSTART; //start converison on regular channels
-}
-
-uint32_t read_adc() {
-    while(!(ADC1->SR & ADC_SR_EOC)); //wait for end of conversion
+uint32_t read_adc_x() {
+    ADC1->SR &= ~ADC_SR_OVR;
+    ADC1->SQR3 = 0;
+    ADC1->SQR3 |= 11 << ADC_SQR3_SQ1_Pos; // ADC1_IN11
+    ADC1->CR2 |= ADC_CR2_SWSTART;
+    while(!(ADC1->SR & ADC_SR_EOC));
     return ADC1->DR;
 }
 
+uint32_t read_adc_y() {
+    ADC1->SR &= ~ADC_SR_OVR;
+    ADC1->SQR3 = 0;
+    ADC1->SQR3 |= 12 << ADC_SQR3_SQ1_Pos; // ADC1_IN12
+    ADC1->CR2 |= ADC_CR2_SWSTART;
+    while(!(ADC1->SR & ADC_SR_EOC));
+    return ADC1->DR;
+}
 
 
 

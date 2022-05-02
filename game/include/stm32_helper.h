@@ -63,6 +63,6 @@ int sendString_USART2(const char* txStr);
 void generateDuration(TIM_TypeDef * TIMx, uint32_t duration, uint32_t compare_val);
 void start_micros(TIM_TypeDef * TIMx, uint32_t us);
 bool tim_done(TIM_TypeDef * TIMx);
-void adc_start_conversion();
-uint32_t read_adc();
+uint32_t read_adc_x();
+uint32_t read_adc_y();
 #endif
