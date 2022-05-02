@@ -238,3 +238,11 @@ void printChar(char data) {
 void sendString(const char* txStr) {
     sendString_USART2(txStr);
 }
+
+void requestChiptune(chiptuneType type, int soundID) {
+    // Bit [7] background music or foreground sound effect
+    // Bits [6:1] sound ID
+    // Bit [0] always 1 for hardware protocol reasons
+    char byte = (type << 7) | ((0x3f & soundID) << 1) | 1;
+    SPIsend(SPI2,byte);
+}

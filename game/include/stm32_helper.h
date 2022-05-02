@@ -30,6 +30,12 @@
 #define Y_SHIFT_REG_LD_GPIO   GPIOC
 #define Y_SHIFT_REG_DATA_PIN  PIN_C12 // brown wire
 #define Y_SHIFT_REG_DATA_GPIO GPIOC
+#define SOUND_SHIFT_REG_CLK_PIN   PIN_B10 // white wire
+#define SOUND_SHIFT_REG_CLK_GPIO  GPIOB
+#define SOUND_SHIFT_REG_NSS_PIN   PIN_B12 // green wire in socket
+#define SOUND_SHIFT_REG_NSS_GPIO  GPIOB
+#define SOUND_SHIFT_REG_DATA_PIN  PIN_B15 // yellow wire in socket
+#define SOUND_SHIFT_REG_DATA_GPIO GPIOB
 #define USART_TX_PIN          PIN_A2  // internally connected to ST-LINK
 #define USART_TX_GPIO         GPIOA
 #define USART_RX_PIN          PIN_A3  // internally connected to ST-LINK
@@ -42,6 +48,7 @@
 #define VEC_TIMER       TIM5
 #define X_SPI SPI1
 #define Y_SPI SPI3
+#define SOUND_SPI SPI2
 
 void initalize_embedded_system();
 void SPIsend(SPI_TypeDef * SPIx, uint16_t data);

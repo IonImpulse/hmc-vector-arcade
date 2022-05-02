@@ -92,6 +92,7 @@ void configure84MHzClock() {
 /////////
 // SPI //
 /////////
+// for the vector X and Y axes
 void configureSPI(SPI_TypeDef * SPIx) {
     SPIx->CR1 &= ~(SPI_CR1_SPE); // Disable SPI so we can change all the settings
                                  // I assume user calls this on startup, but if you want to change
@@ -112,6 +113,27 @@ void configureSPI(SPI_TypeDef * SPIx) {
     SPIx->CR1 |= SPI_CR1_SSM; // To give software control of nSS...
     SPIx->CR1 |= SPI_CR1_SSI; // ...and set internal nSS. You could also set SSOE instead.
     SPIx->CR1 &= ~(SPI_CR1_CRCEN); // Disable CRC calculation by default; if you need it, write your own lib!
+    SPIx->CR1 |= SPI_CR1_SPE; // Enable SPI
+}
+// for the communicating with chiptune CPU
+void configureSoundSPI(SPI_TypeDef * SPIx) {
+    SPIx->CR1 &= ~(SPI_CR1_SPE); // Disable SPI so we can change all the settings
+                                 // I assume user calls this on startup, but if you want to change
+                                 // midway, there may be more complicated shutdown procedures
+    // Baud Rate: divide by 8
+    SPIx->CR1 &= ~(SPI_CR1_BR);
+    SPIx->CR1 |= (0b100 << SPI_CR1_BR_Pos);
+
+    SPIx->CR1 &= ~SPI_CR1_DFF; // 8-bit data
+
+    SPIx->CR1 &= ~(SPI_CR1_BIDIMODE);
+    SPIx->CR1 |= SPI_CR1_BIDIOE;
+    SPIx->CR1 &= ~(SPI_CR1_RXONLY);
+    SPIx->CR1 |= SPI_CR1_MSTR; // Make STM32 act as the master
+    SPIx->CR1 &= ~SPI_CR1_SSM; // To give hardware control of nSS
+    //SPIx->CR2 &= ~SPI_CR2_SSOE; // needed to make nSS go automatically?
+    SPIx->CR2 |= SPI_CR2_FRF; // TI mode -- for some reason this is needed to make nSS go automatically
+    SPIx->CR1 &= ~(SPI_CR1_CRCEN); // Disable CRC calculation by default
     SPIx->CR1 |= SPI_CR1_SPE; // Enable SPI
 }
 
@@ -375,6 +397,8 @@ void initalize_embedded_system() {
     configureSPI(SPI1);
     RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;
     configureSPI(SPI3);
+    RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
+    configureSoundSPI(SPI2);
 
     /* Configure Delay Timer */
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
@@ -424,4 +448,8 @@ void initalize_embedded_system() {
     alternateFunctionMode(Y_SHIFT_REG_CLK_GPIO, Y_SHIFT_REG_CLK_PIN, 6);   // SPI3_SCK
     alternateFunctionMode(Y_SHIFT_REG_DATA_GPIO, Y_SHIFT_REG_DATA_PIN, 6); // SPI3_MOSI
     pinMode(Y_SHIFT_REG_LD_GPIO, Y_SHIFT_REG_LD_PIN, GPIO_OUTPUT);
+    // Sound SPI signals
+    alternateFunctionMode(SOUND_SHIFT_REG_CLK_GPIO, SOUND_SHIFT_REG_CLK_PIN, 5);   // SPI2_SCK
+    alternateFunctionMode(SOUND_SHIFT_REG_DATA_GPIO, SOUND_SHIFT_REG_DATA_PIN, 5); // SPI2_MOSI
+    alternateFunctionMode(SOUND_SHIFT_REG_NSS_GPIO, SOUND_SHIFT_REG_NSS_PIN, 5);   // SPI2_NSS
 }

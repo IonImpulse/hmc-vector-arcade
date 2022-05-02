@@ -29,4 +29,7 @@ bool timer_done();
 
 void printChar(char data);
 void sendString(const char* txStr);
+
+enum chiptuneType{song=1,sfx=0};
+void requestChiptune(chiptuneType type, int soundID);
 #endif

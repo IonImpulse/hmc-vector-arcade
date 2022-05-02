@@ -139,9 +139,9 @@ int main() {
         checkAllCollisions();
         doNextFrame();
         updateTimer();
+        requestChiptune(sfx,3);
         while(!is_halted()) {} // wait until frame has finished drawing, if it hasn't already
         draw_buffer_switch(); // deactivates the halted state
-
         if (timer_done()) {
             sendString("Frame computation too long!\n\r");
         } else {

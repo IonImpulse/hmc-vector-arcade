@@ -207,3 +207,7 @@ void printChar(char data) {
 void sendString(const char* txStr) {
     std::cout<<txStr;
 }
+
+void requestChiptune(chiptuneType type, int soundID) {
+    // not implemented in sim
+}
