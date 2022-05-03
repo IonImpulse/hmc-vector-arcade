@@ -9,21 +9,23 @@ void handleLevel() {
          // Ok so this checks if the victory condition is complete and moves to the next level. 
         // for all but start and gameover this is all the enemies are dead
         if(scene.level == 0 ) {
-                //hide all 
+                hideAll();
                 //render title 
                 // tick down enemies as a clock system before level 1,
-                if(getFrame() % 50 == 0) {
+
+                if(getFrame() % 5 == 0) {
                         static int i = 0;
                         i+=1; 
                         if( i > 5) {
                                 i = 0;
                                 scene.level += 1;
+                                initializeNextScene();
                         }
                 }
                 // have button press render to start. 
 
         }  else if (scene.level == -1) { 
-                //hide all 
+                hideAll();
                 //render title 
 
                 if(getFrame() % 50 == 0) {
@@ -33,7 +35,7 @@ void handleLevel() {
                         if( i > 5) {
                                 i = 0;
                                 scene.level += 1;
-                                 //initializeNextScene();
+                                 initializeNextScene();
 
                         }
                 }
@@ -52,14 +54,14 @@ void handleLevel() {
                 if (scene.nextSceneTrigger > getFrame()) {
                         scene.level += 1;
                         scene.nextSceneAnimation = false; 
-                        //initializeNextScene();
+                        initializeNextScene();
 
                 }
 
                 ///r GAME OVER 
                 if (scene.gameOver ) {
                         scene.gameOverTrigger = getFrame() + 3*FPS;
-                        //hideAll();
+                        hideAll();
                         //run annimation whipe
                         scene.gameOver = false;
                 } if (scene.gameOverTrigger > getFrame()) {
@@ -112,6 +114,7 @@ void doAllProjectiles() {
         if (scene.projFull) {
                 endIndex = SCENE_SIZE*3;
         }
+
         for (int i = 0; i < endIndex; i++) {
                 if (scene.projectiles[i]->visibility) {
                         scene.projectiles[i]->drawProj();
@@ -211,23 +214,49 @@ void  checkAllCollisions() {
 
 }
 
+
+//NOT USED 
 void deleteAll() {
-        for (int i = 0; i < SCENE_SIZE; i++) {
+        int entities;
+        if (!scene.entFull) {
+                entities = scene.entIn;
+        } else {
+                entities = SCENE_SIZE;
+        }
+         int projs;
+        if (!scene.projFull) {
+                projs = scene.projIn;
+        } else {
+                projs = SCENE_SIZE*3;
+        }
+
+        for (int i = 1; i < entities; i++) {
                 delete scene.entities[i];
         }
-        for (int i = 0; i < SCENE_SIZE*3; i++) {
-                delete scene.projectiles[i];
-        }
+        // for (int i = 0; i < projs*3; i++) {
+        //         delete scene.projectiles[i];
+        // }
 }
 
 void deleteEnemies() {
         // saves the player 
-        for (int i = 1; i < SCENE_SIZE; i++) {
+        int entities;
+        if (!scene.entFull) {
+                entities = scene.entIn;
+        } else {
+                entities = SCENE_SIZE;
+        }
+
+        for (int i = 1; i < entities; i++) {
                 delete scene.entities[i];
         }
-        for (int i = 1; i < SCENE_SIZE*3; i++) {
-                delete scene.projectiles[i];
-        }
+        scene.entIn = 1; 
+        scene.entFull = false;
+        
+        scene.projIn = 1; 
+        scene.projFull = false;
+
+       
 }
 
 void hideAll(){ 

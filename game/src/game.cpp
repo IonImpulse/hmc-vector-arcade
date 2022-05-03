@@ -114,6 +114,8 @@ int main() {
     initialize_input_output();
     sendString("Welcome to HMC Vector Arcade!\n\r");
 
+    
+
     Player player = Player(0,-120,PLAYER_SIZE,"player");
     addEntity(&player); // player must be added first 
     addProjectile(&player.proj);
@@ -122,6 +124,7 @@ int main() {
     spawnEnemy(-4,10,40,"basic");
     spawnEnemy(10,5,40,"basic");
 
+    
 
     
 
@@ -130,16 +133,24 @@ int main() {
     
     while (1) {
         start_timer(FRAME_DELAY_MS);
-        handleLevel();
+        //handleLevel();
 
         takeInput();
         handlePlayerProj(&player);
-
+        
         updateMoveVector(&player);
         checkAllCollisions();
+                 
+
+
         doNextFrame();
+              
         updateTimer();
+        
         requestChiptune(sfx,3);
+
+        
+
         while(!is_halted()) {} // wait until frame has finished drawing, if it hasn't already
         draw_buffer_switch(); // deactivates the halted state
         if (timer_done()) {
@@ -148,5 +159,5 @@ int main() {
             while (!timer_done()) {}
         }
     }
-    deleteAll();
+   
 }
