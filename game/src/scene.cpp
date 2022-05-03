@@ -8,7 +8,11 @@ struct Scene scene;
 void handleLevel() {
          // Ok so this checks if the victory condition is complete and moves to the next level. 
         // for all but start and gameover this is all the enemies are dead
-        std::cerr << scene.level;
+        std::cerr << scene.enemies;
+         std::cerr << " ";
+         std::cerr << scene.level;
+
+
         
         
         if(scene.level == 0 ) {
@@ -47,14 +51,14 @@ void handleLevel() {
 
         } else {
                         // normal level time: 
-                if (scene.enemies == 0) {
+                if (scene.enemies == 0 && !scene.nextSceneAnimation) {
                         scene.nextSceneAnimation = true; 
                         scene.nextSceneTrigger = getFrame() + 3;//*FPS;
                 }
                 if (scene.nextSceneAnimation) {
                         //run annimation whipe
                 }
-                if (scene.nextSceneTrigger == getFrame()) {
+                if (scene.nextSceneTrigger == getFrame() ) {
                         scene.level += 1;
                         scene.nextSceneAnimation = false; 
                         initializeNextScene();
@@ -302,7 +306,7 @@ void initializeNextScene() {
                 if(i % 2 == 1) {
                         left = -1;
                 } 
-                spawnEnemy( (i*10+4)*left, i*10+4, 20, "baddie");
+                spawnEnemy( (i*10+4)*left, i*10+4, ENEMY_SIZE, "baddie");
         }
 
 }

@@ -7,6 +7,7 @@
 
 #define PLAYER_SIZE 50
 #define PROJECTILE_SIZE 6
+#define ENEMY_SIZE 40
 
 #define PLAYER_SPEED 5
 #define PROJECTILE_SPEED 10

@@ -54,7 +54,7 @@ void Player::updatePhysics() {
     if ((getFrame() % 50 )== 0) {
         static int angle=0;
         angle++;
-
+        shoot();
         vel.x += PLAYER_SPEED*cos(angle);
         vel.y += PLAYER_SPEED*sin(angle);
     }
