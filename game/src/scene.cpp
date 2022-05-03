@@ -84,6 +84,7 @@ void handleLevel() {
 void gameOver(){ 
         sendString("Game Over");
         scene.gameOver = true;
+        
 } 
 
 unsigned int getLevel() { return scene.level; }
@@ -231,12 +232,6 @@ void deleteAll() {
         } else {
                 entities = SCENE_SIZE;
         }
-         int projs;
-        if (!scene.projFull) {
-                projs = scene.projIn;
-        } else {
-                projs = SCENE_SIZE*3;
-        }
 
         for (int i = 1; i < entities; i++) {
                 delete scene.entities[i];
@@ -292,7 +287,7 @@ void hideAll(){
 }       
 
 void initializeNextScene() { 
-        // deleteEnemies();
+        //deleteEnemies();
         object2D* player = scene.entities[0] ;
         player->pos.x = 0;
         player->pos.y = -100;
@@ -300,6 +295,7 @@ void initializeNextScene() {
         player->vel.y = 0;
         player->visibility = true;
         
+      
         scene.enemies = 0; 
         for (int i = 0; i < scene.level+1; i++) {
                 int left = 1;
