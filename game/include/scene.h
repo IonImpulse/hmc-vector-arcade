@@ -23,15 +23,17 @@ struct Scene {
          //3 bullets per entity. 
         // std::unordered_map<std::pair<int,int>, Projectile> projectiles;
         int level = 0;
+
+           // -1 gameover 
+        // 0 start screen 
+        //
         int enemies = 0;
         bool gameOver = false;
         bool nextSceneAnimation = false; 
         unsigned long long int nextSceneTrigger = 0;
         unsigned long long int gameOverTrigger = 0;
 
-        // -1 gameover 
-        // 0 start screen 
-        //
+     
 
 };
 void gameOver(); 

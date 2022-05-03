@@ -8,6 +8,9 @@ struct Scene scene;
 void handleLevel() {
          // Ok so this checks if the victory condition is complete and moves to the next level. 
         // for all but start and gameover this is all the enemies are dead
+        std::cerr << scene.level;
+        
+        
         if(scene.level == 0 ) {
                 hideAll();
                 //render title 
@@ -46,12 +49,12 @@ void handleLevel() {
                         // normal level time: 
                 if (scene.enemies == 0) {
                         scene.nextSceneAnimation = true; 
-                        scene.nextSceneTrigger = getFrame() + 3*FPS;
+                        scene.nextSceneTrigger = getFrame() + 3;//*FPS;
                 }
                 if (scene.nextSceneAnimation) {
                         //run annimation whipe
                 }
-                if (scene.nextSceneTrigger > getFrame()) {
+                if (scene.nextSceneTrigger == getFrame()) {
                         scene.level += 1;
                         scene.nextSceneAnimation = false; 
                         initializeNextScene();
@@ -64,7 +67,7 @@ void handleLevel() {
                         hideAll();
                         //run annimation whipe
                         scene.gameOver = false;
-                } if (scene.gameOverTrigger > getFrame()) {
+                } if (scene.gameOverTrigger == getFrame()) {
                         scene.level = -1;
                 }
 
@@ -104,6 +107,7 @@ void spawnEnemy(int startx,int starty,  int startsize, std::string name) {
         Enemy * p1 = new Enemy(startx,starty,startsize,name);
         addEntity(p1);
         addProjectile(&(p1->proj));
+        scene.enemies += 1;
 }
 
 
@@ -284,7 +288,7 @@ void hideAll(){
 }       
 
 void initializeNextScene() { 
-        deleteEnemies();
+        // deleteEnemies();
         object2D* player = scene.entities[0] ;
         player->pos.x = 0;
         player->pos.y = -100;
@@ -292,9 +296,13 @@ void initializeNextScene() {
         player->vel.y = 0;
         player->visibility = true;
         
-
+        scene.enemies = 0; 
         for (int i = 0; i < scene.level+1; i++) {
-                spawnEnemy( i*10, i*10, 20, "baddie");
+                int left = 1;
+                if(i % 2 == 1) {
+                        left = -1;
+                } 
+                spawnEnemy( (i*10+4)*left, i*10+4, 20, "baddie");
         }
 
 }

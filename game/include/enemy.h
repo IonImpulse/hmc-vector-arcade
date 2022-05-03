@@ -26,8 +26,8 @@ public:
 
     bool invuln = false;
     unsigned long long int  invTrigger = 0;
-    int life = 4;
-    const int lifeMax = 4;
+    int life = 2;
+    const int lifeMax = 2;
 
     Enemy(float startx, float starty, float startSize, std::string inName);
 
