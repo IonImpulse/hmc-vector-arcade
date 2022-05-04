@@ -1,6 +1,7 @@
 #include "../include/scene.h"
 #include <iostream>
 #include "../include/enemy.h"
+#include "rawio.h"
 
 
 struct Scene scene;
@@ -83,6 +84,7 @@ void handleLevel() {
 
 void gameOver(){ 
         sendString("Game Over");
+        requestChiptune(song,0);
         scene.gameOver = true;
         
 } 

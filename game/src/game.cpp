@@ -22,29 +22,18 @@
 //////////////////
 
 // Movement:
-float M_LEFT = 0;
-float M_UP = 0;
-float M_RIGHT = 0;
-float M_DOWN = 0;
+float M_X = 0;
+float M_Y = 0;
 bool M_shoot = true;
  
-float ACCELERATION = 6; 
+float ACCELERATION = 0.2; 
 
 
 void takeInput() {
     InputState input = get_inputs();
     
-    if (input.ypos < 0) {
-       
-        M_DOWN = 1;
-    } else if (input.ypos > 0) {
-        M_UP = 1;
-    }
-    if (input.xpos < 0) {
-        M_LEFT = 1;
-    } else if (input.xpos > 0) {
-        M_RIGHT = 1;
-    }
+    M_X = (input.xpos-0.5);
+    M_Y = (input.ypos-0.5);
     if (input.buttons){
         M_shoot = true;
     }
@@ -59,27 +48,18 @@ void takeInput() {
 
 
 void updateMoveVector(Player* player) {
-   if (M_UP) {
-       player->vel.y += ACCELERATION*M_UP; 
-       M_UP *= .5;
-   }
-   if (M_DOWN) {
-       player->vel.y -= ACCELERATION*M_DOWN;
-       M_DOWN *= .5; 
-   }
-   if (M_LEFT) {
-       player->vel.x -= ACCELERATION*M_LEFT;
-       M_LEFT *= .5; 
-   }
-   if (M_RIGHT) {
-       player->vel.x += ACCELERATION*M_RIGHT;
-       M_RIGHT  *= .5; 
-   }
+   player->vel.x += ACCELERATION*M_X;
+   player->vel.y += ACCELERATION*M_Y;
+
    if (player->vel.x > PLAYER_SPEED){
        player->vel.x = PLAYER_SPEED;
+   } else if (player->vel.x < -PLAYER_SPEED){
+       player->vel.x = -PLAYER_SPEED;
    }
-    if (player->vel.y > PLAYER_SPEED){
+   if (player->vel.y > PLAYER_SPEED){
        player->vel.y = PLAYER_SPEED;
+   } else if (player->vel.y < -PLAYER_SPEED){
+       player->vel.y = -PLAYER_SPEED;
    }
 }
    
@@ -146,11 +126,6 @@ int main() {
         doNextFrame();
               
         updateTimer();
-        
-        requestChiptune(sfx,3);
-
-        
-
         while(!is_halted()) {} // wait until frame has finished drawing, if it hasn't already
         draw_buffer_switch(); // deactivates the halted state
         if (timer_done()) {

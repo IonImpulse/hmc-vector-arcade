@@ -5,13 +5,18 @@ void pinMode(GPIO_TypeDef * GPIOx, int pin, int function) {
         case GPIO_INPUT:
             GPIOx->MODER &= ~(0b11 << 2*pin);
             break;
+        case GPIO_INPUT_PULLUP:
+            GPIOx->MODER &= ~(0b11 << 2*pin);
+            GPIOx->PUPDR &= ~(0b11 << 2*pin);
+            GPIOx->PUPDR |= 0b01 << 2*pin;
+            break;
         case GPIO_OUTPUT:
-            GPIOx->MODER |= (0b1 << 2*pin);
-            GPIOx->MODER &= ~(0b1 << (2*pin+1));
+            GPIOx->MODER &= ~(0b11 << 2*pin);
+            GPIOx->MODER |= 0b01 << 2*pin;
             break;
         case GPIO_ALT:
-            GPIOx->MODER &= ~(0b1 << 2*pin);
-            GPIOx->MODER |= (0b1 << (2*pin+1));
+            GPIOx->MODER &= ~(0b11 << 2*pin);
+            GPIOx->MODER |= 0b10 << 2*pin;
             break;
         case GPIO_ANALOG:
             GPIOx->MODER |= (0b11 << 2*pin);

@@ -11,10 +11,11 @@
 #define GPIO_HIGH   1
 
 // Arbitrary GPIO functions for pinMode()
-#define GPIO_INPUT  0
-#define GPIO_OUTPUT 1
-#define GPIO_ALT    2
-#define GPIO_ANALOG 3
+#define GPIO_INPUT        0
+#define GPIO_INPUT_PULLUP 1
+#define GPIO_OUTPUT       2
+#define GPIO_ALT          3
+#define GPIO_ANALOG       4
 
 // Pin definitions for every GPIO pin
 #define PIN_A0    0
