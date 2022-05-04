@@ -14,8 +14,14 @@ class Model {
 class Entity {
     public:
         const Model& model;
-        mat4 orientation;
-        vec3 position;
+        mat4& orientation;
+        vec3& position;
+};
+
+class Camera {
+    public: 
+        mat4& orientation;
+        vec3& position;
 };
 
 #endif
