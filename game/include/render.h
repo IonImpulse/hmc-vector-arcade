@@ -21,5 +21,6 @@ void renderN( int size);
 
 void renderG(int size);
 void renderM(int size);
+void renderSPACE(int size);
 void renderO(int size);
 void renderR(int size);

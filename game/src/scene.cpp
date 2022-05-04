@@ -26,7 +26,7 @@ void handleLevel() {
                 if(getFrame() % 5 == 0) {
                         static int i = 0;
                         i+=1; 
-                        if( i > 5) {
+                        if( i > FPS/5) {
                                 i = 0;
                                 scene.level += 1;
                                 initializeNextScene();
@@ -36,7 +36,7 @@ void handleLevel() {
 
         }  else if (scene.level == -1) { 
                 hideAll();
-                //render title 
+                renderGameOver(-450, 200,9);
 
                 if(getFrame() % 50 == 0) {
                         
