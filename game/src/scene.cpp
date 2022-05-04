@@ -2,6 +2,7 @@
 #include <iostream>
 #include "../include/enemy.h"
 #include "../include/rawio.h"
+#include "../include/render.h"
 
 
 struct Scene scene;
@@ -19,6 +20,7 @@ void handleLevel() {
         if(scene.level == 0 ) {
                 hideAll();
                 //render title 
+                renderTitle(-450,200,9);
                 // tick down enemies as a clock system before level 1,
 
                 if(getFrame() % 5 == 0) {
@@ -54,7 +56,7 @@ void handleLevel() {
                         // normal level time: 
                 if (scene.enemies == 0 && !scene.nextSceneAnimation) {
                         scene.nextSceneAnimation = true; 
-                        scene.nextSceneTrigger = getFrame() + 3;//*FPS;
+                        scene.nextSceneTrigger = getFrame() + FPS;//*FPS;
                 }
                 if (scene.nextSceneAnimation) {
                         //run annimation whipe
@@ -68,7 +70,7 @@ void handleLevel() {
 
                 ///r GAME OVER 
                 if (scene.gameOver ) {
-                        scene.gameOverTrigger = getFrame() + 3*FPS;
+                        scene.gameOverTrigger = getFrame() + FPS;
                         hideAll();
                         //run annimation whipe
                         scene.gameOver = false;

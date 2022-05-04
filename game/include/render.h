@@ -8,8 +8,18 @@
 
 void renderTitle(int x, int y, int size);
 
-void renderL(int x, int y, int size);
+void renderL( int size);
 
-void renderE(int x, int y, int size);
+void renderE( int size);
 
-void renderV(int x, int y, int size);
+void renderV( int size);
+
+void renderI( int size);
+
+void renderA( int size);
+
+void renderT( int size);
+
+void renderH( int size);
+
+void renderN( int size);
