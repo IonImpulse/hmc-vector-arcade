@@ -7,6 +7,8 @@
 #include "../include/enemy.h"
 #include "../include/basics.h"
 #include "../include/player.h"
+#include "../include/render.h"
+
 
 #include "../include/rawio.h"
 // Debug

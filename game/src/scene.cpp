@@ -1,7 +1,7 @@
 #include "../include/scene.h"
 #include <iostream>
 #include "../include/enemy.h"
-#include "rawio.h"
+#include "../include/rawio.h"
 
 
 struct Scene scene;
