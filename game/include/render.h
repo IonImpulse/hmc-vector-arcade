@@ -10,7 +10,7 @@ void renderTitle(int x, int y, int size);
 
 void renderGameOver(int x, int y, int size);
 
-void renderHUD(int hp);
+void renderHUD(int hp, int level);
 
 void renderL( int size);
 void renderE( int size);

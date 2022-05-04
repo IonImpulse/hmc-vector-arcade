@@ -7,21 +7,33 @@
 
 
 
-void renderHUD(int hp) {
+void renderHUD(int hp,int level) {
     //render health
     draw_absolute_vector(-500 ,300, 0    );
     renderA(2);
     renderC(2);
      draw_absolute_vector(-500,330, 0    );
-    for (int i = 0; i <= hp; i++ ) {
+    for (int i = 1; i <= hp; i++ ) {
         draw_relative_vector(40,0,1023);
         draw_relative_vector(-40,10,0);
         draw_relative_vector(40,0,1023);
         draw_relative_vector(-40,10,0);
-
-
-
     }
+
+
+    //level
+    draw_absolute_vector(-500 ,-500, 0    );
+    renderL(2);
+    renderE(2);
+    renderV(2);
+    renderE(2);
+    renderL(2);
+    renderSPACE(2);
+    for (int i = 1; i <= level; i++ ) {
+        draw_relative_vector(0,24,1023);
+        draw_relative_vector(14,-24,0);
+    }
+
 
 }
 

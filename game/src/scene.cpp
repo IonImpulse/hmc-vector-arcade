@@ -56,7 +56,7 @@ void handleLevel() {
 
         } else {
                         // normal level time: 
-                renderHUD(scene.entities[0]->life );
+                renderHUD(scene.entities[0]->life, scene.level );
                 
                 if (scene.enemies == 0 && !scene.nextSceneAnimation) {
                         scene.nextSceneAnimation = true; 
