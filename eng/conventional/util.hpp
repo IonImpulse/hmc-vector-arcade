@@ -80,6 +80,7 @@ class mat3 {
         std::array<float,3>& operator[](uint8_t idx);
         const std::array<float,3>& operator[](uint8_t idx) const;
         bool operator==(const mat3& other);
+        mat3 identity();
 
         // Vector operations
         vec3 operator*(const vec3& other);
@@ -105,6 +106,7 @@ class mat4 {
         std::array<float,4>& operator[](uint8_t idx);
         const std::array<float,4>& operator[](uint8_t idx) const; 
         bool operator==(const mat4& other);
+        mat4 inverse();
 
         // Vector operations
         vec4 operator*(const vec4& other);
