@@ -23,9 +23,15 @@ void renderHUD(int hp) {
 
     }
 
-    
-
 }
+
+void renderCharge(bool shooting) {
+    if (!shooting) {
+        draw_absolute_vector(-490,250, 0    );
+        renderLightning(3);
+    }
+}
+
 
 void renderTitle(int x, int y, int size) {
     draw_absolute_vector(x     ,        y, 0    );
@@ -174,6 +180,16 @@ void renderC(int size) {
     draw_relative_vector(-8*size , -12*size , 0  );
     draw_relative_vector(8*size , 0*size , 1023  );
     draw_relative_vector(4*size , 0*size , 0  );
+
+}
+
+void renderLightning (int size) {
+    draw_relative_vector(0*size , 12*size , 0  );
+    draw_relative_vector(8*size , 0*size , 1023  );
+    draw_relative_vector(-6*size , -3*size , 1023  );
+    draw_relative_vector(4*size , -2*size , 1023  );
+    draw_relative_vector(-2*size , -2*size , 1023 );
+    draw_relative_vector(6*size , -3*size , 0 );
 
 }
 

@@ -1,5 +1,7 @@
 #include "../include/player.h"
 #include "../include/scene.h"
+#include "../include/render.h"
+
 #include <string>
 #include <iostream>
 #include <math.h>
@@ -23,6 +25,7 @@ void Player::drawObject() {
     } else {
         object2D::drawObject();
     }
+    renderCharge(shooting);
 
 }
 

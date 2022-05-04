@@ -28,3 +28,6 @@ void renderO(int size);
 void renderR(int size);
 
 void renderC(int size);
+
+void renderLightning (int size) ;
+void renderCharge (bool shooting);
