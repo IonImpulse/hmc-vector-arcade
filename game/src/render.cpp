@@ -77,9 +77,19 @@ void renderT( int size){
 }
 
 void renderH( int size){ 
+    draw_relative_vector(0*size , 12*size , 1023  );
+    draw_relative_vector(0*size , -6*size , 0  );
+    draw_relative_vector(8*size , 0*size , 1023  );
+    draw_relative_vector(0*size , 6*size , 0  );
+    draw_relative_vector(0*size , -12*size , 1023  );
+    draw_relative_vector(4*size , 0*size , 0  );
 
 }
 
 void renderN( int size){
-    
+    draw_relative_vector(0*size , 12*size , 1023 );
+    draw_relative_vector(8*size , -12*size , 1023  );
+    draw_relative_vector(0*size , 12*size , 1023  );
+    draw_relative_vector(4*size , -12*size , 0 );
 }
+
