@@ -6,10 +6,10 @@
 #define SCENE_SIZE 20
 
 #define PLAYER_SIZE 50
-#define PROJECTILE_SIZE 6
+#define PROJECTILE_SIZE 10
 
-#define PLAYER_SPEED 5
-#define PROJECTILE_SPEED 10
+#define PLAYER_SPEED 3
+#define PROJECTILE_SPEED 5
 // vector sim -256 to 256
 //cabinet is -511 to 511
 #define TOP_Y 511

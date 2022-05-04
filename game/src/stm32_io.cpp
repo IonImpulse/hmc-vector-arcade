@@ -45,16 +45,18 @@ int halt_state=0;
 
 InputState get_inputs() {
     InputState state = { .xpos=0, .ypos=0, .buttons=0};
-    state.xpos = ((float)(read_adc_x())) / 4096.0;
-    state.ypos = ((float)(read_adc_y())) / 4096.0;
+    state.xpos = ((((float)(read_adc_x())) / 4096.0)-0.19)*1.45;
+    state.ypos = ((((float)(read_adc_y())) / 4096.0)-0.27)*1.7;
 
     // TODO retreive the data from the buttons (if we have any)
+    state.buttons = !digitalRead(JOYSTICK_BTN_GPIO, JOYSTICK_BTN_PIN);
 
     #if DEBUG_OUTPUT
     char data[256];
-        snprintf(data, 256, "x: %d.%02d, y: %d.%02d\n",
+        snprintf(data, 256, "x: %d.%02d, y: %d.%02d, btn: %d\n",
             (int)state.xpos, ((int)(state.xpos * 100)) % 100,
-            (int)state.ypos, ((int)(state.ypos * 100)) % 100);
+            (int)state.ypos, ((int)(state.ypos * 100)) % 100,
+            state.buttons);
         sendString(data);
     #endif
 
@@ -155,9 +157,15 @@ void draw_buffer_switch() {
 void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness) {
     uint16_t signMagX = (delta_x>=0) ? (uint16_t)(delta_x) : NEG|(uint16_t)(-delta_x);
     uint16_t signMagY = (delta_y>=0) ? (uint16_t)(delta_y) : NEG|(uint16_t)(-delta_y);
-    writeBuff->x[writePtr] = ((brightness>>4)<<12) | signMagX;
-    writeBuff->y[writePtr] = signMagY;
-    writeBuff->z[writePtr] = 0;
+    if (brightness != 0) {
+        writeBuff->x[writePtr] = ((brightness>>4)<<12) | signMagX;
+        writeBuff->y[writePtr] = signMagY;
+        writeBuff->z[writePtr] = 0;
+    } else {
+        writeBuff->x[writePtr] = ((0xFF>>4)<<12) | signMagX;
+        writeBuff->y[writePtr] = signMagY;
+        writeBuff->z[writePtr] = BLANK;
+    }
     writePtr++;
     abs_x += delta_x;
     abs_y += delta_y;

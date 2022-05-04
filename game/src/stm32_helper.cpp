@@ -497,5 +497,5 @@ void initalize_embedded_system() {
     // Analog Joystick signals
     pinMode(JOYSTICK_X_GPIO, JOYSTICK_X_PIN, GPIO_ANALOG); // ADC1_IN11
     pinMode(JOYSTICK_Y_GPIO, JOYSTICK_Y_PIN, GPIO_ANALOG); // ADC1_IN12
-    pinMode(JOYSTICK_BTN_GPIO, JOYSTICK_BTN_PIN, GPIO_INPUT);
+    pinMode(JOYSTICK_BTN_GPIO, JOYSTICK_BTN_PIN, GPIO_INPUT_PULLUP);
 }

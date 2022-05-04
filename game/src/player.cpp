@@ -48,17 +48,6 @@ void Player::shoot() {
 }
 
 void Player::updatePhysics() {
-
-
-    // Player random walk since input doesnt work 
-    if ((getFrame() % 50 )== 0) {
-        static int angle=0;
-        angle++;
-
-        vel.x += PLAYER_SPEED*cos(angle);
-        vel.y += PLAYER_SPEED*sin(angle);
-    }
-    //
     // player 
     pos.x += vel.x;
     pos.y += vel.y;
@@ -72,7 +61,7 @@ void Player::updatePhysics() {
         vel.x = 0;
     }
     if(pos.y < BOT_Y) {
-        pos.y = -256;
+        pos.y = BOT_Y;
         vel.y = 0;
     }
     if((pos.y + SIZE) > SPLIT) {
@@ -80,8 +69,8 @@ void Player::updatePhysics() {
         vel.y = SPLIT;
     }
 
-    vel.x *= .9;
-    vel.y *= .9;
+    vel.x *= .99;
+    vel.y *= .99;
 
     /// Projectile 
     shooting = proj.visibility;
