@@ -12,7 +12,6 @@ public:
     bool shooting = false;
     Projectile proj = Projectile();
 
-    int life = 5;
     bool invuln = false;
     unsigned long long int invTrigger = 0;
     

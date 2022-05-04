@@ -10,6 +10,8 @@ void renderTitle(int x, int y, int size);
 
 void renderGameOver(int x, int y, int size);
 
+void renderHUD(int hp);
+
 void renderL( int size);
 void renderE( int size);
 void renderV( int size);
@@ -24,3 +26,5 @@ void renderM(int size);
 void renderSPACE(int size);
 void renderO(int size);
 void renderR(int size);
+
+void renderC(int size);

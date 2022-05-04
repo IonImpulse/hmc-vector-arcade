@@ -8,6 +8,7 @@
 
 Player::Player(float startx, float starty, float startSize, std::string inName): 
             object2D::object2D(startx,starty,startSize, inName) {
+            life = 5; 
             
 }
 
@@ -31,6 +32,7 @@ void Player::hitReact() {
     life -= 1;
     if (life == 0) { 
         gameOver();
+        life = 5; 
     }
 }
 

@@ -13,12 +13,14 @@ void handleLevel() {
         std::cerr << scene.enemies;
          std::cerr << " ";
          std::cerr << scene.level;
+                  std::cerr << " ";
 
 
         
         
         if(scene.level == 0 ) {
                 hideAll();
+                
                 //render title 
                 renderTitle(-450,200,9);
                 // tick down enemies as a clock system before level 1,
@@ -54,6 +56,8 @@ void handleLevel() {
 
         } else {
                         // normal level time: 
+                renderHUD(scene.entities[0]->life);
+                
                 if (scene.enemies == 0 && !scene.nextSceneAnimation) {
                         scene.nextSceneAnimation = true; 
                         scene.nextSceneTrigger = getFrame() + FPS;//*FPS;

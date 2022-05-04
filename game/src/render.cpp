@@ -7,6 +7,25 @@
 
 
 
+void renderHUD(int hp) {
+    //render health
+    draw_absolute_vector(-500 ,300, 0    );
+    renderA(2);
+    renderC(2);
+     draw_absolute_vector(-500,330, 0    );
+    for (int i = 0; i <= hp; i++ ) {
+        draw_relative_vector(40,0,1023);
+        draw_relative_vector(-40,10,0);
+        draw_relative_vector(40,0,1023);
+        draw_relative_vector(-40,10,0);
+
+
+
+    }
+
+    
+
+}
 
 void renderTitle(int x, int y, int size) {
     draw_absolute_vector(x     ,        y, 0    );
@@ -147,6 +166,14 @@ void renderR(int size) {
     draw_relative_vector(2*size , 0*size , 0  );
     draw_relative_vector(6*size , -6*size , 1023  );
     draw_relative_vector(4*size , 0*size , 0  );
+}
 
+void renderC(int size) {
+    draw_relative_vector(0*size , 12*size , 1023  );
+    draw_relative_vector(8*size , 0*size , 1023  );
+    draw_relative_vector(-8*size , -12*size , 0  );
+    draw_relative_vector(8*size , 0*size , 1023  );
+    draw_relative_vector(4*size , 0*size , 0  );
 
 }
+

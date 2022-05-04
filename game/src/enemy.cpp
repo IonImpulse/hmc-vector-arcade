@@ -9,6 +9,7 @@ Enemy::Enemy(float startx, float starty, float startSize, std::string inName)
 {
     vel.x = (startx)*.2;
     vel.y = (starty)*.2;
+    life = 2;
     
 
 }

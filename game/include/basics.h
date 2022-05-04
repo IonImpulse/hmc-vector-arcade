@@ -35,6 +35,7 @@ class object2D {
         std::string name;
         Vec2 pos;
         Vec2 vel; 
+        int life;
 
         bool visibility = true;
         float ACCELERATION = 1; 
