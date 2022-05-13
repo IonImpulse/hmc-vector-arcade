@@ -157,15 +157,9 @@ void draw_buffer_switch() {
 void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness) {
     uint16_t signMagX = (delta_x>=0) ? (uint16_t)(delta_x) : NEG|(uint16_t)(-delta_x);
     uint16_t signMagY = (delta_y>=0) ? (uint16_t)(delta_y) : NEG|(uint16_t)(-delta_y);
-    if (brightness != 0) {
-        writeBuff->x[writePtr] = ((brightness>>4)<<12) | signMagX;
-        writeBuff->y[writePtr] = signMagY;
-        writeBuff->z[writePtr] = 0;
-    } else {
-        writeBuff->x[writePtr] = ((0xFF>>4)<<12) | signMagX;
-        writeBuff->y[writePtr] = signMagY;
-        writeBuff->z[writePtr] = BLANK;
-    }
+    writeBuff->x[writePtr] = ((brightness>>4)<<12) | signMagX;
+    writeBuff->y[writePtr] = signMagY;
+    writeBuff->z[writePtr] = 0;
     writePtr++;
     abs_x += delta_x;
     abs_y += delta_y;
@@ -198,6 +192,12 @@ bool is_halted() {return halted;}
 extern "C" void TIM5_IRQHandler() {
     // Clear interrupt flag
     VEC_TIMER->SR &= ~(TIM_SR_UIF);
+    // Blank colors if we need to
+    if (curr_z&(BLANK|LD_POS)) {
+        digitalWrite(BLANK_GPIO,BLANK_PIN,GPIO_HIGH);
+    } else {
+        digitalWrite(BLANK_GPIO,BLANK_PIN,GPIO_LOW);
+    }
     // Make sure shift register has time to finish
     for (volatile int i=0;i<10;i++) {}
     // Output the previous vector's data by strobing shift reg latch
@@ -214,22 +214,13 @@ extern "C" void TIM5_IRQHandler() {
     // Strobe counter parallel load if we need to 
     // This moves the beam to absolute position (X,Y)
     if (curr_z & LD_POS) {
-        // Blank colors for absolute loads
-        digitalWrite(BLANKb_GPIO, BLANKb_PIN, GPIO_LOW);
         // Strobe the counter parallel load
         digitalWrite(COUNT_LDb_GPIO, COUNT_LDb_PIN, GPIO_LOW);
         digitalWrite(COUNT_LDb_GPIO, COUNT_LDb_PIN, GPIO_HIGH);
-        
         // Give some time for the beam to settle
         // but set compare value CCR1 so that GOb never activates and accidentally draws a vector
-        generateDuration(VEC_TIMER, 100, 100);
+        generateDuration(VEC_TIMER, 1024, 1024);
     } else {
-        // Blank colors if we need to
-        if (curr_z&BLANK) {
-            digitalWrite(BLANKb_GPIO,BLANKb_PIN,GPIO_LOW);
-        } else {
-            digitalWrite(BLANKb_GPIO,BLANKb_PIN,GPIO_HIGH);
-        }
         // Activate GOb for 1024 / normalization_factor to draw out vector
         // The compare functionality needs a few cycles to get ready after the timer is enabled,
         // hence the offset by 5 ticks.

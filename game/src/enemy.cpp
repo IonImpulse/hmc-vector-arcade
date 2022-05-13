@@ -3,6 +3,7 @@
 #include "../include/scene.h"
 
 #define ENEMYSTUNTIME 1
+#define ENEMY_BRIGHT 100
 
 Enemy::Enemy(float startx, float starty, float startSize, std::string inName)
     : object2D::object2D(startx,starty,startSize, inName)
@@ -21,7 +22,7 @@ void Enemy::drawObject() {
          brightnessScale = 500; 
     }
     else {
-         brightnessScale = 1023;
+         brightnessScale = ENEMY_BRIGHT;
     }
     draw_absolute_vector(pos.x,pos.y+SIZE,0);
     draw_relative_vector(SIZE/2, -SIZE, brightnessScale);
@@ -29,7 +30,7 @@ void Enemy::drawObject() {
     draw_absolute_vector(pos.x + SIZE, pos.y+ SIZE, brightnessScale);   
 
     // damage 
-    int brightnessRatio = 1023 - ((life/lifeMax)*1023) ;
+    int brightnessRatio = ENEMY_BRIGHT - ((life/lifeMax)*ENEMY_BRIGHT) ;
     brightnessRatio = brightnessRatio*brightnessScale;
     draw_absolute_vector(pos.x, pos.y+ SIZE, 0);
     draw_absolute_vector(pos.x+SIZE/2, pos.y+ SIZE/2, brightnessRatio);

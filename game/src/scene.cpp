@@ -296,10 +296,10 @@ void hideAll(){
 void initializeNextScene() { 
         //deleteEnemies();
         object2D* player = scene.entities[0] ;
-        player->pos.x = 0;
-        player->pos.y = -100;
-        player->vel.x = 0;
-        player->vel.y = 0;
+        //player->pos.x = 0;
+        //player->pos.y = -400;
+        //player->vel.x = 0;
+        //player->vel.y = 0;
         player->visibility = true;
         
       

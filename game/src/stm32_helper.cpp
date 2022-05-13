@@ -481,7 +481,7 @@ void initalize_embedded_system() {
     // Vector Gen Controls
     pinMode(COUNT_LDb_GPIO, COUNT_LDb_PIN, GPIO_OUTPUT);
     pinMode(COLOR_LD_GPIO, COLOR_LD_PIN, GPIO_OUTPUT);
-    pinMode(BLANKb_GPIO, BLANKb_PIN, GPIO_OUTPUT);
+    pinMode(BLANK_GPIO, BLANK_PIN, GPIO_OUTPUT);
     // X SPI Signals
     alternateFunctionMode(X_SHIFT_REG_CLK_GPIO, X_SHIFT_REG_CLK_PIN, 5);    // SPI1_SCK
     alternateFunctionMode(X_SHIFT_REG_DATA_GPIO, X_SHIFT_REG_DATA_PIN, 5);  // SPI1_MOSI

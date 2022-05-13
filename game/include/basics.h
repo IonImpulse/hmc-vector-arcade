@@ -10,7 +10,7 @@
 #define ENEMY_SIZE 40
 
 #define PLAYER_SPEED 3
-#define PROJECTILE_SPEED 5
+#define PROJECTILE_SPEED 3
 // vector sim -256 to 256
 //cabinet is -511 to 511
 #define TOP_Y 511

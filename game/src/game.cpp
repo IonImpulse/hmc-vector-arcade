@@ -35,7 +35,7 @@ void takeInput() {
     InputState input = get_inputs();
     
     M_X = (input.xpos-0.5);
-    M_Y = (input.ypos-0.5);
+    M_Y = -(input.ypos-0.5);
     if (input.buttons){
         M_shoot = true;
     }
