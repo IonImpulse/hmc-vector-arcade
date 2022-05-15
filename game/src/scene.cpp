@@ -8,6 +8,7 @@
 struct Scene scene;
 
 void handleLevel() {
+        static int bootup = 1; // is 1 if the system was just reset / powered on
          // Ok so this checks if the victory condition is complete and moves to the next level. 
         // for all but start and gameover this is all the enemies are dead
         std::cerr << scene.enemies;
@@ -28,7 +29,8 @@ void handleLevel() {
                 if(getFrame() % 5 == 0) {
                         static int i = 0;
                         i+=1; 
-                        if( i > FPS) {
+                        if(i > FPS*(3+bootup*13.5)) {
+                                bootup = 0;
                                 i = 0;
                                 scene.level += 1;
                                 initializeNextScene();
