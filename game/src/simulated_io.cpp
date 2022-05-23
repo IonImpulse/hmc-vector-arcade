@@ -6,178 +6,126 @@
 #include <csignal>
 #include <termios.h>
 #include <iostream>
+#include <SDL2/SDL.h>
 
 #include "../include/rawio.h"
 
-#define BUF_SIZE 256
+SDL_Window* window;
+SDL_Renderer* renderer;
+SDL_Joystick* controller = NULL;
+SDL_Event event;
 
-int pipe_to_simulator_fd;
-int child_pid;
+void closeSDL() {
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_JoystickClose(controller);
+    SDL_Quit();
+    exit(0);
+}
 
 struct InputState get_inputs() {
-    struct InputState inputs;
-    char buf[BUF_SIZE];
-    bool w,a,s,d,space;
-    while (read(STDIN_FILENO, buf, BUF_SIZE-1) > 0) {
-        buf[BUF_SIZE-1] = '\0';
-        if (strstr(buf, "\003")) {
-            // exit on receiving a ^C input
-            kill(child_pid, 9);
-            exit(0);
-        }
-        if (strcasestr(buf, "w")) {
-            w = true;
-        }
-        if (strcasestr(buf, "a")) {
-            a = true;
-        }
-        if (strcasestr(buf, "s")) {
-            s = true;
-        }
-        if (strcasestr(buf, "d")) {
-            d = true;
-        }
-        if (strcasestr(buf, " ")) {
-            space = true;
+    static struct InputState inputs;
+    inputs.buttons = 0;
+
+    while( SDL_PollEvent( &event ) != 0 ) {
+        switch (event.type) {
+            case SDL_QUIT:
+                closeSDL();
+                break;
+            case SDL_JOYAXISMOTION:
+                if (event.jaxis.which == 0) { // controller 0
+                    switch (event.jaxis.axis) {
+                        case 0: // x
+                            inputs.xpos = (event.jaxis.value / 65536.0)+0.5;
+                            break;
+                        case 1: // y
+                            inputs.ypos = (event.jaxis.value / 65536.0)+0.5;
+                            break;
+                    }
+                }
+                break;
+            case SDL_JOYBUTTONDOWN:
+            case SDL_JOYBUTTONUP:
+                if (event.jbutton.which == 0) {
+                    switch (event.jbutton.button) {
+                        case 4: // L1 bumper
+                            inputs.buttons = (event.jbutton.state==SDL_PRESSED);
+                            break;
+                        case 5: // R1 bumper
+                            inputs.buttons = (event.jbutton.state==SDL_PRESSED);
+                            break;
+                    }
+                }
+                break;
         }
     }
-    inputs.xpos = 0;
-    inputs.ypos = 0;
-    if (w) inputs.ypos += 1.0;
-    if (s) inputs.ypos -= 1.0;
-    if (a) inputs.xpos += 1.0;
-    if (d) inputs.xpos -= 1.0;
-    inputs.buttons = 0;
-    if (space) inputs.buttons |= 1;
     return inputs;
 }
 
-char SIMULATOR_PATH[]{ "../vector-simulator/target/release/vector-simulator" };
-// Do some hacky stuff to make g++ not complain about converting string constants to `char*`
-char SIMULATOR_ARG_1[]{ "-p" };
-char SIMULATOR_ARG_2[]{ "-d" };
-char SIMULATOR_ARG_3[]{ "0.001" };
-char SIMULATOR_ARG_4[]{ "-f" };
-char SIMULATOR_ARG_5[]{ "0.00000001" };
-char SIMULATOR_ARG_6[]{ "-s" };
-char SIMULATOR_ARG_7[]{ "100000000" };
-char* const SIMULATOR_ARGS[9] = {
-    SIMULATOR_PATH,
-    SIMULATOR_ARG_1,
-    SIMULATOR_ARG_2,
-    SIMULATOR_ARG_3,
-    SIMULATOR_ARG_4,
-    SIMULATOR_ARG_5,
-    SIMULATOR_ARG_6,
-    SIMULATOR_ARG_7,
-    NULL
-};
-
-struct termios old_options;
-
-void restore_old_options() {
-    if (tcsetattr(STDIN_FILENO, TCSANOW, &old_options)) {
-        fprintf(stderr, "Error restoring old options: %s\n", strerror(errno));
-    }
-    fprintf(stdout, "\n");
-}
-
-static inline int setup_stdin() {
-    // Set up stdin to behave how we want (using termios)
-    struct termios new_options;
-    if (tcgetattr(STDIN_FILENO, &old_options) == -1) {
-        fprintf(stderr, "Unexpected tcgetattr failure: %d\n", errno);
-        return -1;
-    }
-    new_options = old_options;
-    atexit(restore_old_options);
-    new_options.c_iflag = ISTRIP;
-    new_options.c_oflag = 0;
-    new_options.c_lflag = 0;
-    new_options.c_cc[VMIN] = 0;
-    new_options.c_cc[VTIME] = 0;
-    if (tcsetattr(STDIN_FILENO, TCSANOW, &new_options) == -1) {
-        fprintf(stderr, "Unexpected tcsetattr failure while creating terminal state: %d", errno);
-        return -1;
-    }
-    return 0;
-}
 
 void initialize_input_output() {
-    int pipe_fds[2], ret_val;
-    if (pipe(pipe_fds) == -1) {
-        goto fail;
-    }
-    if ((ret_val = fork()) == -1) {
-        goto fail;
-    }
-    if (ret_val == 0) {
-        dup2(pipe_fds[0], STDIN_FILENO);
-        dup2(pipe_fds[1], STDOUT_FILENO);
-        close(pipe_fds[0]);
-        close(pipe_fds[1]);
-        execv(SIMULATOR_PATH, SIMULATOR_ARGS);
-        fprintf(stderr, "Failed to exec simulator: %s\r\n", strerror(errno));
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK)<0) {
+        printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
         exit(1);
     }
-    pipe_to_simulator_fd = pipe_fds[1];
-    child_pid = ret_val;
-    close(pipe_fds[0]);
-    if (setup_stdin() == -1) {
-        goto fail;
-    }
-    return;
-fail:
-    fprintf(stderr, "Failed to initialize simulated_io\n");
-    exit(1);
-}
-
-static inline void send(std::string data) {
-    if (write(pipe_to_simulator_fd, data.c_str(), data.length()) < 0) {
-        fprintf(stderr, "Failed to write to simulator: %s\r\n", strerror(errno));
+    window = SDL_CreateWindow("HMC Vector Arcade", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1024, 1024, SDL_WINDOW_SHOWN);
+    if (window == NULL) {
+        printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
         exit(1);
+    }
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL) {
+        printf( "Renderer could not be created! SDL_Error: %s\n", SDL_GetError() );
+        SDL_DestroyWindow(window);
+        window = NULL;
+        exit(1);
+    }
+    SDL_SetRenderDrawBlendMode(renderer,SDL_BLENDMODE_ADD);
+    if(SDL_NumJoysticks() < 1) {
+        printf( "Warning: No joysticks connected!\n" );
+    } else {
+        controller = SDL_JoystickOpen(0);
+        if (controller == NULL) {
+            printf( "Unable to open game controller! SDL Error: %s\n", SDL_GetError() );
+            exit(1);
+        }
     }
 }
 
-static inline std::string number_to_binary(int16_t number, int16_t num_bits) {
-    std::string bits;
-    for (int i=0; i<num_bits; i++) {
-        bits.insert(0, 1, (char)('0' + (number & 1)));
-        number >>= 1;
-    }
-    return bits;
-}
+int16_t currX = 0;
+int16_t currY = 0;
 
 void draw_buffer_switch() {
-    send("0111\n");
+    SDL_RenderPresent(renderer);
+    SDL_SetRenderDrawColor(renderer,0,0,0,255);
+    SDL_RenderClear(renderer);
+    //SDL_UpdateWindowSurface(window);
 }
-static inline void draw_vector(const char* lead, int16_t x_position, int16_t y_position, int16_t brightness) {
-    char command[40];
-    std::string x_bits = number_to_binary(x_position, 10);
-    std::string y_bits = number_to_binary(y_position, 10);
-    std::string b_bits = number_to_binary(brightness, 10);
-    sprintf(
-        command,
-        "%s%s%s%s\n",
-        lead,
-        x_bits.c_str(),
-        y_bits.c_str(),
-        b_bits.c_str()
-    );
-    send(command);
+
+void drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
+    SDL_RenderDrawLine(renderer,x1+512,-y1+512,x2+512,-y2+512);
 }
+
 void draw_absolute_vector(int16_t x_position, int16_t y_position, int16_t brightness) {
-    draw_vector("10", x_position, y_position, brightness);
+    SDL_SetRenderDrawColor(renderer,200,200,255,brightness);
+    drawLine(currX,currY,x_position,y_position);
+    currX = x_position;
+    currY = y_position;
 }
+
 void load_abs_pos(int16_t x_position, int16_t y_position) {
-    draw_absolute_vector(x_position, y_position, 0);
+    currX = x_position;
+    currY = y_position;
 }
 
 void draw_relative_vector(int16_t delta_x, int16_t delta_y, int16_t brightness) {
-    draw_vector("11", delta_x, delta_y, brightness);
+    SDL_SetRenderDrawColor(renderer,200,200,255,brightness);
+    drawLine(currX,currY,currX+delta_x,currY+delta_y);
+    currX += delta_x;
+    currY += delta_y;
 }
+
 void draw_end_buffer() {
-    send("0\n");
 }
 
 bool is_halted() {
@@ -185,19 +133,15 @@ bool is_halted() {
     return true;
 }
 
-typedef std::chrono::high_resolution_clock Clock;
-static std::chrono::time_point<Clock> target_time;
+uint32_t startTime;
+uint32_t endTime;
 void start_timer(uint32_t milliseconds) {
-    target_time = Clock::now() + std::chrono::milliseconds(milliseconds);
+    startTime = SDL_GetTicks();
+    endTime = startTime + milliseconds/10;
 }
+
 bool timer_done() {
-    auto now = Clock::now();
-    if (now > target_time) {
-        return false;
-    }
-    std::chrono::nanoseconds sleep_duration = target_time - now;
-    usleep(sleep_duration.count() / 1000);
-    return true;
+    return (SDL_GetTicks() > endTime);
 }
 
 void printChar(char data) {

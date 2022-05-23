@@ -11,13 +11,6 @@ void handleLevel() {
         static int bootup = 1; // is 1 if the system was just reset / powered on
          // Ok so this checks if the victory condition is complete and moves to the next level. 
         // for all but start and gameover this is all the enemies are dead
-        std::cerr << scene.enemies;
-         std::cerr << " ";
-         std::cerr << scene.level;
-                  std::cerr << " ";
-
-
-        
         
         if(scene.level == 0 ) {
                 hideAll();
