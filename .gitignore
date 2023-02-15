@@ -2,9 +2,13 @@
 vector-simulator/log.txt
 eng/conventional/log.txt
 game/game
-game/log.txt
+*/log.txt
 game/game.exe
 */.vscode
 */.pio
 */*/.vscode
 */*/.pio
+./penguin_game/sim_game
+*.o
+*/*.o
+*/*/*.o

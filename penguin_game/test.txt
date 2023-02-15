@@ -1,0 +1,13 @@
+const size_t test_numVertices[3] = {4, 4, 4};
+const vertB test_f0[4] = {{50,50,0x0}, {0,-100,0xc0}, {-100,0,0xc0}, {0,100,0xc0}};
+const vertB test_f1[4] = {{45,45,0x0}, {0,-90,0xc0}, {-90,0,0xc0}, {0,90,0xc0}};
+const vertB test_f2[4] = {{40,40,0x0}, {0,-80,0xc0}, {-80,0,0xc0}, {0,80,0xc0}};
+const vertB* test_frames[3] = {test_f0, test_f1, test_f2};
+sprite test(3,test_numVertices,test_frames);
+// Comment out the above line and uncomment the below lines if you want the render buffer.
+// If you use the render buffer, be sure to call first call rotatedRender(),
+// then perform your desired modifications to renderedFrame,
+// then lastly call drawFromMem()
+//
+// vertB test_renderedFrame[4];
+// sprite test(3,test_numVertices,test_frames,test_renderedFrame);

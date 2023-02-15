@@ -1,0 +1,11 @@
+const size_t pengBod_numVertices[1] = {14};
+const vertB pengBod_f0[14] = {{56,1,0x0}, {-13,-9,0xc0}, {-18,-3,0xc0}, {-51,0,0xc0}, {-22,7,0xc0}, {-5,10,0xc0}, {-11,8,0xc0}, {-23,11,0xc0}, {-2,9,0xc0}, {36,-11,0xc0}, {33,9,0xc0}, {37,3,0xc0}, {36,-5,0xc0}};
+const vertB* pengBod_frames[1] = {pengBod_f0};
+sprite pengBod(1,pengBod_numVertices,pengBod_frames);
+// Comment out the above line and uncomment the below lines if you want the render buffer.
+// If you use the render buffer, be sure to call first call rotatedRender(),
+// then perform your desired modifications to renderedFrame,
+// then lastly call drawFromMem()
+//
+// vertB pengBod_renderedFrame[14];
+// sprite pengBod(1,pengBod_numVertices,pengBod_frames,pengBod_renderedFrame);

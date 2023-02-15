@@ -1,0 +1,11 @@
+const size_t pengFoot_numVertices[1] = {10};
+const vertB pengFoot_f0[10] = {{-7,7,0x0}, {-10,-5,0xc0}, {-13,2,0xc0}, {3,-4,0xc0}, {-6,-3,0xc0}, {6,-3,0xc0}, {-4,-4,0xc0}, {11,-2,0xc0}, {8,5,0xc0}, {14,0,0xc0}};
+const vertB* pengFoot_frames[1] = {pengFoot_f0};
+sprite pengFoot(1,pengFoot_numVertices,pengFoot_frames);
+// Comment out the above line and uncomment the below lines if you want the render buffer.
+// If you use the render buffer, be sure to call first call rotatedRender(),
+// then perform your desired modifications to renderedFrame,
+// then lastly call drawFromMem()
+//
+// vertB pengFoot_renderedFrame[10];
+// sprite pengFoot(1,pengFoot_numVertices,pengFoot_frames,pengFoot_renderedFrame);

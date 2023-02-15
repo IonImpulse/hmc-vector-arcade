@@ -1,0 +1,13 @@
+const size_t box_numVertices[3] = {4, 4, 4};
+const vertB box_f0[4] = {{160,31,0x0}, {-110,-81,0xc0}, {-100,0,0xc1}, {-23,55,0xc0}};
+const vertB box_f1[4] = {{45,45,0x0}, {0,-90,0xc0}, {-90,0,0xc0}, {0,90,0xc0}};
+const vertB box_f2[4] = {{40,40,0x0}, {0,-80,0xc0}, {-80,0,0xc0}, {0,80,0xc0}};
+const vertB* box_frames[3] = {box_f0, box_f1, box_f2};
+sprite box(3,box_numVertices,box_frames);
+// Comment out the above line and uncomment the below lines if you want the render buffer.
+// If you use the render buffer, be sure to call first call rotatedRender(),
+// then perform your desired modifications to renderedFrame,
+// then lastly call drawFromMem()
+//
+// vertB box_renderedFrame[4];
+// sprite box(3,box_numVertices,box_frames,box_renderedFrame);

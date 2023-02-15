@@ -1,0 +1,37 @@
+const size_t pengFlip_numVertices[27] = {9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 8, 8, 8, 8};
+const vertB pengFlip_f0[9] = {{-17,1,0x0}, {-6,10,0xc0}, {-14,12,0xc0}, {-19,11,0xc0}, {-27,7,0xc0}, {29,2,0xc0}, {22,-9,0xc0}, {20,-15,0xc0}, {11,-21,0xc0}};
+const vertB pengFlip_f1[9] = {{-17,1,0x0}, {-6,8,0xc0}, {-11,10,0xc0}, {-17,11,0xc0}, {-25,7,0xc0}, {23,1,0xc0}, {27,-9,0xc0}, {16,-14,0xc0}, {11,-16,0xc0}};
+const vertB pengFlip_f2[9] = {{-17,1,0x0}, {-10,10,0xc0}, {-9,8,0xc0}, {-12,7,0xc0}, {-21,8,0xc0}, {20,0,0xc0}, {19,-5,0xc0}, {21,-16,0xc0}, {9,-13,0xc0}};
+const vertB pengFlip_f3[8] = {{-17,1,0x0}, {-15,13,0xc0}, {-20,9,0xc0}, {-17,6,0xc0}, {20,0,0xc0}, {19,-7,0xc0}, {18,-12,0xc0}, {12,-13,0xc0}};
+const vertB pengFlip_f4[8] = {{-17,1,0x0}, {-17,12,0xc0}, {-19,8,0xc0}, {-21,4,0xc0}, {18,1,0xc0}, {22,-4,0xc0}, {22,-11,0xc0}, {12,-12,0xc0}};
+const vertB pengFlip_f5[8] = {{-17,1,0x0}, {-18,11,0xc0}, {-18,5,0xc0}, {-29,4,0xc0}, {23,3,0xc0}, {25,-5,0xc0}, {21,-10,0xc0}, {11,-10,0xc0}};
+const vertB pengFlip_f6[8] = {{-17,1,0x0}, {-18,9,0xc0}, {-30,7,0xc0}, {-21,1,0xc0}, {24,3,0xc0}, {25,-3,0xc0}, {25,-10,0xc0}, {12,-9,0xc0}};
+const vertB pengFlip_f7[8] = {{-17,1,0x0}, {-18,7,0xc0}, {-29,6,0xc0}, {-26,0,0xc0}, {24,5,0xc0}, {28,-2,0xc0}, {25,-9,0xc0}, {13,-8,0xc0}};
+const vertB pengFlip_f8[8] = {{-17,1,0x0}, {-22,6,0xc0}, {-30,2,0xc0}, {-22,0,0xc0}, {20,6,0xc0}, {32,-1,0xc0}, {23,-7,0xc0}, {16,-9,0xc0}};
+const vertB pengFlip_f9[8] = {{-17,1,0x0}, {-22,4,0xc0}, {-28,0,0xc0}, {-25,0,0xc0}, {21,6,0xc0}, {33,0,0xc0}, {27,-6,0xc0}, {11,-5,0xc0}};
+const vertB pengFlip_f10[8] = {{-17,1,0x0}, {-26,0,0xc0}, {-29,0,0xc0}, {-21,0,0xc0}, {19,3,0xc0}, {23,1,0xc0}, {36,-2,0xc0}, {13,-4,0xc0}};
+const vertB pengFlip_f11[8] = {{-17,1,0x0}, {-21,-1,0xc0}, {-33,0,0xc0}, {-22,-1,0xc0}, {20,-1,0xc0}, {17,0,0xc0}, {35,1,0xc0}, {21,1,0xc0}};
+const vertB pengFlip_f12[10] = {{-17,1,0x0}, {-13,-1,0xc0}, {-12,-1,0xc0}, {-32,-3,0xc0}, {-16,-2,0xc0}, {15,-1,0xc0}, {18,0,0xc0}, {30,2,0xc0}, {11,3,0xc0}, {16,2,0xc0}};
+const vertB pengFlip_f13[10] = {{-17,1,0x0}, {-12,-2,0xc0}, {-13,-2,0xc0}, {-30,-5,0xc0}, {-17,-4,0xc0}, {15,-1,0xc0}, {18,0,0xc0}, {28,4,0xc0}, {12,4,0xc0}, {16,4,0xc0}};
+const vertB pengFlip_f14[10] = {{-17,1,0x0}, {-11,-2,0xc0}, {-12,-4,0xc0}, {-31,-9,0xc0}, {-17,-4,0xc0}, {13,-2,0xc0}, {21,1,0xc0}, {26,8,0xc0}, {15,7,0xc0}, {13,4,0xc0}};
+const vertB pengFlip_f15[10] = {{-17,1,0x0}, {-11,-3,0xc0}, {-13,-7,0xc0}, {-28,-11,0xc0}, {-17,-3,0xc0}, {13,-3,0xc0}, {23,2,0xc0}, {20,8,0xc0}, {17,10,0xc0}, {14,5,0xc0}};
+const vertB pengFlip_f16[10] = {{-17,1,0x0}, {-12,-5,0xc0}, {-14,-10,0xc0}, {-28,-12,0xc0}, {-15,-3,0xc0}, {11,-5,0xc0}, {27,5,0xc0}, {18,11,0xc0}, {17,13,0xc0}, {14,5,0xc0}};
+const vertB pengFlip_f17[10] = {{-17,1,0x0}, {-14,-8,0xc0}, {-13,-12,0xc0}, {-21,-11,0xc0}, {-17,-6,0xc0}, {14,-4,0xc0}, {20,6,0xc0}, {16,11,0xc0}, {11,12,0xc0}, {20,12,0xc0}};
+const vertB pengFlip_f18[10] = {{-17,1,0x0}, {-14,-10,0xc0}, {-15,-16,0xc0}, {-20,-15,0xc0}, {-12,-10,0xc0}, {17,0,0xc0}, {17,7,0xc0}, {12,10,0xc0}, {13,17,0xc0}, {18,14,0xc0}};
+const vertB pengFlip_f19[9] = {{-17,1,0x0}, {-15,-9,0xc0}, {-19,-18,0xc0}, {-23,-20,0xc0}, {-5,-7,0xc0}, {18,2,0xc0}, {22,15,0xc0}, {19,22,0xc0}, {20,12,0xc0}};
+const vertB pengFlip_f20[9] = {{-17,1,0x0}, {-16,-8,0xc0}, {-19,-14,0xc0}, {-17,-15,0xc0}, {-10,-14,0xc0}, {14,1,0xc0}, {23,19,0xc0}, {22,17,0xc0}, {21,11,0xc0}};
+const vertB pengFlip_f21[9] = {{-17,1,0x0}, {-18,-6,0xc0}, {-19,-11,0xc0}, {-16,-13,0xc0}, {-12,-14,0xc0}, {14,1,0xc0}, {23,16,0xc0}, {23,15,0xc0}, {23,9,0xc0}};
+const vertB pengFlip_f22[9] = {{-17,1,0x0}, {-20,-5,0xc0}, {-19,-10,0xc0}, {-17,-11,0xc0}, {-12,-10,0xc0}, {14,0,0xc0}, {22,13,0xc0}, {25,13,0xc0}, {24,8,0xc0}};
+const vertB pengFlip_f23[8] = {{-17,1,0x0}, {-21,-4,0xc0}, {-32,-12,0xc0}, {-21,-12,0xc0}, {16,-1,0xc0}, {23,10,0xc0}, {26,11,0xc0}, {25,8,0xc0}};
+const vertB pengFlip_f24[8] = {{-17,1,0x0}, {-22,-3,0xc0}, {-33,-9,0xc0}, {-19,-7,0xc0}, {18,-1,0xc0}, {19,4,0xc0}, {29,7,0xc0}, {25,7,0xc0}};
+const vertB pengFlip_f25[8] = {{-17,1,0x0}, {-25,-2,0xc0}, {-31,-6,0xc0}, {-20,-4,0xc0}, {19,-2,0xc0}, {17,2,0xc0}, {28,5,0xc0}, {29,5,0xc0}};
+const vertB pengFlip_f26[8] = {{-17,1,0x0}, {-20,-2,0xc0}, {-35,-3,0xc0}, {-21,-3,0xc0}, {17,-1,0xc0}, {21,1,0xc0}, {30,3,0xc0}, {25,4,0xc0}};
+const vertB* pengFlip_frames[27] = {pengFlip_f0, pengFlip_f1, pengFlip_f2, pengFlip_f3, pengFlip_f4, pengFlip_f5, pengFlip_f6, pengFlip_f7, pengFlip_f8, pengFlip_f9, pengFlip_f10, pengFlip_f11, pengFlip_f12, pengFlip_f13, pengFlip_f14, pengFlip_f15, pengFlip_f16, pengFlip_f17, pengFlip_f18, pengFlip_f19, pengFlip_f20, pengFlip_f21, pengFlip_f22, pengFlip_f23, pengFlip_f24, pengFlip_f25, pengFlip_f26};
+sprite pengFlip(27,pengFlip_numVertices,pengFlip_frames);
+// Comment out the above line and uncomment the below lines if you want the render buffer.
+// If you use the render buffer, be sure to call first call rotatedRender(),
+// then perform your desired modifications to renderedFrame,
+// then lastly call drawFromMem()
+//
+// vertB pengFlip_renderedFrame[10];
+// sprite pengFlip(27,pengFlip_numVertices,pengFlip_frames,pengFlip_renderedFrame);

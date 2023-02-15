@@ -1,0 +1,11 @@
+const size_t fishSprite_numVertices[1] = {9};
+const vertB fishSprite_f0[9] = {{30,0,0x0}, {-30,-15,0xc0}, {-30,10,0xc0}, {-25,-10,0xc0}, {12,15,0xc0}, {-12,15,0xc0}, {25,-10,0xc0}, {30,10,0xc0}, {30,-15,0xc0}};
+const vertB* fishSprite_frames[1] = {fishSprite_f0};
+sprite fishSprite(1,fishSprite_numVertices,fishSprite_frames);
+// Comment out the above line and uncomment the below lines if you want the render buffer.
+// If you use the render buffer, be sure to call first call rotatedRender(),
+// then perform your desired modifications to renderedFrame,
+// then lastly call drawFromMem()
+//
+// vertB fishSprite_renderedFrame[9];
+// sprite fishSprite(1,fishSprite_numVertices,fishSprite_frames,fishSprite_renderedFrame);

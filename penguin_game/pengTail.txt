@@ -1,0 +1,11 @@
+const size_t pengTail_numVertices[1] = {5};
+const vertB pengTail_f0[5] = {{1,-9,0x0}, {-17,4,0xc0}, {-11,14,0xc0}, {13,-5,0xc0}, {15,-3,0xc0}};
+const vertB* pengTail_frames[1] = {pengTail_f0};
+sprite pengTail(1,pengTail_numVertices,pengTail_frames);
+// Comment out the above line and uncomment the below lines if you want the render buffer.
+// If you use the render buffer, be sure to call first call rotatedRender(),
+// then perform your desired modifications to renderedFrame,
+// then lastly call drawFromMem()
+//
+// vertB pengTail_renderedFrame[5];
+// sprite pengTail(1,pengTail_numVertices,pengTail_frames,pengTail_renderedFrame);
