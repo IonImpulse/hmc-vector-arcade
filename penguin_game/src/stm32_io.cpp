@@ -45,8 +45,11 @@ int halt_state=0;
 
 InputState get_inputs() {
     InputState state = {.joyX=0, .joyY=0, .buttons=0};
-    state.joyX = ((((float)(read_adc_x()-2048.0)) / 4096.0)-0.19)*1.45;
-    state.joyY = ((((float)(read_adc_y()-2048.0)) / 4096.0)-0.27)*1.7;
+    // Simulated joystick
+    //state.joyX = ((((float)(read_adc_x()-2048.0)) / 4096.0)-0.19)*1.45;
+    //state.joyY = ((((float)(read_adc_y()-2048.0)) / 4096.0)-0.27)*1.7;
+    state.joyX = ((((float)(read_adc_y()-2048.0)) / 4096.0)-0.1)*4.45;
+    state.joyY = ((((float)(read_adc_x()-2048.0)) / 4096.0)-0.27)*2.7;
 
     // TODO retreive the data from the buttons (if we have any)
     state.buttons = !digitalRead(JOYSTICK_BTN_GPIO, JOYSTICK_BTN_PIN);

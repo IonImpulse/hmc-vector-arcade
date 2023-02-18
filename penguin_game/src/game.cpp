@@ -538,11 +538,12 @@ fish fishes[MAX_NUM_FISHES];
 void initGame() {
 }
 
+int fishAliveCount;
 void updateGame() {    
     static float scrollX = 0;
     // ===== Game logic updates =====
     // fish
-    int fishAliveCount = 0;
+    fishAliveCount = 0;
     int closestFishDistance = 1000;
     int eaten = 0;
     for (int i=0; i<MAX_NUM_FISHES; i++) {
@@ -551,17 +552,30 @@ void updateGame() {
             fishAliveCount+=1;
             eaten |= aFish.update(myPeng.pengMouthLocation.x, myPeng.pengMouthLocation.y);
             closestFishDistance = (closestFishDistance < aFish.distanceToPeng) ? closestFishDistance : aFish.distanceToPeng;
-            if (abs(aFish.x-myPeng.x)>2000) aFish.kill(); // despawn if far away
+            if (abs(aFish.x-myPeng.x)>2000) {
+                aFish.kill();
+                char tmp[100];
+                sprintf(tmp,"FISH: %d      ",(int) (aFish.x));
+                sendString(tmp);
+                char tmp2[100];
+                sprintf(tmp2,"PENG: %d\n\r",(int) (myPeng.x));
+                sendString(tmp2);
+                }
+                 // despawn if far away
+
         }
     }
-    for (int i=0; fishAliveCount<3; i++) {
+    for (int i=0; fishAliveCount<4; i++) {
         fish& aFish = fishes[i];
         if (!aFish.alive) {
             fishAliveCount+=1;
-            aFish.x = myPeng.x+512+50;
-            aFish.y = -200 + 60*i;
-            aFish.alive = 1;
+            aFish.x = myPeng.x +512+100;
             aFish.maxSpeed = 5+i*0.8;
+            if (myPeng.vx < 0) {
+                aFish.x = myPeng.x -512-100;
+                }
+            aFish.y = -200 + 60*i;
+            aFish.alive = 1;  
         }
     }
     // penguin
@@ -574,7 +588,7 @@ void updateGame() {
     #define APPROX_SCROLL_BOUNDARY 280 // so like when the penguin is close to APPROX_SCROLL_BOUNDARY units away from the center of the screen, the scrolling becomes powerful
     float multiplier = abs((APPROX_SCROLL_BOUNDARY*APPROX_SCROLL_BOUNDARY)-((myPeng.x-scrollX)*(myPeng.x-scrollX)));
     scrollX += 300*(myPeng.x-scrollX)*(0.00001+1.0/(1+multiplier));
-    renderMountains(scrollX/16);
+    //renderMountains(scrollX/16);
     renderWaves(scrollX);
 
     // dynamic elemensts
@@ -604,12 +618,17 @@ int main() {
     // Render loop
     while (1) {
         //start_timer(5); // 50 Hz
-        start_timer(20);
+        //start_timer(20);
 
         inputs = get_inputs();
 
         updateGame();
-
+        char tmp[100];
+        int temp = 0;
+        if(myPeng.vx > 0 ) {
+            temp = 1;
+        }
+        
         //if (timer_done()) sendString("Frame computation too long!\n\r");
 
         while(!is_halted()) {} // wait until frame has finished drawing, if it hasn't already
