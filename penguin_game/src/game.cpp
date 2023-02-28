@@ -547,7 +547,14 @@ int fishAliveCount;
 void updateGame() {    
     static float scrollX = 0;
     static int eattimer = 0;
-    static int bootup = 4000;
+    // TODO: don't do this
+    #define SIM
+    #ifdef SIM
+        static int bootup = 1000;
+    #else
+        static int bootup = 4000;
+    #endif
+
     if (bootup>0) {
         bootup-=1;
         char tmp[20];
@@ -664,8 +671,8 @@ int main() {
 
     // Render loop
     while (1) {
-        start_timer(5); // 50 Hz
-        //start_timer(20);
+
+        start_frame_timer();
 
         inputs = get_inputs();
 

@@ -159,6 +159,12 @@ void start_timer(uint32_t milliseconds) {
     endTime = startTime + milliseconds/10;
 }
 
+void start_frame_timer() {
+    // whatever this framerate is, it feels close-ish to
+    // what real hardware actually is achieving
+    start_timer(40);
+}
+
 bool timer_done() {
     return (SDL_GetTicks() > endTime);
 }

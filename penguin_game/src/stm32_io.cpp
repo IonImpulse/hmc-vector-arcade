@@ -255,6 +255,13 @@ extern "C" void TIM5_IRQHandler() {
 void start_timer(uint32_t milliseconds) {
     start_micros(DELAY_TIM, milliseconds*1000);
 }
+
+void start_frame_timer() {
+    // Theoretically 1s / 5ms = 200 FPS
+    // But we're pushing the hardware's limits, so this ends up giving us a reasonable framerate
+    start_timer(5);
+}
+
 bool timer_done() {
     return tim_done(DELAY_TIM);
 }

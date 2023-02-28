@@ -33,6 +33,7 @@ void draw_end_buffer();
 bool is_halted();
 
 void start_timer(uint32_t milliseconds);
+void start_frame_timer();
 bool timer_done();
 
 void printChar(char data);

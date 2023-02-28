@@ -12,3 +12,4 @@ game/game.exe
 *.o
 */*.o
 */*/*.o
+./penguin_game/sprite_creator
