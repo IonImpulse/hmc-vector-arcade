@@ -53,6 +53,16 @@ InputState get_inputs() {
 
     // TODO retreive the data from the buttons (if we have any)
     state.buttons = !digitalRead(JOYSTICK_BTN_GPIO, JOYSTICK_BTN_PIN);
+    state.buttons |= (0x1&~digitalRead(BTN_1_GPIO,BTN_1_PIN))<<1;
+    state.buttons |= (0x1&~digitalRead(BTN_2_GPIO,BTN_2_PIN))<<2;
+    state.buttons |= (0x1&~digitalRead(BTN_3_GPIO,BTN_3_PIN))<<3;
+    state.buttons |= (0x1&~digitalRead(BTN_4_GPIO,BTN_4_PIN))<<4;
+    state.buttons |= (0x1&~digitalRead(BTN_5_GPIO,BTN_5_PIN))<<5;
+    state.buttons |= (0x1&~digitalRead(BTN_6_GPIO,BTN_6_PIN))<<6;
+    state.buttons |= (0x1&~digitalRead(BTN_7_GPIO,BTN_7_PIN))<<7;
+    state.buttons |= (0x1&~digitalRead(BTN_8_GPIO,BTN_8_PIN))<<8;
+    state.buttons |= (0x1&~digitalRead(BTN_9_GPIO,BTN_9_PIN))<<9;
+    state.buttons |= (0x1&~digitalRead(BTN_10_GPIO,BTN_10_PIN))<<10;
 
     #if DEBUG_OUTPUT
     char data[256];

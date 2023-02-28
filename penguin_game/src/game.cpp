@@ -171,8 +171,8 @@ void renderWaves(int scrollX) {
     scrollX = -(scrollX%period + period)%period;
     int currX = scrollX % spacing-512-10;
     int timeShift = (frameCount%(2*period))/2;
-    draw_absolute_vector(currX,0,0);
-    load_abs_pos(currX,0);
+    draw_absolute_vector(currX,WATER_HEIGHT,0);
+    load_abs_pos(currX,WATER_HEIGHT);
     while (currX < 512+spacing) {
         int currY = 10*sin(2*M_PI*(currX-scrollX+timeShift)/period)+WATER_HEIGHT;
         draw_absolute_vector(currX,currY,0x80);
@@ -267,6 +267,7 @@ class physicsBox {
 
 enum flapState {resting,charging,discharging,returning};
 enum headState {blinking,unblinking,neutral,catching,uncatching};
+int airtime = 0;
 class penguin : public physicsBox {
     public:
         float headAngle;
@@ -405,8 +406,10 @@ class penguin : public physicsBox {
                 //   This is nonlinear because I don't want much damping at slow speeds
                 //   but I do want there to be a noticeable limit for how fast you can go
                 damping = 0.99 + 7.0*0.01/(7.0+currSpeed*currSpeed);
+                airtime=0;
             // not underwater
             } else {
+                airtime+=1;
             }
             // tail -- sticks up when slow, bounces with flap, also maybe steers just a little
             tailAngle = bodyAngle+0.8-1.2/(1+2.5*_smoothedSpeed)-0.2*(2+_smoothedSpeed)*(headAngle - bodyAngle);
@@ -492,6 +495,7 @@ class penguin : public physicsBox {
         headState _headState = unblinking;
 };
 
+int noms = 0;
 class fish {
     public:
         int alive = 0;
@@ -514,6 +518,7 @@ class fish {
                 vx = (vx > maxSpeed) ? maxSpeed : vx; 
                 x+=vx;
                 if (x-_width/2<pengX && pengX<x+_width/2 && y-_height/2<pengY && pengY<y+_height/2) {
+                    noms +=1;
                     kill();
                     eaten = 1;
                     return eaten;
@@ -541,67 +546,109 @@ void initGame() {
 int fishAliveCount;
 void updateGame() {    
     static float scrollX = 0;
-    // ===== Game logic updates =====
-    // fish
-    fishAliveCount = 0;
-    int closestFishDistance = 1000;
-    int eaten = 0;
-    for (int i=0; i<MAX_NUM_FISHES; i++) {
-        fish& aFish = fishes[i];
-        if (aFish.alive) {
-            fishAliveCount+=1;
-            eaten |= aFish.update(myPeng.pengMouthLocation.x, myPeng.pengMouthLocation.y);
-            closestFishDistance = (closestFishDistance < aFish.distanceToPeng) ? closestFishDistance : aFish.distanceToPeng;
-            if (abs(aFish.x-myPeng.x)>2000) {
-                aFish.kill();
-                char tmp[100];
-                sprintf(tmp,"FISH: %d      ",(int) (aFish.x));
-                sendString(tmp);
-                char tmp2[100];
-                sprintf(tmp2,"PENG: %d\n\r",(int) (myPeng.x));
-                sendString(tmp2);
+    static int eattimer = 0;
+    static int bootup = 4000;
+    if (bootup>0) {
+        bootup-=1;
+        char tmp[20];
+        load_abs_pos(-300,100);
+        sprintf(tmp,"leviathan");
+        drawString(tmp,0xa0,12);
+
+    } else {
+        // ===== Game logic updates =====
+        // fish
+        fishAliveCount = 0;
+        int closestFishDistance = 1000;
+        int eaten = 0;
+        for (int i=0; i<MAX_NUM_FISHES; i++) {
+            fish& aFish = fishes[i];
+            if (aFish.alive) {
+                fishAliveCount+=1;
+                eaten |= aFish.update(myPeng.pengMouthLocation.x, myPeng.pengMouthLocation.y);
+                if (eaten) {
+                    eattimer = 100;
                 }
-                 // despawn if far away
+                closestFishDistance = (closestFishDistance < aFish.distanceToPeng) ? closestFishDistance : aFish.distanceToPeng;
+                if (abs(aFish.x-myPeng.x)>2000) {
+                    aFish.kill();
+                    //char tmp[100];
+                    //sprintf(tmp,"FISH: %d      ",(int) (aFish.x));
+                    //sendString(tmp);
+                    //char tmp2[100];
+                    //sprintf(tmp2,"PENG: %d\n\r",(int) (myPeng.x));
+                    //sendString(tmp2);
+                    }
+                    // despawn if far away
 
+            }
         }
-    }
-    for (int i=0; fishAliveCount<4; i++) {
-        fish& aFish = fishes[i];
-        if (!aFish.alive) {
-            fishAliveCount+=1;
-            aFish.x = myPeng.x +512+100;
-            aFish.maxSpeed = 5+i*0.8;
-            if (myPeng.vx < 0) {
-                aFish.x = myPeng.x -512-100;
-                }
-            aFish.y = -200 + 60*i;
-            aFish.alive = 1;  
+        for (int i=0; fishAliveCount<4; i++) {
+            fish& aFish = fishes[i];
+            if (!aFish.alive) {
+                fishAliveCount+=1;
+                aFish.x = myPeng.x +512+100;
+                aFish.maxSpeed = 5+i*0.8;
+                if (myPeng.vx < 0) {
+                    aFish.x = myPeng.x -512-100;
+                    }
+                aFish.y = -200 + 60*i;
+                aFish.alive = 1;  
+            }
         }
-    }
-    // penguin
-    myPeng.headAngle = M_PI*inputs.joyX/4+myPeng.bodyAngle;
-    //myPeng.headAngle = 0.7*M_PI*inputs.joyY+myPeng.bodyAngle+0.6;
-    myPeng.update(inputs.buttons & 0x1, closestFishDistance, eaten);
+        // penguin
+        myPeng.headAngle = M_PI*inputs.joyX/4+myPeng.bodyAngle;
+        //myPeng.headAngle = 0.7*M_PI*inputs.joyY+myPeng.bodyAngle+0.6;
+        myPeng.update(inputs.buttons & 0x1, closestFishDistance, eaten);
 
-    // ===== Render stuff =====
-    // scrolling
-    #define APPROX_SCROLL_BOUNDARY 280 // so like when the penguin is close to APPROX_SCROLL_BOUNDARY units away from the center of the screen, the scrolling becomes powerful
-    float multiplier = abs((APPROX_SCROLL_BOUNDARY*APPROX_SCROLL_BOUNDARY)-((myPeng.x-scrollX)*(myPeng.x-scrollX)));
-    scrollX += 300*(myPeng.x-scrollX)*(0.00001+1.0/(1+multiplier));
-    //renderMountains(scrollX/16);
-    renderWaves(scrollX);
+        // ===== Render stuff =====
+        // scrolling
+        #define APPROX_SCROLL_BOUNDARY 280 // so like when the penguin is close to APPROX_SCROLL_BOUNDARY units away from the center of the screen, the scrolling becomes powerful
+        float multiplier = abs((APPROX_SCROLL_BOUNDARY*APPROX_SCROLL_BOUNDARY)-((myPeng.x-scrollX)*(myPeng.x-scrollX)));
+        scrollX += 300*(myPeng.x-scrollX)*(0.00001+1.0/(1+multiplier));
+        //renderMountains(scrollX/16);
+        renderWaves(scrollX);
 
-    // dynamic elemensts
-    myPeng.render(scrollX);
-    for (int i=0; i<MAX_NUM_FISHES; i++) {
-        fish& aFish = fishes[i];
-        if (aFish.alive) {
-            if ((aFish.x-scrollX)>-580 && (aFish.x-scrollX)<580) aFish.render(scrollX);
+        // dynamic elemensts
+        myPeng.render(scrollX);
+        for (int i=0; i<MAX_NUM_FISHES; i++) {
+            fish& aFish = fishes[i];
+            if (aFish.alive) {
+                if ((aFish.x-scrollX)>-580 && (aFish.x-scrollX)<580) aFish.render(scrollX);
+            }
         }
-    }
-    // background
-    sun.render(-240+(frameCount>>10),475+(frameCount>>12));
+        // background
+        sun.render(-240+(frameCount>>10),475+(frameCount>>12));
+        
+        // print buttons
+        if (inputs.buttons>1) {
+            char tmp[100];
+            load_abs_pos(300,470);
+            sprintf(tmp,"b%03x",(int)inputs.buttons);
+            drawString(tmp,0x40,4);
+        }
 
+        // print nom
+        if (eattimer>0) {
+            char tmp[100];
+            load_abs_pos(-40,0);
+            sprintf(tmp,"nom");
+            drawString(tmp,0xa0,(noms+1)<10?(noms+1):10);
+            eattimer-=1;
+        }
+        // print nom
+        if (airtime>50) {
+            char tmp[100];
+            load_abs_pos(-30,400);
+            sprintf(tmp,"fly");
+            drawString(tmp,0xa0,5);
+            eattimer-=1;
+        }
+        char tmp[100];
+        load_abs_pos(-80,-480);
+        sprintf(tmp,"noms: %d",noms);
+        drawString(tmp,0x40,4);
+    }
     frameCount++;
     draw_end_buffer();
 }
@@ -617,17 +664,12 @@ int main() {
 
     // Render loop
     while (1) {
-        //start_timer(5); // 50 Hz
+        start_timer(5); // 50 Hz
         //start_timer(20);
 
         inputs = get_inputs();
 
         updateGame();
-        char tmp[100];
-        int temp = 0;
-        if(myPeng.vx > 0 ) {
-            temp = 1;
-        }
         
         //if (timer_done()) sendString("Frame computation too long!\n\r");
 

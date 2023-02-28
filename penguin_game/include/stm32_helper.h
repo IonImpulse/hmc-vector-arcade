@@ -46,6 +46,26 @@
 #define JOYSTICK_Y_GPIO           GPIOC
 #define JOYSTICK_BTN_PIN          PIN_C0
 #define JOYSTICK_BTN_GPIO         GPIOC
+#define BTN_1_GPIO                GPIOB
+#define BTN_2_GPIO                GPIOB
+#define BTN_3_GPIO                GPIOB
+#define BTN_4_GPIO                GPIOB
+#define BTN_5_GPIO                GPIOB
+#define BTN_6_GPIO                GPIOA
+#define BTN_7_GPIO                GPIOB
+#define BTN_8_GPIO                GPIOB
+#define BTN_9_GPIO                GPIOB
+#define BTN_10_GPIO               GPIOB
+#define BTN_1_PIN                 PIN_B0
+#define BTN_2_PIN                 PIN_B1
+#define BTN_3_PIN                 PIN_B2
+#define BTN_4_PIN                 PIN_B3
+#define BTN_5_PIN                 PIN_B5
+#define BTN_6_PIN                 PIN_A10
+#define BTN_7_PIN                 PIN_B8
+#define BTN_8_PIN                 PIN_B9
+#define BTN_9_PIN                 PIN_B13
+#define BTN_10_PIN                PIN_B14
 
 // Peripheral Assignments
 #define USART           USART2
