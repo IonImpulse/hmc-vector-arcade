@@ -11,6 +11,7 @@ size_t frameCount = 0;
 #define WATER_HEIGHT 200
 // Sorry not everything is perfectly equivalent between simulated and hardware implementations
 #define SIMULATION 1
+const float sine_lookup[100] = {0.0,0.062791,0.125333,0.187381,0.24869,0.309017,0.368125,0.425779,0.481754,0.535827,0.587785,0.637424,0.684547,0.728969,0.770513,0.809017,0.844328,0.876307,0.904827,0.929776,0.951057,0.968583,0.982287,0.992115,0.998027,1.0,0.998027,0.992115,0.982287,0.968583,0.951057,0.929776,0.904827,0.876307,0.844328,0.809017,0.770513,0.728969,0.684547,0.637424,0.587785,0.535827,0.481754,0.425779,0.368125,0.309017,0.24869,0.187381,0.125333,0.062791,0.0,-0.062791,-0.125333,-0.187381,-0.24869,-0.309017,-0.368125,-0.425779,-0.481754,-0.535827,-0.587785,-0.637424,-0.684547,-0.728969,-0.770513,-0.809017,-0.844328,-0.876307,-0.904827,-0.929776,-0.951057,-0.968583,-0.982287,-0.992115,-0.998027,-1.0,-0.998027,-0.992115,-0.982287,-0.968583,-0.951057,-0.929776,-0.904827,-0.876307,-0.844328,-0.809017,-0.770513,-0.728969,-0.684547,-0.637424,-0.587785,-0.535827,-0.481754,-0.425779,-0.368125,-0.309017,-0.24869,-0.187381,-0.125333,-0.062791};
 
 /////////////
 // Sprites //
@@ -40,11 +41,11 @@ const vertB sun_f0[24] = {{-26,-18,0x0}, {11,-11,0xff}, {15,-3,0xff}, {15,4,0xff
 const vertB* sun_frames[1] = {sun_f0};
 sprite sun(1,sun_numVertices,sun_frames);
 
-// blink 0 - MAX_BLINK_HEAD
+// blink 0 thru MAX_BLINK_HEAD
 #define MAX_BLINK_HEAD 3
 // neutral
 #define NEUTRAL_HEAD 4
-// mouth NEUTRAL_HEAD+1 - MAX_MOUTH_HEAD
+// mouth NEUTRAL_HEAD+1 thru MAX_MOUTH_HEAD
 #define MAX_MOUTH_HEAD 14
 const size_t pengHead_numVertices[15] = {18, 18, 18, 18, 18, 18, 20, 20, 20, 20, 21, 21, 21, 21, 21};
 const vertB pengHead_f0[18] = {{12,20,0x0}, {9,-2,0xc0}, {-2,-9,0x0}, {-1,-2,0xff}, {-3,0,0xff}, {-2,2,0xff}, {2,1,0xff}, {2,0,0xff}, {2,-1,0xff}, {2,9,0x0}, {9,-6,0xc0}, {16,-3,0xc0}, {6,-3,0xc0}, {-26,0,0xc0}, {26,-1,0xc0}, {-5,-2,0xc0}, {-20,-1,0xc0}, {-9,-2,0xc0}};
@@ -134,6 +135,7 @@ sprite pengFlip(27,pengFlip_numVertices,pengFlip_frames);
 /////////////////////////
 
 void renderMountains(int scrollX) {
+    // Ha whoops looks like real hardware isn't ready for this
     #define POINTS 142
     const int16_t mountY[POINTS] = {5, -2, 5, 24, 45, 41, 48, 38, 23, 29, 6, 11, 35, 51, 40, 11, -12, -22, -26, -14, -16, -10, -9, -25, -14, -14, -27, -26, -24, -10, 8, 19, 47, 31, 31, 20, 17, -3, -21, -18, -29, -31, -13, -9, 1, 1, -6, 1, -18, -28, -45, -37, -43, -40, -49, -54, -53, -45, -53, -55, -58, -60, -57, -57, -42, -20, -2, 0, 24, 31, 38, 50, 40, 33, 38, 32, 9, 9, -12, -15, -34, -21,6, 0, 2, 9, 8, -21, -32, -45, -58, -53, -53, -58, -54, -54, -73, -62, -67, -85, -73, -75, -68, -60, -70, -71, -82, -83, -77, -60, -23, -11, 3, 4, 27, 42, 61, 72, 69, 60, 51, 55, 35, 12, 14, -6, 5, 41, 49, 61, 42, 37, 21, 13, -19, -40, -45, -37, -53, -55, -43, -25};
     const int16_t mountX[POINTS] = {10, 13, 34, 27, 45, 20, 12, 29, 12, 4, 38, 22, 38, 20, 22, 15, 29, 6, 17, 30, 13, 3, 8, 18, 10, 14, 7, 24, 18, 34, 7, 27, 37, 11, 15, 8, 22, 15, 24, 32, 11, 18, 19, 13, 4, 10, 2, 33, 20, 25, 23, 9, 13, 25, 17, 19, 26, 13, 9, 13, 18, 21, 10, 27, 35, 13, 38, 26, 51, 10, 31, 19, 13, 11, 21, 12, 48, 36, 25, 29, 29, 35,18, 7, 21, 7, 18, 32, 26, 26, 18, 10, 17, 7, 13, 22, 16, 12, 13, 17, 8, 14, 8, 18, 8, 17, 45, 20, 39, 50, 20, 39, 17, 47, 49, 13, 56, 15, 15, 4, 20, 13, 30, 56, 34, 33, 33, 43, 48, 32, 15, 20, 13, 33, 9, 31, 43, 11, 17, 14, 24, 27}; // pls don't make spacing larger than 100
@@ -167,14 +169,16 @@ void renderMountains(int scrollX) {
 
 void renderWaves(int scrollX) {
     const int period=400;
-    const int spacing=40;
+    const int spacing=64;
     scrollX = -(scrollX%period + period)%period;
     int currX = scrollX % spacing-512-10;
     int timeShift = (frameCount%(2*period))/2;
     draw_absolute_vector(currX,WATER_HEIGHT,0);
     load_abs_pos(currX,WATER_HEIGHT);
     while (currX < 512+spacing) {
-        int currY = 10*sin(2*M_PI*(currX-scrollX+timeShift)/period)+WATER_HEIGHT;
+        //int currY = 10*sin(2*M_PI*(currX-scrollX+timeShift)/period)+WATER_HEIGHT;
+        // Lookup table sine might save floating point unit some grief.
+        int currY = 10*sine_lookup[(((int)(currX-scrollX+timeShift)*100/period)+100) % 100]+WATER_HEIGHT;
         draw_absolute_vector(currX,currY,0x80);
         currX += spacing;
     }
@@ -550,7 +554,7 @@ void updateGame() {
     // TODO: don't do this
     #define SIM
     #ifdef SIM
-        static int bootup = 1000;
+        static int bootup = 200;
     #else
         static int bootup = 4000;
     #endif
