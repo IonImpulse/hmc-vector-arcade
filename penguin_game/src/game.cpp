@@ -8,14 +8,16 @@
 /////////////////
 struct InputState inputs;
 size_t frameCount = 0;
+enum {MENU,GAME} global_game_state;
 #define WATER_HEIGHT 200
 // Sorry not everything is perfectly equivalent between simulated and hardware implementations
 #define SIMULATION 1
-const float sine_lookup[100] = {0.0,0.062791,0.125333,0.187381,0.24869,0.309017,0.368125,0.425779,0.481754,0.535827,0.587785,0.637424,0.684547,0.728969,0.770513,0.809017,0.844328,0.876307,0.904827,0.929776,0.951057,0.968583,0.982287,0.992115,0.998027,1.0,0.998027,0.992115,0.982287,0.968583,0.951057,0.929776,0.904827,0.876307,0.844328,0.809017,0.770513,0.728969,0.684547,0.637424,0.587785,0.535827,0.481754,0.425779,0.368125,0.309017,0.24869,0.187381,0.125333,0.062791,0.0,-0.062791,-0.125333,-0.187381,-0.24869,-0.309017,-0.368125,-0.425779,-0.481754,-0.535827,-0.587785,-0.637424,-0.684547,-0.728969,-0.770513,-0.809017,-0.844328,-0.876307,-0.904827,-0.929776,-0.951057,-0.968583,-0.982287,-0.992115,-0.998027,-1.0,-0.998027,-0.992115,-0.982287,-0.968583,-0.951057,-0.929776,-0.904827,-0.876307,-0.844328,-0.809017,-0.770513,-0.728969,-0.684547,-0.637424,-0.587785,-0.535827,-0.481754,-0.425779,-0.368125,-0.309017,-0.24869,-0.187381,-0.125333,-0.062791};
 
 /////////////
 // Sprites //
 /////////////
+const float sine_lookup[100] = {0.0,0.062791,0.125333,0.187381,0.24869,0.309017,0.368125,0.425779,0.481754,0.535827,0.587785,0.637424,0.684547,0.728969,0.770513,0.809017,0.844328,0.876307,0.904827,0.929776,0.951057,0.968583,0.982287,0.992115,0.998027,1.0,0.998027,0.992115,0.982287,0.968583,0.951057,0.929776,0.904827,0.876307,0.844328,0.809017,0.770513,0.728969,0.684547,0.637424,0.587785,0.535827,0.481754,0.425779,0.368125,0.309017,0.24869,0.187381,0.125333,0.062791,0.0,-0.062791,-0.125333,-0.187381,-0.24869,-0.309017,-0.368125,-0.425779,-0.481754,-0.535827,-0.587785,-0.637424,-0.684547,-0.728969,-0.770513,-0.809017,-0.844328,-0.876307,-0.904827,-0.929776,-0.951057,-0.968583,-0.982287,-0.992115,-0.998027,-1.0,-0.998027,-0.992115,-0.982287,-0.968583,-0.951057,-0.929776,-0.904827,-0.876307,-0.844328,-0.809017,-0.770513,-0.728969,-0.684547,-0.637424,-0.587785,-0.535827,-0.481754,-0.425779,-0.368125,-0.309017,-0.24869,-0.187381,-0.125333,-0.062791};
+
 const size_t pengbody_numVertices[11] = {21, 21, 22, 21, 19, 18, 20, 21, 22, 22, 20};
 const vertB pengbody_f0[21] = {{84,0,0x0}, {18,-5,0xc0}, {-18,-12,0xc0}, {-5,-12,0xc0}, {-11,-16,0xc0}, {-10,-10,0xc0}, {-128,1,0xc0}, {-45,21,0xc0}, {-21,-14,0xc0}, {-12,-5,0xc0}, {6,10,0xc0}, {-11,-3,0xc0}, {29,18,0xc0}, {9,16,0xc0}, {-17,5,0xc0}, {39,3,0xc0}, {27,18,0xc0}, {51,2,0xc0}, {42,-4,0xc0}, {41,0,0xc0}, {18,-12,0xc0}};
 const vertB pengbody_f1[21] = {{83,3,0x0}, {14,-5,0xc0}, {-14,-11,0xc0}, {-13,-17,0xc0}, {-3,-15,0xc0}, {-9,-11,0xc0}, {-123,0,0xc0}, {-37,16,0xc0}, {-14,6,0xc0}, {-17,-11,0xc0}, {3,-8,0xc0}, {-13,8,0xc0}, {20,21,0xc0}, {3,12,0xc0}, {-23,7,0xc0}, {52,3,0xc0}, {24,15,0xc0}, {44,3,0xc0}, {50,-3,0xc0}, {37,0,0xc0}, {19,-11,0xc0}};
@@ -543,123 +545,124 @@ class fish {
 penguin myPeng = penguin();
 #define MAX_NUM_FISHES 10
 fish fishes[MAX_NUM_FISHES];
-
-void initGame() {
-}
-
 int fishAliveCount;
-void updateGame() {    
-    static float scrollX = 0;
-    static int eattimer = 0;
-    // TODO: don't do this
-    #define SIM
-    #ifdef SIM
-        static int bootup = 200;
+
+void updateMenu() {
+    #ifdef SIMULATION
+        static int bootup = 600;
     #else
         static int bootup = 4000;
     #endif
+    bootup-=1;
+    char tmp[20];
+    load_abs_pos(-300,100);
+    sprintf(tmp,"leviathan");
+    drawString(tmp,0xa0,12);
+    renderMountains(frameCount/10);
+    sun.render(-240,475);
+    if (bootup == 0) {
+        global_game_state = GAME;
+        frameCount = 0;
+    }
+    frameCount++;
+    draw_end_buffer();
+}
 
-    if (bootup>0) {
-        bootup-=1;
-        char tmp[20];
-        load_abs_pos(-300,100);
-        sprintf(tmp,"leviathan");
-        drawString(tmp,0xa0,12);
-
-    } else {
-        // ===== Game logic updates =====
-        // fish
-        fishAliveCount = 0;
-        int closestFishDistance = 1000;
-        int eaten = 0;
-        for (int i=0; i<MAX_NUM_FISHES; i++) {
-            fish& aFish = fishes[i];
-            if (aFish.alive) {
-                fishAliveCount+=1;
-                eaten |= aFish.update(myPeng.pengMouthLocation.x, myPeng.pengMouthLocation.y);
-                if (eaten) {
-                    eattimer = 100;
+void updateGame() {    
+    static float scrollX = 0;
+    static int eattimer = 0;
+    // ===== Game logic updates =====
+    // fish
+    fishAliveCount = 0;
+    int closestFishDistance = 1000;
+    int eaten = 0;
+    for (int i=0; i<MAX_NUM_FISHES; i++) {
+        fish& aFish = fishes[i];
+        if (aFish.alive) {
+            fishAliveCount+=1;
+            eaten |= aFish.update(myPeng.pengMouthLocation.x, myPeng.pengMouthLocation.y);
+            if (eaten) {
+                eattimer = 100;
+            }
+            closestFishDistance = (closestFishDistance < aFish.distanceToPeng) ? closestFishDistance : aFish.distanceToPeng;
+            if (abs(aFish.x-myPeng.x)>2000) {
+                aFish.kill();
+                //char tmp[100];
+                //sprintf(tmp,"FISH: %d      ",(int) (aFish.x));
+                //sendString(tmp);
+                //char tmp2[100];
+                //sprintf(tmp2,"PENG: %d\n\r",(int) (myPeng.x));
+                //sendString(tmp2);
                 }
-                closestFishDistance = (closestFishDistance < aFish.distanceToPeng) ? closestFishDistance : aFish.distanceToPeng;
-                if (abs(aFish.x-myPeng.x)>2000) {
-                    aFish.kill();
-                    //char tmp[100];
-                    //sprintf(tmp,"FISH: %d      ",(int) (aFish.x));
-                    //sendString(tmp);
-                    //char tmp2[100];
-                    //sprintf(tmp2,"PENG: %d\n\r",(int) (myPeng.x));
-                    //sendString(tmp2);
-                    }
-                    // despawn if far away
+                // despawn if far away
 
-            }
         }
-        for (int i=0; fishAliveCount<4; i++) {
-            fish& aFish = fishes[i];
-            if (!aFish.alive) {
-                fishAliveCount+=1;
-                aFish.x = myPeng.x +512+100;
-                aFish.maxSpeed = 5+i*0.8;
-                if (myPeng.vx < 0) {
-                    aFish.x = myPeng.x -512-100;
-                    }
-                aFish.y = -200 + 60*i;
-                aFish.alive = 1;  
-            }
+    }
+    for (int i=0; fishAliveCount<4; i++) {
+        fish& aFish = fishes[i];
+        if (!aFish.alive) {
+            fishAliveCount+=1;
+            aFish.x = myPeng.x +512+100;
+            aFish.maxSpeed = 5+i*0.8;
+            if (myPeng.vx < 0) {
+                aFish.x = myPeng.x -512-100;
+                }
+            aFish.y = -200 + 60*i;
+            aFish.alive = 1;  
         }
-        // penguin
-        myPeng.headAngle = M_PI*inputs.joyX/4+myPeng.bodyAngle;
-        //myPeng.headAngle = 0.7*M_PI*inputs.joyY+myPeng.bodyAngle+0.6;
-        myPeng.update(inputs.buttons & 0x1, closestFishDistance, eaten);
+    }
+    // penguin
+    myPeng.headAngle = M_PI*inputs.joyX/4+myPeng.bodyAngle;
+    //myPeng.headAngle = 0.7*M_PI*inputs.joyY+myPeng.bodyAngle+0.6;
+    myPeng.update(inputs.buttons & 0x1, closestFishDistance, eaten);
 
-        // ===== Render stuff =====
-        // scrolling
-        #define APPROX_SCROLL_BOUNDARY 280 // so like when the penguin is close to APPROX_SCROLL_BOUNDARY units away from the center of the screen, the scrolling becomes powerful
-        float multiplier = abs((APPROX_SCROLL_BOUNDARY*APPROX_SCROLL_BOUNDARY)-((myPeng.x-scrollX)*(myPeng.x-scrollX)));
-        scrollX += 300*(myPeng.x-scrollX)*(0.00001+1.0/(1+multiplier));
-        //renderMountains(scrollX/16);
-        renderWaves(scrollX);
+    // ===== Render stuff =====
+    // scrolling
+    #define APPROX_SCROLL_BOUNDARY 280 // so like when the penguin is close to APPROX_SCROLL_BOUNDARY units away from the center of the screen, the scrolling becomes powerful
+    float multiplier = abs((APPROX_SCROLL_BOUNDARY*APPROX_SCROLL_BOUNDARY)-((myPeng.x-scrollX)*(myPeng.x-scrollX)));
+    scrollX += 300*(myPeng.x-scrollX)*(0.00001+1.0/(1+multiplier));
+    //renderMountains(scrollX/16);
+    renderWaves(scrollX);
 
-        // dynamic elemensts
-        myPeng.render(scrollX);
-        for (int i=0; i<MAX_NUM_FISHES; i++) {
-            fish& aFish = fishes[i];
-            if (aFish.alive) {
-                if ((aFish.x-scrollX)>-580 && (aFish.x-scrollX)<580) aFish.render(scrollX);
-            }
+    // dynamic elemensts
+    myPeng.render(scrollX);
+    for (int i=0; i<MAX_NUM_FISHES; i++) {
+        fish& aFish = fishes[i];
+        if (aFish.alive) {
+            if ((aFish.x-scrollX)>-580 && (aFish.x-scrollX)<580) aFish.render(scrollX);
         }
-        // background
-        sun.render(-240+(frameCount>>10),475+(frameCount>>12));
-        
-        // print buttons
-        if (inputs.buttons>1) {
-            char tmp[100];
-            load_abs_pos(300,470);
-            sprintf(tmp,"b%03x",(int)inputs.buttons);
-            drawString(tmp,0x40,4);
-        }
-
-        // print nom
-        if (eattimer>0) {
-            char tmp[100];
-            load_abs_pos(-40,0);
-            sprintf(tmp,"nom");
-            drawString(tmp,0xa0,(noms+1)<10?(noms+1):10);
-            eattimer-=1;
-        }
-        // print nom
-        if (airtime>50) {
-            char tmp[100];
-            load_abs_pos(-30,400);
-            sprintf(tmp,"fly");
-            drawString(tmp,0xa0,5);
-            eattimer-=1;
-        }
+    }
+    // background
+    sun.render(-240+(frameCount>>10),475+(frameCount>>12));
+    
+    // print buttons
+    if (inputs.buttons>1) {
         char tmp[100];
-        load_abs_pos(-80,-480);
-        sprintf(tmp,"noms: %d",noms);
+        load_abs_pos(300,470);
+        sprintf(tmp,"b%03x",(int)inputs.buttons);
         drawString(tmp,0x40,4);
     }
+
+    // print nom
+    if (eattimer>0) {
+        char tmp[100];
+        load_abs_pos(-40,0);
+        sprintf(tmp,"nom");
+        drawString(tmp,0xa0,(noms+1)<10?(noms+1):10);
+        eattimer-=1;
+    }
+    // print nom
+    if (airtime>50) {
+        char tmp[100];
+        load_abs_pos(-30,400);
+        sprintf(tmp,"fly");
+        drawString(tmp,0xa0,5);
+        eattimer-=1;
+    }
+    char tmp[100];
+    load_abs_pos(-80,-480);
+    sprintf(tmp,"noms: %d",noms);
+    drawString(tmp,0x40,4);
     frameCount++;
     draw_end_buffer();
 }
@@ -671,7 +674,7 @@ int main() {
     // Startup
     initialize_input_output();
     sendString("Welcome to HMC Vector Arcade!\n\r");
-    initGame();
+    global_game_state = MENU;
 
     // Render loop
     while (1) {
@@ -679,8 +682,13 @@ int main() {
         start_frame_timer();
 
         inputs = get_inputs();
-
-        updateGame();
+        switch(global_game_state) {
+            case MENU:
+                updateMenu();
+                break;
+            case GAME:
+                updateGame();
+        }
         
         //if (timer_done()) sendString("Frame computation too long!\n\r");
 
